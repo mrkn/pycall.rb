@@ -1,5 +1,5 @@
 require "pycall/version"
 
-module Pycall
+module PyCall
   # Your code goes here...
 end
