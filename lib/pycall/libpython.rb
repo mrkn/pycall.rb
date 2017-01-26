@@ -87,6 +87,9 @@ module PyCall
     # PyObject_IsInstane :: (PyPtr, PyPtr) -> int
     attach_function :PyObject_IsInstance, [:pointer, :pointer], :int
 
+    # PyImport_ImportModule :: (char const*) -> PyPtr
+    attach_function :PyImport_ImportModule, [:string], :pointer
+
     public_class_method
   end
 end
