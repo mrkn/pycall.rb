@@ -84,6 +84,9 @@ module PyCall
 
     attach_function :Py_GetVersion, [], :string
 
+    # PyObject_IsInstane :: (PyPtr, PyPtr) -> int
+    attach_function :PyObject_IsInstance, [:pointer, :pointer], :int
+
     public_class_method
   end
 end
