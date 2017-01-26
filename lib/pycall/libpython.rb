@@ -56,8 +56,8 @@ module PyCall
         libpaths.each do |libpath|
           libpath_lib = File.join(libpath, lib)
           if File.file?("#{libpath_lib}.#{libsuffix}")
-            ffi_lib "#{libpath_lib}.#{libsuffix}"
-            return
+            libs = ffi_lib("#{libpath_lib}.#{libsuffix}")
+            return libs.first
           end
         end
       end
@@ -79,16 +79,88 @@ module PyCall
       File.expand_path('../python/investigator.py', __FILE__)
     end
 
+    class PyObject_struct < FFI::Struct
+      layout ob_refcnt: :int,
+             ob_type:   :pointer
+    end
+
     ffi_lib_flags :lazy, :global
-    find_libpython ENV['PYTHON']
+    libpython = find_libpython ENV['PYTHON']
+
+    # --- type objects ---
+
+    if libpython.find_variable('PyInt_Type')
+      has_PyInt_Type = true
+      attach_variable :PyInt_Type, PyObject_struct
+    else
+      has_PyInt_Type = false
+      attach_variable :PyInt_Type, :PyLong_Type, PyObject_struct
+    end
+
+    attach_variable :PyLong_Type, PyObject_struct
+    attach_variable :PyBool_Type, PyObject_struct
+    attach_variable :PyFloat_Type, PyObject_struct
+    attach_variable :PyUnicode_Type, PyObject_struct
+
+    if libpython.find_symbol('PyString_FromStringAndSize')
+      string_as_bytes = false
+      attach_variable :PyString_Type, PyObject_struct
+    else
+      string_as_bytes = true
+      attach_variable :PyString_Type, :PyBytes_Type, PyObject_struct
+    end
+
+    # --- functions ---
 
     attach_function :Py_GetVersion, [], :string
+
+    # Py_InitializeEx :: (int) -> void
+    attach_function :Py_InitializeEx, [:int], :void
+
+    # Py_IsInitialized :: () -> int
+    attach_function :Py_IsInitialized, [], :int
 
     # PyObject_IsInstane :: (PyPtr, PyPtr) -> int
     attach_function :PyObject_IsInstance, [:pointer, :pointer], :int
 
+    # PyInt_AsSsize_t :: (PyPtr) -> ssize_t
+    if has_PyInt_Type
+      attach_function :PyInt_AsSsize_t, [:pointer], :ssize_t
+    else
+      attach_function :PyInt_AsSsize_t, :PyLong_AsSsize_t, [:pointer], :ssize_t
+    end
+
+    # PyFloat_AsDouble :: (PyPtr) - double
+    attach_function :PyFloat_AsDouble, [:pointer], :double
+
+    # PyString_AsStringAndSize :: (PyPtr, char**, int*) -> int
+    if string_as_bytes
+      attach_function :PyString_AsStringAndSize, :PyBytes_AsStringAndSize, [:pointer, :pointer, :pointer], :int
+    else
+      attach_function :PyString_AsStringAndSize, [:pointer, :pointer, :pointer], :int
+    end
+
+    # PyUnicode_AsUTF8String :: (PyPtr) -> PyPtr
+    case
+    when libpython.find_symbol('PyUnicode_AsUTF8String')
+      attach_function :PyUnicode_AsUTF8String, [:pointer], :pointer
+    when libpython.find_symbol('PyUnicodeUCS4_AsUTF8String')
+      attach_function :PyUnicode_AsUTF8String, :PyUnicodeUCS4_AsUTF8String, [:pointer], :pointer
+    when libpython.find_symbol('PyUnicodeUCS2_AsUTF8String')
+      attach_function :PyUnicode_AsUTF8String, :PyUnicodeUCS2_AsUTF8String, [:pointer], :pointer
+    end
+
+    # PyModule_GetDict :: (PyPtr) -> PyPtr
+    attach_function :PyModule_GetDict, [:pointer], :pointer
+
     # PyImport_ImportModule :: (char const*) -> PyPtr
     attach_function :PyImport_ImportModule, [:string], :pointer
+
+    # Py_CompileString :: (char const*, char const*, int) -> PyPtr
+    attach_function :Py_CompileString, [:string, :string, :int], :pointer
+
+    # PyEval_EvalCode :: (PyPtr, PyPtr, PyPtr) -> PyPtr
+    attach_function :PyEval_EvalCode, [:pointer, :pointer, :pointer], :pointer
 
     # PyErr_Print :: () -> Void
     attach_function :PyErr_Print, [], :void

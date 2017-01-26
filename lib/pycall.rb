@@ -1,2 +1,6 @@
 require "pycall/version"
 require "pycall/libpython"
+require "pycall/eval"
+require "pycall/types"
+require "pycall/conversion"
+require "pycall/init"
