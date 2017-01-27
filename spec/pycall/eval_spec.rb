@@ -18,6 +18,7 @@ describe PyCall, '.eval' do
   specify { expect_python('1').to eq(1) }
   specify { expect_python('1.0').to be_kind_of(Float) }
   specify { expect_python('1.0').to eq(1.0) }
+  specify { expect_python('complex(1, 2)').to eq(1 + 2i) }
 
   specify { expect_python('"python"').to eq("python") }
 

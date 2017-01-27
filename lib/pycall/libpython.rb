@@ -100,6 +100,7 @@ module PyCall
     attach_variable :PyLong_Type, PyObject_struct
     attach_variable :PyBool_Type, PyObject_struct
     attach_variable :PyFloat_Type, PyObject_struct
+    attach_variable :PyComplex_Type, PyObject_struct
     attach_variable :PyUnicode_Type, PyObject_struct
 
     if libpython.find_symbol('PyString_FromStringAndSize')
@@ -132,6 +133,12 @@ module PyCall
 
     # PyFloat_AsDouble :: (PyPtr) - double
     attach_function :PyFloat_AsDouble, [:pointer], :double
+
+    # PyComplex_RealAsDouble :: (PyPtr) -> double
+    attach_function :PyComplex_RealAsDouble, [:pointer], :double
+
+    # PyComplex_ImagAsDouble :: (PyPtr) -> double
+    attach_function :PyComplex_ImagAsDouble, [:pointer], :double
 
     # PyString_AsStringAndSize :: (PyPtr, char**, int*) -> int
     if string_as_bytes

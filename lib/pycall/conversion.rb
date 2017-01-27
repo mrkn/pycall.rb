@@ -2,17 +2,25 @@ module PyCall
   module Conversions
     def self.convert(py_obj_ptr)
       case
-      when Types.pyisinstance(py_obj_ptr, LibPython.PyBool_Type)
+      when isinstance?(py_obj_ptr, LibPython.PyBool_Type)
         return convert_to_boolean(py_obj_ptr)
-      when Types.pyisinstance(py_obj_ptr, LibPython.PyInt_Type)
+
+      when isinstance?(py_obj_ptr, LibPython.PyInt_Type)
         return convert_to_integer(py_obj_ptr)
-      when Types.pyisinstance(py_obj_ptr, LibPython.PyLong_Type)
+
+      when isinstance?(py_obj_ptr, LibPython.PyLong_Type)
         # TODO: should make Bignum
-      when Types.pyisinstance(py_obj_ptr, LibPython.PyFloat_Type)
+
+      when isinstance?(py_obj_ptr, LibPython.PyFloat_Type)
         return convert_to_float(py_obj_ptr)
-      when Types.pyisinstance(py_obj_ptr, LibPython.PyString_Type)
+
+      when isinstance?(py_obj_ptr, LibPython.PyComplex_Type)
+        return convert_to_complex(py_obj_ptr)
+
+      when isinstance?(py_obj_ptr, LibPython.PyString_Type)
         return convert_to_string(py_obj_ptr)
-      when Types.pyisinstance(py_obj_ptr, LibPython.PyUnicode_Type)
+
+      when isinstance?(py_obj_ptr, LibPython.PyUnicode_Type)
         py_str_ptr = LibPython.PyUnicode_AsUTF8String(py_obj_ptr)
         return convert_to_string(py_str_ptr)
       end
@@ -31,6 +39,12 @@ module PyCall
       LibPython.PyFloat_AsDouble(py_obj_ptr)
     end
 
+    def self.convert_to_complex(py_obj_ptr)
+      real = LibPython.PyComplex_RealAsDouble(py_obj_ptr)
+      imag = LibPython.PyComplex_ImagAsDouble(py_obj_ptr)
+      Complex(real, imag)
+    end
+
     def self.convert_to_string(py_obj_ptr)
       FFI::MemoryPointer.new(:string) do |str_ptr|
         FFI::MemoryPointer.new(:int) do |len_ptr|
@@ -40,6 +54,14 @@ module PyCall
           len = len_ptr.get(:int, 0)
           return str_ptr.get_pointer(0).read_string(len)
         end
+      end
+    end
+
+    class << self
+      private
+
+      def isinstance?(py_obj_ptr, py_type)
+        Types.pyisinstance(py_obj_ptr, py_type)
       end
     end
   end
