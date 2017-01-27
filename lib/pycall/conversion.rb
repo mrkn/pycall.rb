@@ -2,6 +2,9 @@ module PyCall
   module Conversions
     def self.convert(py_obj_ptr)
       case
+      when isnone?(py_obj_ptr)
+        return nil
+
       when isinstance?(py_obj_ptr, LibPython.PyBool_Type)
         return convert_to_boolean(py_obj_ptr)
 
@@ -59,6 +62,10 @@ module PyCall
 
     class << self
       private
+
+      def isnone?(py_obj_ptr)
+        py_obj_ptr == LibPython.Py_None
+      end
 
       def isinstance?(py_obj_ptr, py_type)
         Types.pyisinstance(py_obj_ptr, py_type)

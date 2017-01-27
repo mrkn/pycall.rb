@@ -87,7 +87,13 @@ module PyCall
     ffi_lib_flags :lazy, :global
     libpython = find_libpython ENV['PYTHON']
 
-    # --- type objects ---
+    # --- global variables ---
+
+    attach_variable :_Py_NoneStruct, PyObject_struct
+
+    def self.Py_None
+      _Py_NoneStruct.to_ptr
+    end
 
     if libpython.find_variable('PyInt_Type')
       has_PyInt_Type = true
