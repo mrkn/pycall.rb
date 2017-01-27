@@ -26,6 +26,9 @@ module PyCall
       when isinstance?(py_obj_ptr, LibPython.PyUnicode_Type)
         py_str_ptr = LibPython.PyUnicode_AsUTF8String(py_obj_ptr)
         return convert_to_string(py_str_ptr)
+
+      when isinstance?(py_obj_ptr, LibPython.PyList_Type)
+        return convert_to_array(py_obj_ptr)
       end
       py_obj_ptr
     end
@@ -56,6 +59,16 @@ module PyCall
 
           len = len_ptr.get(:int, 0)
           return str_ptr.get_pointer(0).read_string(len)
+        end
+      end
+    end
+
+    def self.convert_to_array(py_obj_ptr, force_list=true)
+      case
+      when force_list || isinstance?(py_obj_ptr, LibPython.PyList_Type)
+        len = LibPython.PySequence_Size(py_obj_ptr)
+        Array.new(len) do |i|
+          convert(LibPython.PySequence_GetItem(py_obj_ptr, i))
         end
       end
     end

@@ -117,6 +117,8 @@ module PyCall
       attach_variable :PyString_Type, :PyBytes_Type, PyObject_struct
     end
 
+    attach_variable :PyList_Type, PyObject_struct
+
     # --- functions ---
 
     attach_function :Py_GetVersion, [], :string
@@ -162,6 +164,12 @@ module PyCall
     when libpython.find_symbol('PyUnicodeUCS2_AsUTF8String')
       attach_function :PyUnicode_AsUTF8String, :PyUnicodeUCS2_AsUTF8String, [:pointer], :pointer
     end
+
+    # PySequence_Size :: (PyPtr) -> ssize_t
+    attach_function :PySequence_Size, [:pointer], :ssize_t
+
+    # PySequence_GetItem :: (PyPtr, ssize_t) -> PyPtr
+    attach_function :PySequence_GetItem, [:pointer, :ssize_t], :pointer
 
     # PyModule_GetDict :: (PyPtr) -> PyPtr
     attach_function :PyModule_GetDict, [:pointer], :pointer
