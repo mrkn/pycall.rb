@@ -24,6 +24,9 @@ describe PyCall, '.eval' do
 
   specify { expect_python('[1, 2, 3]').to eq([1, 2, 3]) }
 
+  specify { expect_python('(1, 2, 3)').to be_kind_of(PyCall::Tuple) }
+  specify { expect_python('(1, 2, 3)').to eq(PyCall::Tuple[1, 2, 3]) }
+
   specify { expect_python('{ "a": 1, "b": 2 }').to eq({ 'a' => 1, 'b' => 2 }) }
 
   specify { expect_python('{1, 2, 3}').to eq(Set[1, 2, 3]) }

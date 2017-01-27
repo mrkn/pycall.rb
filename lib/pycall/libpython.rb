@@ -118,6 +118,7 @@ module PyCall
     end
 
     attach_variable :PyList_Type, PyObject_struct
+    attach_variable :PyTuple_Type, PyObject_struct
 
     # --- functions ---
 

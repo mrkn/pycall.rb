@@ -29,6 +29,9 @@ module PyCall
 
       when isinstance?(py_obj_ptr, LibPython.PyList_Type)
         return convert_to_array(py_obj_ptr)
+
+      when isinstance?(py_obj_ptr, LibPython.PyTuple_Type)
+        return convert_to_tuple(py_obj_ptr)
       end
       py_obj_ptr
     end
@@ -63,14 +66,18 @@ module PyCall
       end
     end
 
-    def self.convert_to_array(py_obj_ptr, force_list=true)
+    def self.convert_to_array(py_obj_ptr, force_list: true, array_class: Array)
       case
       when force_list || isinstance?(py_obj_ptr, LibPython.PyList_Type)
         len = LibPython.PySequence_Size(py_obj_ptr)
-        Array.new(len) do |i|
+        array_class.new(len) do |i|
           convert(LibPython.PySequence_GetItem(py_obj_ptr, i))
         end
       end
+    end
+
+    def self.convert_to_tuple(py_obj_ptr)
+      convert_to_array(py_obj_ptr, array_class: PyCall::Tuple)
     end
 
     class << self
