@@ -1,33 +1,62 @@
 require 'spec_helper'
 
-describe PyCall, '.eval' do
+describe PyCall do
   def py_eval(src)
     PyCall.eval(src)
   end
 
-  def expect_python(src)
-    expect(py_eval(src))
+  def self.describe_eval(src, &block)
+    describe ".eval(#{src.inspect})" do
+      subject { py_eval(src) }
+      module_eval &block
+    end
   end
 
-  specify { expect_python('None').to equal(nil) }
+  describe_eval('None') do
+    it { is_expected.to equal(nil) }
+  end
 
-  specify { expect_python('True').to equal(true) }
-  specify { expect_python('False').to equal(false) }
+  describe_eval('True') do
+    it { is_expected.to equal(true) }
+  end
 
-  specify { expect_python('1').to be_kind_of(Integer) }
-  specify { expect_python('1').to eq(1) }
-  specify { expect_python('1.0').to be_kind_of(Float) }
-  specify { expect_python('1.0').to eq(1.0) }
-  specify { expect_python('complex(1, 2)').to eq(1 + 2i) }
+  describe_eval('False') do
+    it { is_expected.to equal(false) }
+  end
 
-  specify { expect_python('"python"').to eq("python") }
+  describe_eval('1') do
+    it { is_expected.to be_kind_of(Integer) }
+    it { is_expected.to eq(1) }
+  end
 
-  specify { expect_python('[1, 2, 3]').to eq([1, 2, 3]) }
+  describe_eval('1.0') do
+    it { is_expected.to be_kind_of(Float) }
+    it { is_expected.to eq(1.0) }
+  end
 
-  specify { expect_python('(1, 2, 3)').to be_kind_of(PyCall::Tuple) }
-  specify { expect_python('(1, 2, 3)').to eq(PyCall::Tuple[1, 2, 3]) }
+  describe_eval('complex(1, 2)') do
+    it { is_expected.to eq(1 + 2i) }
+  end
 
-  specify { expect_python('{ "a": 1, "b": 2 }').to eq({ 'a' => 1, 'b' => 2 }) }
+  describe_eval('"python"') do
+    it { is_expected.to eq("python") }
+  end
 
-  specify { expect_python('{1, 2, 3}').to eq(Set[1, 2, 3]) }
+  describe_eval('[1, 2, 3]') do
+    it { is_expected.to eq([1, 2, 3]) }
+  end
+
+  describe_eval('(1, 2, 3)') do
+    it { is_expected.to be_kind_of(PyCall::Tuple) }
+    it { is_expected.to eq(PyCall::Tuple[1, 2, 3]) }
+  end
+
+  describe_eval('{ "a": 1, "b": 2 }') do
+    it { is_expected.to eq({ 'a' => 1, 'b' => 2 }) }
+  end
+
+  describe_eval('{1, 2, 3}') do
+    it { is_expected.to be_kind_of(Set) }
+    it { is_expected.to eq(Set[1, 2, 3]) }
+  end
 end
