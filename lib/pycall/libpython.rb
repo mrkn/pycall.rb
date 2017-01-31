@@ -119,6 +119,7 @@ module PyCall
 
     attach_variable :PyList_Type, PyObject_struct
     attach_variable :PyTuple_Type, PyObject_struct
+    attach_variable :PyDict_Type, PyObject_struct
 
     # --- functions ---
 
@@ -171,6 +172,39 @@ module PyCall
 
     # PySequence_GetItem :: (PyPtr, ssize_t) -> PyPtr
     attach_function :PySequence_GetItem, [:pointer, :ssize_t], :pointer
+
+    # PyDict_GetItem :: (PyPtr, PyPtr) -> PyPtr
+    attach_function :PyDict_GetItem, [:pointer, :pointer], :pointer
+
+    # PyDict_GetItemString :: (PyPtr, char const*) -> PyPtr
+    attach_function :PyDict_GetItemString, [:pointer, :string], :pointer
+
+    # PyDict_SetItem :: (PyPtr, PyPtr, PyPtr) -> int
+    attach_function :PyDict_SetItem, [:pointer, :pointer, :pointer], :int
+
+    # PyDict_SetItemString :: (PyPtr, char const*, PyPtr) -> int
+    attach_function :PyDict_SetItem, [:pointer, :string, :pointer], :int
+
+    # PyDict_DelItem :: (PyPtr, PyPtr) -> int
+    attach_function :PyDict_DelItem, [:pointer, :pointer], :int
+
+    # PyDict_DelItemString :: (PyPtr, char const*) -> int
+    attach_function :PyDict_DelItem, [:pointer, :string], :int
+
+    # PyDict_Size :: (PyPtr) -> ssize_t
+    attach_function :PyDict_Size, [:pointer], :ssize_t
+
+    # PyDict_Keys :: (PyPtr) -> PyPtr
+    attach_function :PyDict_Keys, [:pointer], :pointer
+
+    # PyDict_Values :: (PyPtr) -> PyPtr
+    attach_function :PyDict_Values, [:pointer], :pointer
+
+    # PyDict_Items :: (PyPtr) -> PyPtr
+    attach_function :PyDict_Items, [:pointer], :pointer
+
+    # PyDict_Contains :: (PyPtr, PyPtr) -> int
+    attach_function :PyDict_Contains, [:pointer, :pointer], :int
 
     # PyModule_GetDict :: (PyPtr) -> PyPtr
     attach_function :PyModule_GetDict, [:pointer], :pointer

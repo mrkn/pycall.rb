@@ -52,7 +52,12 @@ describe PyCall do
   end
 
   describe_eval('{ "a": 1, "b": 2 }') do
-    it { is_expected.to eq({ 'a' => 1, 'b' => 2 }) }
+    it { is_expected.to be_kind_of(PyCall::Dict) }
+    specify do
+      expect(subject['a']).to eq(1)
+      expect(subject['b']).to eq(2)
+      expect(subject['c']).to be_nil
+    end
   end
 
   describe_eval('{1, 2, 3}') do

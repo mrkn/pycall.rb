@@ -32,6 +32,9 @@ module PyCall
 
       when isinstance?(py_obj_ptr, LibPython.PyTuple_Type)
         return convert_to_tuple(py_obj_ptr)
+
+      when isinstance?(py_obj_ptr, LibPython.PyDict_Type)
+        return PyCall::Dict.new(py_obj_ptr)
       end
       py_obj_ptr
     end
