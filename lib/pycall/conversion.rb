@@ -1,48 +1,5 @@
 module PyCall
   module Conversions
-    def self.convert(py_obj)
-      case
-      when isnone?(py_obj)
-        return nil
-
-      when isinstance?(py_obj, LibPython.PyBool_Type)
-        return convert_to_boolean(py_obj)
-
-      when isinstance?(py_obj, LibPython.PyInt_Type)
-        return convert_to_integer(py_obj)
-
-      when isinstance?(py_obj, LibPython.PyLong_Type)
-        # TODO: should make Bignum
-
-      when isinstance?(py_obj, LibPython.PyFloat_Type)
-        return convert_to_float(py_obj)
-
-      when isinstance?(py_obj, LibPython.PyComplex_Type)
-        return convert_to_complex(py_obj)
-
-      when isinstance?(py_obj, LibPython.PyString_Type)
-        return convert_to_string(py_obj)
-
-      when isinstance?(py_obj, LibPython.PyUnicode_Type)
-        py_str_ptr = LibPython.PyUnicode_AsUTF8String(py_obj)
-        return convert_to_string(py_str_ptr)
-
-      when isinstance?(py_obj, LibPython.PyList_Type)
-        return convert_to_array(py_obj)
-
-      when isinstance?(py_obj, LibPython.PyTuple_Type)
-        return convert_to_tuple(py_obj)
-
-      when isinstance?(py_obj, LibPython.PyDict_Type)
-        return PyCall::Dict.new(py_obj)
-
-      when isinstance?(py_obj, LibPython.PySet_Type)
-        return PyCall::Set.new(py_obj)
-      end
-
-      py_obj
-    end
-
     def self.convert_to_boolean(py_obj)
       0 != LibPython.PyInt_AsSsize_t(py_obj)
     end
@@ -75,10 +32,10 @@ module PyCall
 
     def self.convert_to_array(py_obj, force_list: true, array_class: Array)
       case
-      when force_list || isinstance?(py_obj, LibPython.PyList_Type)
+      when force_list || py_obj.kind_of?(LibPython.PyList_Type)
         len = LibPython.PySequence_Size(py_obj)
         array_class.new(len) do |i|
-          convert(LibPython.PySequence_GetItem(py_obj, i))
+          LibPython.PySequence_GetItem(py_obj, i).to_ruby
         end
       end
     end
@@ -86,17 +43,49 @@ module PyCall
     def self.convert_to_tuple(py_obj)
       convert_to_array(py_obj, array_class: PyCall::Tuple)
     end
+  end
 
-    class << self
-      private
+  class PyObject
+    def to_ruby
+      return nil if self.null? || self.py_none?
 
-      def isnone?(py_obj)
-        py_obj.to_ptr == LibPython.Py_None.to_ptr
+      case self
+      when LibPython.PyBool_Type
+        return Conversions.convert_to_boolean(self)
+
+      when LibPython.PyInt_Type
+        return Conversions.convert_to_integer(self)
+
+      when LibPython.PyLong_Type
+        # TODO: should make Bignum
+
+      when LibPython.PyFloat_Type
+        return Conversions.convert_to_float(self)
+
+      when LibPython.PyComplex_Type
+        return Conversions.convert_to_complex(self)
+
+      when LibPython.PyString_Type
+        return Conversions.convert_to_string(self)
+
+      when LibPython.PyUnicode_Type
+        py_str_ptr = LibPython.PyUnicode_AsUTF8String(self)
+        return Conversions.convert_to_string(py_str_ptr)
+
+      when LibPython.PyList_Type
+        return Conversions.convert_to_array(self)
+
+      when LibPython.PyTuple_Type
+        return Conversions.convert_to_tuple(self)
+
+      when LibPython.PyDict_Type
+        return PyCall::Dict.new(self)
+
+      when LibPython.PySet_Type
+        return PyCall::Set.new(self)
       end
 
-      def isinstance?(py_obj, py_type)
-        Types.pyisinstance(py_obj, py_type)
-      end
+      self
     end
   end
 end

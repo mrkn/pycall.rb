@@ -31,7 +31,6 @@ module PyCall
   end
 
   def self.eval(str)
-    py_obj = Eval.eval(str)
-    Conversions.convert(py_obj)
+    Eval.eval(str).to_ruby
   end
 end

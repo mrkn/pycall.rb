@@ -1,5 +1,6 @@
 require "pycall/version"
 require "pycall/libpython"
+require "pycall/pyobject"
 require "pycall/eval"
 require "pycall/types"
 require "pycall/tuple"
