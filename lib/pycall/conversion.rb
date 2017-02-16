@@ -35,6 +35,9 @@ module PyCall
 
       when isinstance?(py_obj_ptr, LibPython.PyDict_Type)
         return PyCall::Dict.new(py_obj_ptr)
+
+      when isinstance?(py_obj_ptr, LibPython.PySet_Type)
+        return PyCall::Set.new(py_obj_ptr)
       end
       py_obj_ptr
     end

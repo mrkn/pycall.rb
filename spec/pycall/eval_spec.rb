@@ -61,7 +61,11 @@ describe PyCall do
   end
 
   describe_eval('{1, 2, 3}') do
-    it { is_expected.to be_kind_of(Set) }
-    it { is_expected.to eq(Set[1, 2, 3]) }
+    it { is_expected.to be_kind_of(PyCall::Set) }
+
+    specify { expect(subject.length).to eq(3) }
+
+    it { is_expected.to include(1, 2, 3) }
+    it { is_expected.not_to include(0, 4) }
   end
 end

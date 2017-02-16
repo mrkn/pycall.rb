@@ -120,6 +120,7 @@ module PyCall
     attach_variable :PyList_Type, PyObject_struct
     attach_variable :PyTuple_Type, PyObject_struct
     attach_variable :PyDict_Type, PyObject_struct
+    attach_variable :PySet_Type, PyObject_struct
 
     # --- functions ---
 
@@ -205,6 +206,18 @@ module PyCall
 
     # PyDict_Contains :: (PyPtr, PyPtr) -> int
     attach_function :PyDict_Contains, [:pointer, :pointer], :int
+
+    # PySet_Size :: (PyPtr) -> ssize_t
+    attach_function :PySet_Size, [:pointer], :ssize_t
+
+    # PySet_Contains :: (PyPtr, PyPtr) -> int
+    attach_function :PySet_Contains, [:pointer, :pointer], :int
+
+    # PySet_Add :: (PyPtr, PyPtr) -> int
+    attach_function :PySet_Add, [:pointer, :pointer], :int
+
+    # PySet_Discard :: (PyPtr, PyPtr) -> int
+    attach_function :PySet_Discard, [:pointer, :pointer], :int
 
     # PyModule_GetDict :: (PyPtr) -> PyPtr
     attach_function :PyModule_GetDict, [:pointer], :pointer
