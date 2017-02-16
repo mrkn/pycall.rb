@@ -145,6 +145,9 @@ module PyCall
     # PyObject_IsInstane :: (PyPtr, PyPtr) -> int
     attach_function :PyObject_IsInstance, [PyObject.by_ref, PyTypeObject.by_ref], :int
 
+    # PyBool_FromLong :: (long) -> PyPtr
+    attach_function :PyBool_FromLong, [:long], PyObject.by_ref
+
     # PyInt_AsSsize_t :: (PyPtr) -> ssize_t
     if has_PyInt_Type
       attach_function :PyInt_AsSsize_t, [PyObject.by_ref], :ssize_t
@@ -152,7 +155,13 @@ module PyCall
       attach_function :PyInt_AsSsize_t, :PyLong_AsSsize_t, [PyObject.by_ref], :ssize_t
     end
 
-    # PyFloat_AsDouble :: (PyPtr) - double
+    # PyLong_FromLong :: (long) -> PyPtr
+    attach_function :PyLong_FromLong, [:long], PyObject.by_ref
+
+    # PyFloat_FromDouble :: (double) -> PyPtr
+    attach_function :PyFloat_FromDouble, [:double], PyObject.by_ref
+
+    # PyFloat_AsDouble :: (PyPtr) -> double
     attach_function :PyFloat_AsDouble, [PyObject.by_ref], :double
 
     # PyComplex_RealAsDouble :: (PyPtr) -> double

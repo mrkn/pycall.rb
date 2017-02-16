@@ -1,5 +1,18 @@
 module PyCall
   module Conversions
+    def self.from_ruby(obj)
+      case obj
+      when TrueClass, FalseClass
+        LibPython.PyBool_FromLong(obj ? 1 : 0)
+      when Integer
+        LibPython.PyLong_FromLong(obj)
+      when Float
+        LibPython.PyFloat_FromDouble(obj)
+      else
+        LibPython.Py_None
+      end
+    end
+
     def self.convert_to_boolean(py_obj)
       0 != LibPython.PyInt_AsSsize_t(py_obj)
     end
