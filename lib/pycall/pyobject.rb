@@ -13,4 +13,14 @@ module PyCall
       end
     end
   end
+
+  class PyTypeObject < FFI::Struct
+    def ===(obj)
+      obj.kind_of? self
+    end
+
+    def inspect
+      "pytype(#{self[:tp_name]})"
+    end
+  end
 end

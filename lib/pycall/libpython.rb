@@ -10,10 +10,6 @@ module PyCall
     layout ob_base: PyObject,
            ob_size: :ssize_t,
            tp_name: :string
-
-    def ===(obj)
-      obj.kind_of? self
-    end
   end
 
   module LibPython
