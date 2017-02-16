@@ -79,7 +79,7 @@ module PyCall
       File.expand_path('../python/investigator.py', __FILE__)
     end
 
-    class PyObject_struct < FFI::Struct
+    class PyObject < FFI::Struct
       layout ob_refcnt: :int,
              ob_type:   :pointer
     end
@@ -89,7 +89,7 @@ module PyCall
 
     # --- global variables ---
 
-    attach_variable :_Py_NoneStruct, PyObject_struct
+    attach_variable :_Py_NoneStruct, PyObject
 
     def self.Py_None
       _Py_NoneStruct.to_ptr
@@ -97,30 +97,30 @@ module PyCall
 
     if libpython.find_variable('PyInt_Type')
       has_PyInt_Type = true
-      attach_variable :PyInt_Type, PyObject_struct
+      attach_variable :PyInt_Type, PyObject
     else
       has_PyInt_Type = false
-      attach_variable :PyInt_Type, :PyLong_Type, PyObject_struct
+      attach_variable :PyInt_Type, :PyLong_Type, PyObject
     end
 
-    attach_variable :PyLong_Type, PyObject_struct
-    attach_variable :PyBool_Type, PyObject_struct
-    attach_variable :PyFloat_Type, PyObject_struct
-    attach_variable :PyComplex_Type, PyObject_struct
-    attach_variable :PyUnicode_Type, PyObject_struct
+    attach_variable :PyLong_Type, PyObject
+    attach_variable :PyBool_Type, PyObject
+    attach_variable :PyFloat_Type, PyObject
+    attach_variable :PyComplex_Type, PyObject
+    attach_variable :PyUnicode_Type, PyObject
 
     if libpython.find_symbol('PyString_FromStringAndSize')
       string_as_bytes = false
-      attach_variable :PyString_Type, PyObject_struct
+      attach_variable :PyString_Type, PyObject
     else
       string_as_bytes = true
-      attach_variable :PyString_Type, :PyBytes_Type, PyObject_struct
+      attach_variable :PyString_Type, :PyBytes_Type, PyObject
     end
 
-    attach_variable :PyList_Type, PyObject_struct
-    attach_variable :PyTuple_Type, PyObject_struct
-    attach_variable :PyDict_Type, PyObject_struct
-    attach_variable :PySet_Type, PyObject_struct
+    attach_variable :PyList_Type, PyObject
+    attach_variable :PyTuple_Type, PyObject
+    attach_variable :PyDict_Type, PyObject
+    attach_variable :PySet_Type, PyObject
 
     # --- functions ---
 
