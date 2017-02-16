@@ -3,7 +3,7 @@ module PyCall
     def self.pyisinstance(pyobj, pytype)
       check_pyobject(pyobj)
       pyobj_ptr = pyobj # TODO: fix after introducing PyObject class
-      LibPython.PyObject_IsInstance(pyobj_ptr, pytype.to_ptr) == 1
+      LibPython.PyObject_IsInstance(pyobj_ptr, pytype) == 1
     end
 
     class << self

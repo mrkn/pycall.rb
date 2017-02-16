@@ -6,13 +6,13 @@ module PyCall
 
     def [](key)
       key = key.to_s if key.is_a? Symbol
-      py_obj_ptr = if key.is_a? String
+      py_obj = if key.is_a? String
                      LibPython.PyDict_GetItemString(__pyobj__, key)
                    else
                      LibPython.PyDict_GetItem(__pyobj__, key)
                    end
-      return nil if py_obj_ptr.null?
-      __convert__ py_obj_ptr
+      return nil if py_obj.null?
+      __convert__ py_obj
     end
 
     def []=(key, value)
@@ -75,8 +75,8 @@ module PyCall
       @pyobj
     end
 
-    def __convert__(py_obj_ptr)
-      Conversions.convert(py_obj_ptr)
+    def __convert__(py_obj)
+      Conversions.convert(py_obj)
     end
   end
 end

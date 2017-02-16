@@ -31,7 +31,7 @@ module PyCall
   end
 
   def self.eval(str)
-    py_obj_ptr = Eval.eval(str)
-    Conversions.convert(py_obj_ptr)
+    py_obj = Eval.eval(str)
+    Conversions.convert(py_obj)
   end
 end

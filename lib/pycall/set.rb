@@ -17,8 +17,8 @@ module PyCall
 
     attr_reader :__pyobj__
 
-    def __convert__(py_obj_ptr)
-      Conversions.convert(py_obj_ptr)
+    def __convert__(py_obj)
+      Conversions.convert(py_obj)
     end
   end
 end

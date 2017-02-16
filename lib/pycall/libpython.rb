@@ -92,7 +92,7 @@ module PyCall
     attach_variable :_Py_NoneStruct, PyObject
 
     def self.Py_None
-      _Py_NoneStruct.to_ptr
+      _Py_NoneStruct
     end
 
     if libpython.find_variable('PyInt_Type')
@@ -133,103 +133,103 @@ module PyCall
     attach_function :Py_IsInitialized, [], :int
 
     # PyObject_IsInstane :: (PyPtr, PyPtr) -> int
-    attach_function :PyObject_IsInstance, [:pointer, :pointer], :int
+    attach_function :PyObject_IsInstance, [PyObject.by_ref, PyObject.by_ref], :int
 
     # PyInt_AsSsize_t :: (PyPtr) -> ssize_t
     if has_PyInt_Type
-      attach_function :PyInt_AsSsize_t, [:pointer], :ssize_t
+      attach_function :PyInt_AsSsize_t, [PyObject.by_ref], :ssize_t
     else
-      attach_function :PyInt_AsSsize_t, :PyLong_AsSsize_t, [:pointer], :ssize_t
+      attach_function :PyInt_AsSsize_t, :PyLong_AsSsize_t, [PyObject.by_ref], :ssize_t
     end
 
     # PyFloat_AsDouble :: (PyPtr) - double
-    attach_function :PyFloat_AsDouble, [:pointer], :double
+    attach_function :PyFloat_AsDouble, [PyObject.by_ref], :double
 
     # PyComplex_RealAsDouble :: (PyPtr) -> double
-    attach_function :PyComplex_RealAsDouble, [:pointer], :double
+    attach_function :PyComplex_RealAsDouble, [PyObject.by_ref], :double
 
     # PyComplex_ImagAsDouble :: (PyPtr) -> double
-    attach_function :PyComplex_ImagAsDouble, [:pointer], :double
+    attach_function :PyComplex_ImagAsDouble, [PyObject.by_ref], :double
 
     # PyString_AsStringAndSize :: (PyPtr, char**, int*) -> int
     if string_as_bytes
-      attach_function :PyString_AsStringAndSize, :PyBytes_AsStringAndSize, [:pointer, :pointer, :pointer], :int
+      attach_function :PyString_AsStringAndSize, :PyBytes_AsStringAndSize, [PyObject.by_ref, :pointer, :pointer], :int
     else
-      attach_function :PyString_AsStringAndSize, [:pointer, :pointer, :pointer], :int
+      attach_function :PyString_AsStringAndSize, [PyObject.by_ref, :pointer, :pointer], :int
     end
 
     # PyUnicode_AsUTF8String :: (PyPtr) -> PyPtr
     case
     when libpython.find_symbol('PyUnicode_AsUTF8String')
-      attach_function :PyUnicode_AsUTF8String, [:pointer], :pointer
+      attach_function :PyUnicode_AsUTF8String, [PyObject.by_ref], PyObject.by_ref
     when libpython.find_symbol('PyUnicodeUCS4_AsUTF8String')
-      attach_function :PyUnicode_AsUTF8String, :PyUnicodeUCS4_AsUTF8String, [:pointer], :pointer
+      attach_function :PyUnicode_AsUTF8String, :PyUnicodeUCS4_AsUTF8String, [PyObject.by_ref], PyObject.by_ref
     when libpython.find_symbol('PyUnicodeUCS2_AsUTF8String')
-      attach_function :PyUnicode_AsUTF8String, :PyUnicodeUCS2_AsUTF8String, [:pointer], :pointer
+      attach_function :PyUnicode_AsUTF8String, :PyUnicodeUCS2_AsUTF8String, [PyObject.by_ref], PyObject.by_ref
     end
 
     # PySequence_Size :: (PyPtr) -> ssize_t
-    attach_function :PySequence_Size, [:pointer], :ssize_t
+    attach_function :PySequence_Size, [PyObject.by_ref], :ssize_t
 
     # PySequence_GetItem :: (PyPtr, ssize_t) -> PyPtr
-    attach_function :PySequence_GetItem, [:pointer, :ssize_t], :pointer
+    attach_function :PySequence_GetItem, [PyObject.by_ref, :ssize_t], PyObject.by_ref
 
     # PyDict_GetItem :: (PyPtr, PyPtr) -> PyPtr
-    attach_function :PyDict_GetItem, [:pointer, :pointer], :pointer
+    attach_function :PyDict_GetItem, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
 
     # PyDict_GetItemString :: (PyPtr, char const*) -> PyPtr
-    attach_function :PyDict_GetItemString, [:pointer, :string], :pointer
+    attach_function :PyDict_GetItemString, [PyObject.by_ref, :string], PyObject.by_ref
 
     # PyDict_SetItem :: (PyPtr, PyPtr, PyPtr) -> int
-    attach_function :PyDict_SetItem, [:pointer, :pointer, :pointer], :int
+    attach_function :PyDict_SetItem, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], :int
 
     # PyDict_SetItemString :: (PyPtr, char const*, PyPtr) -> int
-    attach_function :PyDict_SetItem, [:pointer, :string, :pointer], :int
+    attach_function :PyDict_SetItem, [PyObject.by_ref, :string, PyObject.by_ref], :int
 
     # PyDict_DelItem :: (PyPtr, PyPtr) -> int
-    attach_function :PyDict_DelItem, [:pointer, :pointer], :int
+    attach_function :PyDict_DelItem, [PyObject.by_ref, PyObject.by_ref], :int
 
     # PyDict_DelItemString :: (PyPtr, char const*) -> int
-    attach_function :PyDict_DelItem, [:pointer, :string], :int
+    attach_function :PyDict_DelItem, [PyObject.by_ref, :string], :int
 
     # PyDict_Size :: (PyPtr) -> ssize_t
-    attach_function :PyDict_Size, [:pointer], :ssize_t
+    attach_function :PyDict_Size, [PyObject.by_ref], :ssize_t
 
     # PyDict_Keys :: (PyPtr) -> PyPtr
-    attach_function :PyDict_Keys, [:pointer], :pointer
+    attach_function :PyDict_Keys, [PyObject.by_ref], PyObject.by_ref
 
     # PyDict_Values :: (PyPtr) -> PyPtr
-    attach_function :PyDict_Values, [:pointer], :pointer
+    attach_function :PyDict_Values, [PyObject.by_ref], PyObject.by_ref
 
     # PyDict_Items :: (PyPtr) -> PyPtr
-    attach_function :PyDict_Items, [:pointer], :pointer
+    attach_function :PyDict_Items, [PyObject.by_ref], PyObject.by_ref
 
     # PyDict_Contains :: (PyPtr, PyPtr) -> int
-    attach_function :PyDict_Contains, [:pointer, :pointer], :int
+    attach_function :PyDict_Contains, [PyObject.by_ref, PyObject.by_ref], :int
 
     # PySet_Size :: (PyPtr) -> ssize_t
-    attach_function :PySet_Size, [:pointer], :ssize_t
+    attach_function :PySet_Size, [PyObject.by_ref], :ssize_t
 
     # PySet_Contains :: (PyPtr, PyPtr) -> int
-    attach_function :PySet_Contains, [:pointer, :pointer], :int
+    attach_function :PySet_Contains, [PyObject.by_ref, PyObject.by_ref], :int
 
     # PySet_Add :: (PyPtr, PyPtr) -> int
-    attach_function :PySet_Add, [:pointer, :pointer], :int
+    attach_function :PySet_Add, [PyObject.by_ref, PyObject.by_ref], :int
 
     # PySet_Discard :: (PyPtr, PyPtr) -> int
-    attach_function :PySet_Discard, [:pointer, :pointer], :int
+    attach_function :PySet_Discard, [PyObject.by_ref, PyObject.by_ref], :int
 
     # PyModule_GetDict :: (PyPtr) -> PyPtr
-    attach_function :PyModule_GetDict, [:pointer], :pointer
+    attach_function :PyModule_GetDict, [PyObject.by_ref], PyObject.by_ref
 
     # PyImport_ImportModule :: (char const*) -> PyPtr
-    attach_function :PyImport_ImportModule, [:string], :pointer
+    attach_function :PyImport_ImportModule, [:string], PyObject.by_ref
 
     # Py_CompileString :: (char const*, char const*, int) -> PyPtr
-    attach_function :Py_CompileString, [:string, :string, :int], :pointer
+    attach_function :Py_CompileString, [:string, :string, :int], PyObject.by_ref
 
     # PyEval_EvalCode :: (PyPtr, PyPtr, PyPtr) -> PyPtr
-    attach_function :PyEval_EvalCode, [:pointer, :pointer, :pointer], :pointer
+    attach_function :PyEval_EvalCode, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
 
     # PyErr_Print :: () -> Void
     attach_function :PyErr_Print, [], :void
