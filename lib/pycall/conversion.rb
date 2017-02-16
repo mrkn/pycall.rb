@@ -5,7 +5,7 @@ module PyCall
       when TrueClass, FalseClass
         LibPython.PyBool_FromLong(obj ? 1 : 0)
       when Integer
-        LibPython.PyLong_FromLong(obj)
+        LibPython.PyInt_FromSsize_t(obj)
       when Float
         LibPython.PyFloat_FromDouble(obj)
       else

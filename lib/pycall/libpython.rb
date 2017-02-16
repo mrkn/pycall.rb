@@ -151,8 +151,12 @@ module PyCall
       attach_function :PyInt_AsSsize_t, :PyLong_AsSsize_t, [PyObject.by_ref], :ssize_t
     end
 
-    # PyLong_FromLong :: (long) -> PyPtr
-    attach_function :PyLong_FromLong, [:long], PyObject.by_ref
+    # PyInt_FromSsize_t :: (ssize_t) -> PyPtr
+    if has_PyInt_Type
+      attach_function :PyInt_FromSsize_t, [:ssize_t], PyObject.by_ref
+    else
+      attach_function :PyInt_FromSsize_t, :PyLong_FromSsize_t, [:ssize_t], PyObject.by_ref
+    end
 
     # PyFloat_FromDouble :: (double) -> PyPtr
     attach_function :PyFloat_FromDouble, [:double], PyObject.by_ref
