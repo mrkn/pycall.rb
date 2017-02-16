@@ -9,8 +9,7 @@ module PyCall
     end
 
     def include?(obj)
-      # TODO: PySet_Contains
-      false
+      1 == LibPython.PySet_Contains(__pyobj__, Conversions.from_ruby(obj))
     end
 
     private
