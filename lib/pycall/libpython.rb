@@ -90,6 +90,9 @@ module PyCall
     # PyImport_ImportModule :: (char const*) -> PyPtr
     attach_function :PyImport_ImportModule, [:string], :pointer
 
+    # PyErr_Print :: () -> Void
+    attach_function :PyErr_Print, [], :void
+
     public_class_method
   end
 end
