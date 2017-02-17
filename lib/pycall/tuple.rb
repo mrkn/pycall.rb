@@ -41,7 +41,8 @@ module PyCall
     end
 
     def []=(index, value)
-      LibPython.PyTuple_SetItem(__pyobj__, index, Conversions.from_ruby(value))
+      value = Conversions.from_ruby(value)
+      LibPython.PyTuple_SetItem(__pyobj__, index, value)
     end
 
     private
