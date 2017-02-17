@@ -43,6 +43,17 @@ module PyCall
       LibPython.PyObject_SetItem(self, key, value)
       self
     end
+
+    def call(*args, **kwargs)
+      args = PyCall::Tuple[*args]
+      kwargs = if kwargs.empty?
+                 PyObject.new(FFI::Pointer::NULL)
+               else
+                 PyCall::Dict.new(kwargs).__pyobj__
+               end
+      res = LibPython.PyObject_Call(self, args.__pyobj__, kwargs)
+      res.to_ruby
+    end
   end
 
   class PyTypeObject < FFI::Struct
