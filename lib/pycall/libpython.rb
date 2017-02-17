@@ -138,6 +138,11 @@ module PyCall
     # Py_IsInitialized :: () -> int
     attach_function :Py_IsInitialized, [], :int
 
+    # Accessing Object's items
+    attach_function :PyObject_GetItem, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
+    attach_function :PyObject_SetItem, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], :int
+    attach_function :PyObject_DelItem, [PyObject.by_ref, PyObject.by_ref], :int
+
     # PyObject_IsInstane :: (PyPtr, PyPtr) -> int
     attach_function :PyObject_IsInstance, [PyObject.by_ref, PyTypeObject.by_ref], :int
 
