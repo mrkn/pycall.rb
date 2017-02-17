@@ -138,6 +138,9 @@ module PyCall
     # Py_IsInitialized :: () -> int
     attach_function :Py_IsInitialized, [], :int
 
+    # Comparing two objects
+    attach_function :PyObject_RichCompareBool, [PyObject.by_ref, PyObject.by_ref, :int], :int
+
     # Accessing Object's items
     attach_function :PyObject_GetItem, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
     attach_function :PyObject_SetItem, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], :int
@@ -191,6 +194,12 @@ module PyCall
     when libpython.find_symbol('PyUnicodeUCS2_AsUTF8String')
       attach_function :PyUnicode_AsUTF8String, :PyUnicodeUCS2_AsUTF8String, [PyObject.by_ref], PyObject.by_ref
     end
+
+    # Tuple
+
+    attach_function :PyTuple_New, [:ssize_t], PyObject.by_ref
+    attach_function :PyTuple_GetItem, [PyObject.by_ref, :ssize_t], PyObject.by_ref
+    attach_function :PyTuple_SetItem, [PyObject.by_ref, :ssize_t, PyObject.by_ref], :int
 
     # PySequence_Size :: (PyPtr) -> ssize_t
     attach_function :PySequence_Size, [PyObject.by_ref], :ssize_t

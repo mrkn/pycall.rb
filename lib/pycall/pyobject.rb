@@ -1,5 +1,20 @@
 module PyCall
+  Py_EQ = 2
+
   module PyObjectMethods
+    def ==(other)
+      return false unless other.kind_of?(PyObject)
+      return super if self.null? || other.null?
+      case LibPython.PyObject_RichCompareBool(self, other, Py_EQ)
+      when 0
+        false
+      when 1
+        true
+      else
+        super
+      end
+    end
+
     def py_none?
       to_ptr == LibPython.Py_None.to_ptr
     end
@@ -12,6 +27,10 @@ module PyCall
         super
       end
     end
+  end
+
+  class PyObject < FFI::Struct
+    include PyObjectMethods
 
     def [](key)
       key = Conversions.from_ruby(key)
@@ -24,10 +43,6 @@ module PyCall
       LibPython.PyObject_SetItem(self, key, value)
       self
     end
-  end
-
-  class PyObject < FFI::Struct
-    include PyObjectMethods
   end
 
   class PyTypeObject < FFI::Struct

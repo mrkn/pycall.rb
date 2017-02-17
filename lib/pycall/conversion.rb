@@ -54,7 +54,7 @@ module PyCall
     end
 
     def self.convert_to_tuple(py_obj)
-      convert_to_array(py_obj, array_class: PyCall::Tuple)
+      PyCall::Tuple.new(py_obj)
     end
   end
 
