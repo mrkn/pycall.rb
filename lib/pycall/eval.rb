@@ -27,7 +27,7 @@ module PyCall
 
   def self.import_module(name)
     name = name.to_s if name.kind_of? Symbol
-    LibPython.PyImport_ImportModule(name) # TODO: fix after introducing PyObject class
+    LibPython.PyImport_ImportModule(name)
   end
 
   def self.eval(str)
