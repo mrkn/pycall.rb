@@ -9,5 +9,11 @@ module PyCall
       expect(subject[1]).to eq(2)
       expect(subject[2]).to eq(3)
     end
+
+    describe '#length' do
+      it 'returns its size' do
+        expect(subject.length).to eq(3)
+      end
+    end
   end
 end

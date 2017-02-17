@@ -36,6 +36,10 @@ module PyCall
       end
     end
 
+    def length
+      LibPython.PyTuple_Size(__pyobj__)
+    end
+
     def [](index)
       LibPython.PyTuple_GetItem(__pyobj__, index).to_ruby
     end

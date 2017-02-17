@@ -200,6 +200,7 @@ module PyCall
     attach_function :PyTuple_New, [:ssize_t], PyObject.by_ref
     attach_function :PyTuple_GetItem, [PyObject.by_ref, :ssize_t], PyObject.by_ref
     attach_function :PyTuple_SetItem, [PyObject.by_ref, :ssize_t, PyObject.by_ref], :int
+    attach_function :PyTuple_Size, [PyObject.by_ref], :ssize_t
 
     # PySequence_Size :: (PyPtr) -> ssize_t
     attach_function :PySequence_Size, [PyObject.by_ref], :ssize_t
