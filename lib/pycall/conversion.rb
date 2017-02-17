@@ -8,6 +8,14 @@ module PyCall
         LibPython.PyInt_FromSsize_t(obj)
       when Float
         LibPython.PyFloat_FromDouble(obj)
+      when String
+        case obj.encoding
+        when Encoding::US_ASCII, Encoding::BINARY
+          LibPython.PyString_FromStringAndSize(obj, obj.bytesize)
+        else
+          obj = obj.encode(Encoding::UTF_8)
+          LibPython.PyUnicode_DecodeUTF8(obj, obj.bytesize, nil)
+        end
       else
         LibPython.Py_None
       end
@@ -83,7 +91,7 @@ module PyCall
 
       when LibPython.PyUnicode_Type
         py_str_ptr = LibPython.PyUnicode_AsUTF8String(self)
-        return Conversions.convert_to_string(py_str_ptr)
+        return Conversions.convert_to_string(py_str_ptr).force_encoding(Encoding::UTF_8)
 
       when LibPython.PyList_Type
         return Conversions.convert_to_array(self)

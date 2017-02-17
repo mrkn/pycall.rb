@@ -181,11 +181,31 @@ module PyCall
     # PyComplex_ImagAsDouble :: (PyPtr) -> double
     attach_function :PyComplex_ImagAsDouble, [PyObject.by_ref], :double
 
+    # String
+
+    if string_as_bytes
+      attach_function :PyString_FromStringAndSize, :PyBytes_FromStringAndSize, [:string, :ssize_t], PyObject.by_ref
+    else
+      attach_function :PyString_FromStringAndSize, [:string, :ssize_t], PyObject.by_ref
+    end
+
     # PyString_AsStringAndSize :: (PyPtr, char**, int*) -> int
     if string_as_bytes
       attach_function :PyString_AsStringAndSize, :PyBytes_AsStringAndSize, [PyObject.by_ref, :pointer, :pointer], :int
     else
       attach_function :PyString_AsStringAndSize, [PyObject.by_ref, :pointer, :pointer], :int
+    end
+
+    # Unicode
+
+    # PyUnicode_DecodeUTF8
+    case
+    when libpython.find_symbol('PyUnicode_DecodeUTF8')
+      attach_function :PyUnicode_DecodeUTF8, [:string, :ssize_t, :string], PyObject.by_ref
+    when libpython.find_symbol('PyUnicodeUCS4_DecodeUTF8')
+      attach_function :PyUnicodeUCS4_DecodeUTF8, [:string, :ssize_t, :string], PyObject.by_ref
+    when libpython.find_symbol('PyUnicodeUCS2_DecodeUTF8')
+      attach_function :PyUnicodeUCS2_DecodeUTF8, [:string, :ssize_t, :string], PyObject.by_ref
     end
 
     # PyUnicode_AsUTF8String :: (PyPtr) -> PyPtr
