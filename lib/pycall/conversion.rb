@@ -16,6 +16,8 @@ module PyCall
           obj = obj.encode(Encoding::UTF_8)
           LibPython.PyUnicode_DecodeUTF8(obj, obj.bytesize, nil)
         end
+      when Symbol
+        from_ruby(obj.to_s)
       else
         LibPython.Py_None
       end

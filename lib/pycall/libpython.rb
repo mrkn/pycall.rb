@@ -141,6 +141,10 @@ module PyCall
     # Comparing two objects
     attach_function :PyObject_RichCompareBool, [PyObject.by_ref, PyObject.by_ref, :int], :int
 
+    # Accessing Object's attributes
+    attach_function :PyObject_GetAttrString, [PyObject.by_ref, :string], PyObject.by_ref
+    attach_function :PyObject_SetAttrString, [PyObject.by_ref, :string, PyObject.by_ref], :int
+
     # Accessing Object's items
     attach_function :PyObject_GetItem, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
     attach_function :PyObject_SetItem, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], :int

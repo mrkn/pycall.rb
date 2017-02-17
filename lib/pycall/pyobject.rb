@@ -33,14 +33,22 @@ module PyCall
     include PyObjectMethods
 
     def [](key)
-      key = Conversions.from_ruby(key)
-      LibPython.PyObject_GetItem(self, key)
+      case key
+      when String, Symbol
+        LibPython.PyObject_GetAttrString(self, key.to_s).to_ruby
+      else
+        raise TypeError, "key must be a String"
+      end
     end
 
     def []=(key, value)
-      key = Conversions.from_ruby(key)
-      value = Conversions.from_ruby(value)
-      LibPython.PyObject_SetItem(self, key, value)
+      case key
+      when String, Symbol
+        value = Conversions.from_ruby(value)
+        LibPython.PyObject_SetAttrString(self, key.to_s, value)
+      else
+        raise TypeError, "key must be a String"
+      end
       self
     end
 
