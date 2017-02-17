@@ -1,5 +1,9 @@
 # More info at https://github.com/guard/guard#readme
 
+if RUBY_PLATFORM =~ /darwin/
+  notification :terminal_notifier, app_name: 'pycall.gem ::', activate: 'com.googlecode.iTerm2'
+end
+
 directories %w(config lib spec).select { |d|
   Dir.exists?(d) ? d : UI.warning("Directory #{d} does not exist")
 }
