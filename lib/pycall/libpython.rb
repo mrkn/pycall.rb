@@ -207,6 +207,10 @@ module PyCall
     # PySequence_GetItem :: (PyPtr, ssize_t) -> PyPtr
     attach_function :PySequence_GetItem, [PyObject.by_ref, :ssize_t], PyObject.by_ref
 
+    # Dict
+
+    attach_function :PyDict_New, [], PyObject.by_ref
+
     # PyDict_GetItem :: (PyPtr, PyPtr) -> PyPtr
     attach_function :PyDict_GetItem, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
 
@@ -217,7 +221,7 @@ module PyCall
     attach_function :PyDict_SetItem, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], :int
 
     # PyDict_SetItemString :: (PyPtr, char const*, PyPtr) -> int
-    attach_function :PyDict_SetItem, [PyObject.by_ref, :string, PyObject.by_ref], :int
+    attach_function :PyDict_SetItemString, [PyObject.by_ref, :string, PyObject.by_ref], :int
 
     # PyDict_DelItem :: (PyPtr, PyPtr) -> int
     attach_function :PyDict_DelItem, [PyObject.by_ref, PyObject.by_ref], :int
