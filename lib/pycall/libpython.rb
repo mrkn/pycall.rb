@@ -255,4 +255,7 @@ module PyCall
 
     public_class_method
   end
+
+  PYTHON_DESCRIPTION = LibPython.Py_GetVersion().freeze
+  PYTHON_VERSION = PYTHON_DESCRIPTION.split(' ', 2)[0].freeze
 end
