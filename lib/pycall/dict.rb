@@ -26,7 +26,7 @@ module PyCall
 
     def ==(other)
       case other
-      when Tuple
+      when Dict
         __pyobj__ == other.__pyobj__
       else
         super
