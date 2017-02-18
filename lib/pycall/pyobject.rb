@@ -62,6 +62,14 @@ module PyCall
       res = LibPython.PyObject_Call(self, args.__pyobj__, kwargs)
       res.to_ruby
     end
+
+    def method_missing(name, *args, **kwargs)
+      if 1 == LibPython.PyObject_HasAttrString(self, name.to_s)
+        self[name]
+      else
+        super
+      end
+    end
   end
 
   class PyTypeObject < FFI::Struct
