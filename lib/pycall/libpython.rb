@@ -144,6 +144,7 @@ module PyCall
     # Accessing Object's attributes
     attach_function :PyObject_GetAttrString, [PyObject.by_ref, :string], PyObject.by_ref
     attach_function :PyObject_SetAttrString, [PyObject.by_ref, :string, PyObject.by_ref], :int
+    attach_function :PyObject_HasAttrString, [PyObject.by_ref, :string], :int
 
     # Accessing Object's items
     attach_function :PyObject_GetItem, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
