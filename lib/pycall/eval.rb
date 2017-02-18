@@ -27,7 +27,8 @@ module PyCall
 
   def self.import_module(name)
     name = name.to_s if name.kind_of? Symbol
-    LibPython.PyImport_ImportModule(name)
+    raise TypeError, "name must be a String" unless name.kind_of? String
+    LibPython.PyImport_ImportModule(name).to_ruby
   end
 
   def self.eval(str)
