@@ -50,7 +50,7 @@ module PyCall
         it 'defines methods with the given names in the Hash values' do
           expect(mod).not_to be_respond_to(:foo)
           expect(mod).not_to be_respond_to(:bar)
-          mod.pyfrom 'multiprocessing.pool', import: { Pool: :foo, AsyncResult: :bar }
+          mod.pyfrom 'multiprocessing', import: { Process: :foo, Queue: :bar }
           expect(mod.foo).to be_kind_of(PyObject)
           expect(mod.bar).to be_kind_of(PyObject)
         end
@@ -58,19 +58,19 @@ module PyCall
 
       context 'the import: argument is an Array' do
         it 'defines methods with the given names in the Array' do
-          expect(mod).not_to be_respond_to(:Pool)
-          expect(mod).not_to be_respond_to(:AsyncResult)
-          mod.pyfrom 'multiprocessing.pool', import: %i[Pool AsyncResult]
-          expect(mod.Pool).to be_kind_of(PyObject)
-          expect(mod.AsyncResult).to be_kind_of(PyObject)
+          expect(mod).not_to be_respond_to(:Process)
+          expect(mod).not_to be_respond_to(:Queue)
+          mod.pyfrom 'multiprocessing', import: %i[Process Queue]
+          expect(mod.Process).to be_kind_of(PyObject)
+          expect(mod.Queue).to be_kind_of(PyObject)
         end
       end
 
       context 'the import: argument is a String' do
         it 'defines a methodswith the given name' do
-          expect(mod).not_to be_respond_to(:Pool)
-          mod.pyfrom 'multiprocessing.pool', import: 'Pool'
-          expect(mod.Pool).to be_kind_of(PyObject)
+          expect(mod).not_to be_respond_to(:Queue)
+          mod.pyfrom 'multiprocessing', import: 'Queue'
+          expect(mod.Queue).to be_kind_of(PyObject)
         end
       end
     end
