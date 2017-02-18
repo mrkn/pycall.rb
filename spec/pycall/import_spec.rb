@@ -30,16 +30,16 @@ module PyCall
         context 'the as: argument is not given' do
           it 'raises ArgumentError' do
             expect {
-              mod.pyimport 'concurrent.futures'
-            }.to raise_error(ArgumentError, /concurrent\.futures is not a valid module variable name/)
+              mod.pyimport 'multiprocessing.pool'
+            }.to raise_error(ArgumentError, /multiprocessing\.pool is not a valid module variable name/)
           end
         end
 
         context 'the as: argument is given' do
           it 'defines a method with the specified name by as: argument' do
-            expect(mod).not_to be_respond_to(:futures)
-            mod.pyimport 'concurrent.futures', as: 'futures'
-            expect(mod.futures).to be_kind_of(PyObject)
+            expect(mod).not_to be_respond_to(:pool)
+            mod.pyimport 'multiprocessing.pool', as: 'pool'
+            expect(mod.pool).to be_kind_of(PyObject)
           end
         end
       end
