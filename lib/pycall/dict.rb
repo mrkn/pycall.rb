@@ -1,5 +1,7 @@
 module PyCall
   class Dict
+    include PyObjectWrapper
+
     def self.new(init=nil)
       case init
       when PyObject
@@ -18,19 +20,7 @@ module PyCall
     end
 
     def initialize(pyobj)
-      check_type pyobj
-      @__pyobj__ = pyobj
-    end
-
-    attr_reader :__pyobj__
-
-    def ==(other)
-      case other
-      when Dict
-        __pyobj__ == other.__pyobj__
-      else
-        super
-      end
+      super(pyobj, LibPython.PyDict_Type)
     end
 
     def [](key)
@@ -95,13 +85,6 @@ module PyCall
 
     def to_hash
       # TODO: PyDict_Next
-    end
-
-    private
-
-    def check_type(pyobj)
-      return if pyobj.kind_of?(PyObject) && pyobj.kind_of?(LibPython.PyDict_Type)
-      raise TypeError, "the argument must be a PyObject of dict"
     end
   end
 end

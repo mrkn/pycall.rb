@@ -1,5 +1,7 @@
 module PyCall
   class Tuple
+    include PyObjectWrapper
+
     def self.new(init)
       case init
       when Integer
@@ -21,19 +23,7 @@ module PyCall
     end
 
     def initialize(pyobj)
-      check_type pyobj
-      @__pyobj__ = pyobj
-    end
-
-    attr_reader :__pyobj__
-
-    def ==(other)
-      case other
-      when Tuple
-        __pyobj__ == other.__pyobj__
-      else
-        super
-      end
+      super(pyobj, LibPython.PyTuple_Type)
     end
 
     def length
@@ -47,13 +37,6 @@ module PyCall
     def []=(index, value)
       value = Conversions.from_ruby(value)
       LibPython.PyTuple_SetItem(__pyobj__, index, value)
-    end
-
-    private
-
-    def check_type(pyobj)
-      return if pyobj.kind_of?(PyObject) && pyobj.kind_of?(LibPython.PyTuple_Type)
-      raise TypeError, "the argument must be a PyObject of tuple"
     end
   end
 end

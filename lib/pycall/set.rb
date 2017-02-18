@@ -1,7 +1,9 @@
 module PyCall
   class Set
+    include PyObjectWrapper
+
     def initialize(pyobj)
-      @__pyobj__ = pyobj
+      super(pyobj, LibPython.PySet_Type)
     end
 
     def length
@@ -11,9 +13,5 @@ module PyCall
     def include?(obj)
       1 == LibPython.PySet_Contains(__pyobj__, Conversions.from_ruby(obj))
     end
-
-    private
-
-    attr_reader :__pyobj__
   end
 end

@@ -1,5 +1,7 @@
 module PyCall
   class List
+    include PyObjectWrapper
+
     def self.new(init=nil)
       case init
       when PyObject
@@ -20,19 +22,7 @@ module PyCall
     end
 
     def initialize(pyobj)
-      check_type pyobj
-      @__pyobj__ = pyobj
-    end
-
-    attr_reader :__pyobj__
-
-    def ==(other)
-      case other
-      when List
-        __pyobj__ == other.__pyobj__
-      else
-        super
-      end
+      super(pyobj, LibPython.PyList_Type)
     end
 
     def [](index)
@@ -71,12 +61,5 @@ module PyCall
     end
 
     alias to_ary to_a
-
-    private
-
-    def check_type(pyobj)
-      return if pyobj.kind_of?(PyObject) && pyobj.kind_of?(LibPython.PyList_Type)
-      raise TypeError, "the argument must be a PyObject of list"
-    end
   end
 end
