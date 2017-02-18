@@ -18,6 +18,8 @@ module PyCall
         end
       when Symbol
         from_ruby(obj.to_s)
+      when Array
+        PyCall::List.new(obj).__pyobj__
       else
         LibPython.Py_None
       end

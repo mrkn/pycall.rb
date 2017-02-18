@@ -229,6 +229,14 @@ module PyCall
     attach_function :PyTuple_SetItem, [PyObject.by_ref, :ssize_t, PyObject.by_ref], :int
     attach_function :PyTuple_Size, [PyObject.by_ref], :ssize_t
 
+    # List
+
+    attach_function :PyList_New, [:ssize_t], PyObject.by_ref
+    attach_function :PyList_Size, [PyObject.by_ref], :ssize_t
+    attach_function :PyList_GetItem, [PyObject.by_ref, :ssize_t], PyObject.by_ref
+    attach_function :PyList_SetItem, [PyObject.by_ref, :ssize_t, PyObject.by_ref], :int
+    attach_function :PyList_Append, [PyObject.by_ref, PyObject.by_ref], :int
+
     # PySequence_Size :: (PyPtr) -> ssize_t
     attach_function :PySequence_Size, [PyObject.by_ref], :ssize_t
 
