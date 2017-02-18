@@ -14,6 +14,28 @@ module PyCall
       define_singleton_method(as) { mod }
     end
 
+    def pyfrom(mod_name, import: nil)
+      raise ArgumentError, "missing identifiers to be imported" unless import
+
+      mod = PyCall.import_module(mod_name)
+
+      case import
+      when Hash
+        import.each do |attr, as|
+          val = mod[attr]
+          define_singleton_method(as) { val }
+        end
+      when Array
+        import.each do |attr|
+          val = mod[attr]
+          define_singleton_method(attr) { val }
+        end
+      when Symbol, String
+        val = mod[import]
+        define_singleton_method(import) { val }
+      end
+    end
+
     private
 
     def check_valid_module_variable_name(mod_name, var_name)
