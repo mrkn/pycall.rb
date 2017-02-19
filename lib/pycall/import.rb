@@ -22,16 +22,16 @@ module PyCall
       case import
       when Hash
         import.each do |attr, as|
-          val = mod[attr]
+          val = PyCall.getattr(mod, attr)
           define_singleton_method(as) { val }
         end
       when Array
         import.each do |attr|
-          val = mod[attr]
+          val = PyCall.getattr(mod, attr)
           define_singleton_method(attr) { val }
         end
       when Symbol, String
-        val = mod[import]
+        val = PyCall.getattr(mod, import)
         define_singleton_method(import) { val }
       end
     end

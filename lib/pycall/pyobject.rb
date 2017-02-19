@@ -32,26 +32,6 @@ module PyCall
   class PyObject < FFI::Struct
     include PyObjectMethods
 
-    def [](key)
-      case key
-      when String, Symbol
-        LibPython.PyObject_GetAttrString(self, key.to_s).to_ruby
-      else
-        raise TypeError, "key must be a String"
-      end
-    end
-
-    def []=(key, value)
-      case key
-      when String, Symbol
-        value = Conversions.from_ruby(value)
-        LibPython.PyObject_SetAttrString(self, key.to_s, value)
-      else
-        raise TypeError, "key must be a String"
-      end
-      self
-    end
-
     def call(*args, **kwargs)
       args = PyCall::Tuple[*args]
       kwargs = if kwargs.empty?
@@ -64,8 +44,8 @@ module PyCall
     end
 
     def method_missing(name, *args, **kwargs)
-      if 1 == LibPython.PyObject_HasAttrString(self, name.to_s)
-        self[name]
+      if PyCall.hasattr?(self, name)
+        PyCall.getattr(self, name)
       else
         super
       end
@@ -83,4 +63,33 @@ module PyCall
       "pytype(#{self[:tp_name]})"
     end
   end
+
+  def self.getattr(pyobj, name, default=nil)
+    name = check_attr_name(name)
+    value = LibPython.PyObject_GetAttrString(pyobj, name)
+    if value.null?
+      return default if default
+      raise 'No attributes error' # TODO: implement PyError
+    end
+    value.to_ruby
+  end
+
+  def self.setattr(pyobj, name, value)
+    name = check_attr_name(name)
+    value = Conversions.from_ruby(value)
+    return self unless LibPython.PyObject_SetAttrString(pyobj, name, value) == -1
+    raise "Unable to set attribute `#{name}`" # TODO: implement PyError
+  end
+
+  def self.hasattr?(pyobj, name)
+    name = check_attr_name(name)
+    1 == LibPython.PyObject_HasAttrString(pyobj, name)
+  end
+
+  def self.check_attr_name(name)
+    return name.to_str if name.respond_to? :to_str
+    return name.to_s if name.kind_of? Symbol
+    raise TypeError, "attribute name must be a String or a Symbol: #{name.inspect}"
+  end
+  private_class_method :check_attr_name
 end

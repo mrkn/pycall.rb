@@ -19,8 +19,8 @@ module PyCall
     end
 
     def method_missing(name, *args, **kwargs)
-      if 1 == LibPython.PyObject_HasAttrString(__pyobj__, name.to_s)
-        __pyobj__[name]
+      if PyCall.hasattr?(__pyobj__, name.to_s)
+        PyCall.getattr(__pyobj__, name)
       else
         super
       end
