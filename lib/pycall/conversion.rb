@@ -2,6 +2,8 @@ module PyCall
   module Conversions
     def self.from_ruby(obj)
       case obj
+      when PyObject
+        obj
       when TrueClass, FalseClass
         LibPython.PyBool_FromLong(obj ? 1 : 0)
       when Integer
