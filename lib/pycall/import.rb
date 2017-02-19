@@ -1,3 +1,5 @@
+require 'pycall'
+
 module PyCall
   module Import
     def pyimport(mod_name, as: nil)
