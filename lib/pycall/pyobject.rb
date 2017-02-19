@@ -83,9 +83,4 @@ module PyCall
       "pytype(#{self[:tp_name]})"
     end
   end
-
-  def self.del_item(pyobj, key)
-    key = Conversions.from_ruby(key)
-    LibPython.PyObject_DelItem(pyobj, key)
-  end
 end
