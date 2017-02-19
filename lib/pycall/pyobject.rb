@@ -43,6 +43,22 @@ module PyCall
       PyCall.setitem(self, index, value)
     end
 
+    def +(other)
+      value = LibPython.PyNumber_Add(self, other)
+      return value.to_ruby unless value.null?
+      raise "Unable to add #{self} and #{other}" # TODO: PyError
+    end
+
+    def *(other)
+      value = LibPython.PyNumber_Multiply(self, other)
+      return value.to_ruby unless value.null?
+      raise "Unable to add #{self} and #{other}" # TODO: PyError
+    end
+
+    def coerce(other)
+      [Conversions.from_ruby(other), self]
+    end
+
     def call(*args, **kwargs)
       args = PyCall::Tuple[*args]
       kwargs = if kwargs.empty?
