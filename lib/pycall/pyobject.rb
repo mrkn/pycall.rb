@@ -32,6 +32,17 @@ module PyCall
   class PyObject < FFI::Struct
     include PyObjectMethods
 
+    alias __aref__ []
+    alias __aset__ []=
+
+    def [](index)
+      PyCall.getitem(self, index)
+    end
+
+    def []=(index, value)
+      PyCall.setitem(self, index, value)
+    end
+
     def call(*args, **kwargs)
       args = PyCall::Tuple[*args]
       kwargs = if kwargs.empty?
@@ -92,4 +103,18 @@ module PyCall
     raise TypeError, "attribute name must be a String or a Symbol: #{name.inspect}"
   end
   private_class_method :check_attr_name
+
+  def self.getitem(pyobj, key)
+    pykey = Conversions.from_ruby(key)
+    value = LibPython.PyObject_GetItem(pyobj, pykey)
+    return value.to_ruby unless value.null?
+    raise "Unable to getitem for #{pyobj} with #{key}" # TODO: implement PyError
+  end
+
+  def self.setitem(pyobj, key, value)
+    pykey = Conversions.from_ruby(key)
+    value = Conversions.from_ruby(value)
+    return self unless LibPython.PyObject_SetItem(pyobj, pykey, value) == -1
+    raise "Unable to setitem for #{pyobj} with #{key}" # TODO: implement PyError
+  end
 end
