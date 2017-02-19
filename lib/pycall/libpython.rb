@@ -302,7 +302,9 @@ module PyCall
     # Operators
 
     attach_function :PyNumber_Add, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
+    attach_function :PyNumber_Subtract, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
     attach_function :PyNumber_Multiply, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
+    attach_function :PyNumber_TrueDivide, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
 
     # Py_CompileString :: (char const*, char const*, int) -> PyPtr
     attach_function :Py_CompileString, [:string, :string, :int], PyObject.by_ref

@@ -49,10 +49,22 @@ module PyCall
       raise "Unable to add #{self} and #{other}" # TODO: PyError
     end
 
+    def -(other)
+      value = LibPython.PyNumber_Subtract(self, other)
+      return value.to_ruby unless value.null?
+      raise "Unable to subtract #{self} and #{other}" # TODO: PyError
+    end
+
     def *(other)
       value = LibPython.PyNumber_Multiply(self, other)
       return value.to_ruby unless value.null?
-      raise "Unable to add #{self} and #{other}" # TODO: PyError
+      raise "Unable to multiply #{self} and #{other}" # TODO: PyError
+    end
+
+    def /(other)
+      value = LibPython.PyNumber_TrueDivide(self, other)
+      return value.to_ruby unless value.null?
+      raise "Unable to divide #{self} and #{other}" # TODO: PyError
     end
 
     def coerce(other)
