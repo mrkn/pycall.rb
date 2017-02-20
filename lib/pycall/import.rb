@@ -16,9 +16,7 @@ module PyCall
     def pyimport(mod_name, as: nil)
       case as
       when nil
-        as = mod_name.to_str
-      else
-        as = as.to_str
+        as = mod_name
       end
 
       check_valid_module_variable_name(mod_name, as)
@@ -67,6 +65,7 @@ module PyCall
     end
 
     def check_valid_module_variable_name(mod_name, var_name)
+      var_name = var_name.to_s if var_name.kind_of? Symbol
       if var_name.include?('.')
         raise ArgumentError, "#{var_name} is not a valid module variable name, use pyimport #{mod_name}, as: <name>"
       end
