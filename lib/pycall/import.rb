@@ -2,6 +2,17 @@ require 'pycall'
 
 module PyCall
   module Import
+    def self.main_object
+      @main_object
+    end
+  end
+end
+
+main_object = self
+PyCall::Import.class_eval { @main_object = main_object }
+
+module PyCall
+  module Import
     def pyimport(mod_name, as: nil)
       case as
       when nil
@@ -20,25 +31,40 @@ module PyCall
       raise ArgumentError, "missing identifiers to be imported" unless import
 
       mod = PyCall.import_module(mod_name)
+      raise "Unable to import module #{mod_name}" unless mod # TODO: PyError
 
       case import
       when Hash
         import.each do |attr, as|
           val = PyCall.getattr(mod, attr)
-          define_singleton_method(as) { val }
+          define_name(as, val)
         end
       when Array
         import.each do |attr|
           val = PyCall.getattr(mod, attr)
-          define_singleton_method(attr) { val }
+          define_name(attr, val)
         end
       when Symbol, String
         val = PyCall.getattr(mod, import)
-        define_singleton_method(import) { val }
+        define_name(import, val)
       end
     end
 
     private
+
+    def define_name(name, pyobj)
+      if constant_name?(name)
+        context = self
+        context = (self == PyCall::Import.main_object) ? Object : self
+        context.module_eval { const_set(name, pyobj) }
+      else
+        define_singleton_method(name) { pyobj }
+      end
+    end
+
+    def constant_name?(name)
+      name =~ /\A[A-Z]/
+    end
 
     def check_valid_module_variable_name(mod_name, var_name)
       if var_name.include?('.')

@@ -61,8 +61,8 @@ module PyCall
           expect(mod).not_to be_respond_to(:Process)
           expect(mod).not_to be_respond_to(:Queue)
           mod.pyfrom 'multiprocessing', import: %i[Process Queue]
-          expect(mod.Process).to be_kind_of(PyObject)
-          expect(mod.Queue).to be_kind_of(PyObject)
+          expect(mod::Process).to be_kind_of(PyObject)
+          expect(mod::Queue).to be_kind_of(PyObject)
         end
       end
 
@@ -70,7 +70,15 @@ module PyCall
         it 'defines a methodswith the given name' do
           expect(mod).not_to be_respond_to(:Queue)
           mod.pyfrom 'multiprocessing', import: 'Queue'
-          expect(mod.Queue).to be_kind_of(PyObject)
+          expect(mod::Queue).to be_kind_of(PyObject)
+        end
+      end
+
+      context 'there is not the module with the given name' do
+        it 'raises an error' do
+          expect {
+            mod.pyfrom 'foo', import: 'bar'
+          }.to raise_error(RuntimeError) # TODO: PyError
         end
       end
     end
