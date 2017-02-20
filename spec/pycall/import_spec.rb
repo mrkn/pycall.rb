@@ -78,7 +78,7 @@ module PyCall
         it 'raises an error' do
           expect {
             mod.pyfrom 'foo', import: 'bar'
-          }.to raise_error(RuntimeError) # TODO: PyError
+          }.to raise_error(PyCall::PyError)
         end
       end
     end
