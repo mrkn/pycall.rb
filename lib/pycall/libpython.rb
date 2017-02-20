@@ -230,6 +230,10 @@ module PyCall
     attach_function :PyTuple_SetItem, [PyObject.by_ref, :ssize_t, PyObject.by_ref], :int
     attach_function :PyTuple_Size, [PyObject.by_ref], :ssize_t
 
+    # Slice
+
+    attach_function :PySlice_New, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
+
     # List
 
     attach_function :PyList_New, [:ssize_t], PyObject.by_ref
