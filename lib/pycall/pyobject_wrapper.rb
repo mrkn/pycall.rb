@@ -18,12 +18,24 @@ module PyCall
       end
     end
 
+    def call(*args, **kwargs)
+      __pyobj__.call(*args, **kwargs)
+    end
+
     def method_missing(name, *args, **kwargs)
       if PyCall.hasattr?(__pyobj__, name.to_s)
         PyCall.getattr(__pyobj__, name)
       else
         super
       end
+    end
+
+    def to_s
+      __pyobj__.to_s
+    end
+
+    def inspect
+      __pyobj__.inspect
     end
 
     private
