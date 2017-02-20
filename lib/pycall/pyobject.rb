@@ -80,25 +80,25 @@ module PyCall
     def +(other)
       value = LibPython.PyNumber_Add(self, other)
       return value.to_ruby unless value.null?
-      raise "Unable to add #{self} and #{other}" # TODO: PyError
+      raise PyError.fetch
     end
 
     def -(other)
       value = LibPython.PyNumber_Subtract(self, other)
       return value.to_ruby unless value.null?
-      raise "Unable to subtract #{self} and #{other}" # TODO: PyError
+      raise PyError.fetch
     end
 
     def *(other)
       value = LibPython.PyNumber_Multiply(self, other)
       return value.to_ruby unless value.null?
-      raise "Unable to multiply #{self} and #{other}" # TODO: PyError
+      raise PyError.fetch
     end
 
     def /(other)
       value = LibPython.PyNumber_TrueDivide(self, other)
       return value.to_ruby unless value.null?
-      raise "Unable to divide #{self} and #{other}" # TODO: PyError
+      raise PyError.fetch
     end
 
     def coerce(other)
@@ -145,7 +145,7 @@ module PyCall
     value = LibPython.PyObject_GetAttrString(pyobj, name)
     if value.null?
       return default if default
-      raise 'No attributes error' # TODO: implement PyError
+      raise PyError.fetch
     end
     value.to_ruby
   end
@@ -154,7 +154,7 @@ module PyCall
     name = check_attr_name(name)
     value = Conversions.from_ruby(value)
     return self unless LibPython.PyObject_SetAttrString(pyobj, name, value) == -1
-    raise "Unable to set attribute `#{name}`" # TODO: implement PyError
+    raise PyError.fetch
   end
 
   def self.hasattr?(pyobj, name)
@@ -173,13 +173,13 @@ module PyCall
     pykey = Conversions.from_ruby(key)
     value = LibPython.PyObject_GetItem(pyobj, pykey)
     return value.to_ruby unless value.null?
-    raise "Unable to getitem for #{pyobj} with #{key}" # TODO: implement PyError
+    raise PyError.fetch
   end
 
   def self.setitem(pyobj, key, value)
     pykey = Conversions.from_ruby(key)
     value = Conversions.from_ruby(value)
     return self unless LibPython.PyObject_SetItem(pyobj, pykey, value) == -1
-    raise "Unable to setitem for #{pyobj} with #{key}" # TODO: implement PyError
+    raise PyError.fetch
   end
 end
