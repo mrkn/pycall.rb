@@ -10,6 +10,10 @@ module PyCall
       @len.(pyobj)
     end
 
+    def slice(*args)
+      Slice.new(*args)
+    end
+
     def str(pyobj)
       @str ||= PyCall.eval('str')
       @str.(pyobj)
