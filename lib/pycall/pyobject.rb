@@ -50,6 +50,10 @@ module PyCall
   class PyObject < FFI::Struct
     include PyObjectMethods
 
+    def self.null
+      new(FFI::Pointer::NULL)
+    end
+
     alias __aref__ []
     alias __aset__ []=
 
@@ -91,11 +95,7 @@ module PyCall
 
     def call(*args, **kwargs)
       args = PyCall::Tuple[*args]
-      kwargs = if kwargs.empty?
-                 PyObject.new(FFI::Pointer::NULL)
-               else
-                 PyCall::Dict.new(kwargs).__pyobj__
-               end
+      kwargs = kwargs.empty? ? PyObject.null : PyCall::Dict.new(kwargs).__pyobj__
       res = LibPython.PyObject_Call(self, args.__pyobj__, kwargs)
       return res.to_ruby if LibPython.PyErr_Occurred().null?
       raise PyError.fetch
