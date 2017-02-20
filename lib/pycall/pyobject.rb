@@ -108,6 +108,12 @@ module PyCall
         super
       end
     end
+
+    def to_s
+      PyCall.str(self)
+    end
+
+    alias inspect to_s
   end
 
   class PyTypeObject < FFI::Struct
