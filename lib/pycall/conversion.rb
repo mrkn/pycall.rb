@@ -4,6 +4,8 @@ module PyCall
       case obj
       when PyObject
         obj
+      when PyObjectWrapper
+        obj.__pyobj__
       when TrueClass, FalseClass
         LibPython.PyBool_FromLong(obj ? 1 : 0)
       when Integer
