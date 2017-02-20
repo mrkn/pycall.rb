@@ -2,7 +2,7 @@ require 'ffi'
 
 module PyCall
   class PyObject < FFI::Struct
-    layout ob_refcnt: :int,
+    layout ob_refcnt: :ssize_t,
            ob_type:   :pointer
   end
 
