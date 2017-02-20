@@ -312,8 +312,12 @@ module PyCall
     # PyEval_EvalCode :: (PyPtr, PyPtr, PyPtr) -> PyPtr
     attach_function :PyEval_EvalCode, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
 
-    # PyErr_Print :: () -> Void
+    # Error
+
     attach_function :PyErr_Print, [], :void
+    attach_function :PyErr_Occurred, [], PyObject.by_ref
+    attach_function :PyErr_Fetch, [:pointer, :pointer, :pointer], :void
+    attach_function :PyErr_NormalizeException, [:pointer, :pointer, :pointer], :void
 
     public_class_method
   end

@@ -97,7 +97,8 @@ module PyCall
                  PyCall::Dict.new(kwargs).__pyobj__
                end
       res = LibPython.PyObject_Call(self, args.__pyobj__, kwargs)
-      res.to_ruby
+      return res.to_ruby if LibPython.PyErr_Occurred().null?
+      raise PyError.fetch
     end
 
     def method_missing(name, *args, **kwargs)
