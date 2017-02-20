@@ -57,12 +57,24 @@ module PyCall
     alias __aref__ []
     alias __aset__ []=
 
-    def [](index)
-      PyCall.getitem(self, index)
+    def [](*indices)
+      if indices.length == 1
+        indices = indices[0]
+      else
+        indices = PyCall.tuple(*indices)
+      end
+      PyCall.getitem(self, indices)
     end
 
-    def []=(index, value)
-      PyCall.setitem(self, index, value)
+    def []=(*indices_and_value)
+      value = indices_and_value.pop
+      indices = indices_and_value
+      if indices.length == 1
+        indices = indices[0]
+      else
+        indices = PyCall.tuple(*indices)
+      end
+      PyCall.setitem(self, indices, value)
     end
 
     def +(other)
