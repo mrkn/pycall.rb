@@ -22,6 +22,8 @@ module PyCall
       check_valid_module_variable_name(mod_name, as)
 
       mod = PyCall.import_module(mod_name)
+      raise PyError.fetch unless mod
+
       define_singleton_method(as) { mod }
     end
 
