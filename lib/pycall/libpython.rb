@@ -131,11 +131,7 @@ module PyCall
     # --- functions ---
 
     attach_function :Py_GetVersion, [], :string
-
-    # Py_InitializeEx :: (int) -> void
     attach_function :Py_InitializeEx, [:int], :void
-
-    # Py_IsInitialized :: () -> int
     attach_function :Py_IsInitialized, [], :int
 
     # Comparing two objects
@@ -154,36 +150,34 @@ module PyCall
     # Calling a object as a function
     attach_function :PyObject_Call, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
 
-    # PyObject_IsInstane :: (PyPtr, PyPtr) -> int
     attach_function :PyObject_IsInstance, [PyObject.by_ref, PyTypeObject.by_ref], :int
 
-    # PyBool_FromLong :: (long) -> PyPtr
+    # Bool
+
     attach_function :PyBool_FromLong, [:long], PyObject.by_ref
 
-    # PyInt_AsSsize_t :: (PyPtr) -> ssize_t
+    # Integer
+
     if has_PyInt_Type
       attach_function :PyInt_AsSsize_t, [PyObject.by_ref], :ssize_t
     else
       attach_function :PyInt_AsSsize_t, :PyLong_AsSsize_t, [PyObject.by_ref], :ssize_t
     end
 
-    # PyInt_FromSsize_t :: (ssize_t) -> PyPtr
     if has_PyInt_Type
       attach_function :PyInt_FromSsize_t, [:ssize_t], PyObject.by_ref
     else
       attach_function :PyInt_FromSsize_t, :PyLong_FromSsize_t, [:ssize_t], PyObject.by_ref
     end
 
-    # PyFloat_FromDouble :: (double) -> PyPtr
-    attach_function :PyFloat_FromDouble, [:double], PyObject.by_ref
+    # Float
 
-    # PyFloat_AsDouble :: (PyPtr) -> double
+    attach_function :PyFloat_FromDouble, [:double], PyObject.by_ref
     attach_function :PyFloat_AsDouble, [PyObject.by_ref], :double
 
-    # PyComplex_RealAsDouble :: (PyPtr) -> double
-    attach_function :PyComplex_RealAsDouble, [PyObject.by_ref], :double
+    # Complex
 
-    # PyComplex_ImagAsDouble :: (PyPtr) -> double
+    attach_function :PyComplex_RealAsDouble, [PyObject.by_ref], :double
     attach_function :PyComplex_ImagAsDouble, [PyObject.by_ref], :double
 
     # String
@@ -213,7 +207,7 @@ module PyCall
       attach_function :PyUnicodeUCS2_DecodeUTF8, [:string, :ssize_t, :string], PyObject.by_ref
     end
 
-    # PyUnicode_AsUTF8String :: (PyPtr) -> PyPtr
+    # PyUnicode_AsUTF8String
     case
     when libpython.find_symbol('PyUnicode_AsUTF8String')
       attach_function :PyUnicode_AsUTF8String, [PyObject.by_ref], PyObject.by_ref
@@ -242,65 +236,39 @@ module PyCall
     attach_function :PyList_SetItem, [PyObject.by_ref, :ssize_t, PyObject.by_ref], :int
     attach_function :PyList_Append, [PyObject.by_ref, PyObject.by_ref], :int
 
-    # PySequence_Size :: (PyPtr) -> ssize_t
-    attach_function :PySequence_Size, [PyObject.by_ref], :ssize_t
+    # Sequence
 
-    # PySequence_GetItem :: (PyPtr, ssize_t) -> PyPtr
+    attach_function :PySequence_Size, [PyObject.by_ref], :ssize_t
     attach_function :PySequence_GetItem, [PyObject.by_ref, :ssize_t], PyObject.by_ref
 
     # Dict
 
     attach_function :PyDict_New, [], PyObject.by_ref
-
-    # PyDict_GetItem :: (PyPtr, PyPtr) -> PyPtr
     attach_function :PyDict_GetItem, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
-
-    # PyDict_GetItemString :: (PyPtr, char const*) -> PyPtr
     attach_function :PyDict_GetItemString, [PyObject.by_ref, :string], PyObject.by_ref
-
-    # PyDict_SetItem :: (PyPtr, PyPtr, PyPtr) -> int
     attach_function :PyDict_SetItem, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], :int
-
-    # PyDict_SetItemString :: (PyPtr, char const*, PyPtr) -> int
     attach_function :PyDict_SetItemString, [PyObject.by_ref, :string, PyObject.by_ref], :int
-
-    # PyDict_DelItem :: (PyPtr, PyPtr) -> int
     attach_function :PyDict_DelItem, [PyObject.by_ref, PyObject.by_ref], :int
-
-    # PyDict_DelItemString :: (PyPtr, char const*) -> int
     attach_function :PyDict_DelItem, [PyObject.by_ref, :string], :int
-
-    # PyDict_Size :: (PyPtr) -> ssize_t
     attach_function :PyDict_Size, [PyObject.by_ref], :ssize_t
-
-    # PyDict_Keys :: (PyPtr) -> PyPtr
     attach_function :PyDict_Keys, [PyObject.by_ref], PyObject.by_ref
-
-    # PyDict_Values :: (PyPtr) -> PyPtr
     attach_function :PyDict_Values, [PyObject.by_ref], PyObject.by_ref
-
-    # PyDict_Items :: (PyPtr) -> PyPtr
     attach_function :PyDict_Items, [PyObject.by_ref], PyObject.by_ref
-
-    # PyDict_Contains :: (PyPtr, PyPtr) -> int
     attach_function :PyDict_Contains, [PyObject.by_ref, PyObject.by_ref], :int
 
-    # PySet_Size :: (PyPtr) -> ssize_t
+    # Set
+
     attach_function :PySet_Size, [PyObject.by_ref], :ssize_t
-
-    # PySet_Contains :: (PyPtr, PyPtr) -> int
     attach_function :PySet_Contains, [PyObject.by_ref, PyObject.by_ref], :int
-
-    # PySet_Add :: (PyPtr, PyPtr) -> int
     attach_function :PySet_Add, [PyObject.by_ref, PyObject.by_ref], :int
-
-    # PySet_Discard :: (PyPtr, PyPtr) -> int
     attach_function :PySet_Discard, [PyObject.by_ref, PyObject.by_ref], :int
 
-    # PyModule_GetDict :: (PyPtr) -> PyPtr
+    # Module
+
     attach_function :PyModule_GetDict, [PyObject.by_ref], PyObject.by_ref
 
-    # PyImport_ImportModule :: (char const*) -> PyPtr
+    # Import
+
     attach_function :PyImport_ImportModule, [:string], PyObject.by_ref
 
     # Operators
@@ -310,10 +278,9 @@ module PyCall
     attach_function :PyNumber_Multiply, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
     attach_function :PyNumber_TrueDivide, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
 
-    # Py_CompileString :: (char const*, char const*, int) -> PyPtr
-    attach_function :Py_CompileString, [:string, :string, :int], PyObject.by_ref
+    # Compiler
 
-    # PyEval_EvalCode :: (PyPtr, PyPtr, PyPtr) -> PyPtr
+    attach_function :Py_CompileString, [:string, :string, :int], PyObject.by_ref
     attach_function :PyEval_EvalCode, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
 
     # Error
