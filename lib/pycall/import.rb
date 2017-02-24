@@ -29,7 +29,7 @@ module PyCall
       raise ArgumentError, "missing identifiers to be imported" unless import
 
       mod = PyCall.import_module(mod_name)
-      raise PyError.fetch
+      raise PyError.fetch unless mod
 
       case import
       when Hash
