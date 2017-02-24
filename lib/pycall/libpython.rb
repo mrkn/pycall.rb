@@ -128,6 +128,8 @@ module PyCall
     attach_variable :PyDict_Type, PyTypeObject
     attach_variable :PySet_Type, PyTypeObject
 
+    attach_variable :PyFunction_Type, PyTypeObject
+
     # --- functions ---
 
     attach_function :Py_GetVersion, [], :string
