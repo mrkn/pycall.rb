@@ -145,6 +145,7 @@ module PyCall
     attach_function :PyObject_DelItem, [PyObject.by_ref, PyObject.by_ref], :int
     attach_function :PyObject_Call, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
     attach_function :PyObject_IsInstance, [PyObject.by_ref, PyTypeObject.by_ref], :int
+    attach_function :PyObject_Dir, [PyObject.by_ref], PyObject.by_ref
 
     # Bool
 

@@ -10,4 +10,10 @@ describe PyCall do
       expect(PyCall::PYTHON_VERSION).to be_kind_of(String)
     end
   end
+
+  describe '.dir' do
+    it 'calls global dir function' do
+      expect(PyCall.dir(PyCall.eval('object()'))).to include('__class__')
+    end
+  end
 end

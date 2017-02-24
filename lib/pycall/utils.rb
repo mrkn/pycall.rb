@@ -1,5 +1,11 @@
 module PyCall
   module Utils
+    def dir(pyobj)
+      value = LibPython.PyObject_Dir(pyobj)
+      return value.to_ruby unless value.null?
+      raise PyError.fetch
+    end
+
     def int(pyobj)
       @int ||= PyCall.eval('int')
       @int.(pyobj)
