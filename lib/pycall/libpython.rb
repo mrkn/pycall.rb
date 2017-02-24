@@ -134,22 +134,16 @@ module PyCall
     attach_function :Py_InitializeEx, [:int], :void
     attach_function :Py_IsInitialized, [], :int
 
-    # Comparing two objects
-    attach_function :PyObject_RichCompare, [PyObject.by_ref, PyObject.by_ref, :int], PyObject.by_ref
+    # Object
 
-    # Accessing Object's attributes
+    attach_function :PyObject_RichCompare, [PyObject.by_ref, PyObject.by_ref, :int], PyObject.by_ref
     attach_function :PyObject_GetAttrString, [PyObject.by_ref, :string], PyObject.by_ref
     attach_function :PyObject_SetAttrString, [PyObject.by_ref, :string, PyObject.by_ref], :int
     attach_function :PyObject_HasAttrString, [PyObject.by_ref, :string], :int
-
-    # Accessing Object's items
     attach_function :PyObject_GetItem, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
     attach_function :PyObject_SetItem, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], :int
     attach_function :PyObject_DelItem, [PyObject.by_ref, PyObject.by_ref], :int
-
-    # Calling a object as a function
     attach_function :PyObject_Call, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
-
     attach_function :PyObject_IsInstance, [PyObject.by_ref, PyTypeObject.by_ref], :int
 
     # Bool
