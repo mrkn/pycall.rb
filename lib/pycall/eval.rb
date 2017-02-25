@@ -7,6 +7,7 @@ module PyCall
       locals_ptr = maindict_ptr
       defer_sigint do
         py_code_ptr = LibPython.Py_CompileString(str, filename, Py_eval_input)
+        raise PyError.fetch if py_code_ptr.null?
         LibPython.PyEval_EvalCode(py_code_ptr, globals_ptr, locals_ptr)
       end
     end
