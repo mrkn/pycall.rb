@@ -33,6 +33,11 @@ module PyCall
       @type ||= PyCall.eval('type')
       @type.(pyobj)
     end
+
+    def format_traceback(pyobj)
+      @format_tb ||= import_module('traceback').format_tb
+      @format_tb.(pyobj)
+    end
   end
 
   extend Utils
