@@ -122,7 +122,16 @@ module PyCall
     end
 
     def to_s
-      PyCall.str(self)
+      s = LibPython.PyObject_Repr(self)
+      if s.null?
+        LibPython.PyErr_Clear()
+        s = LibPython.PyObject_Str(self)
+        if s.null?
+          LibPython.PyErr_Clear()
+          return super
+        end
+      end
+      s.to_ruby
     end
 
     alias inspect to_s
