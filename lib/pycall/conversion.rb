@@ -102,7 +102,7 @@ module PyCall
         return Conversions.convert_to_string(py_str_ptr).force_encoding(Encoding::UTF_8)
 
       when LibPython.PyList_Type
-        return Conversions.convert_to_array(self)
+        return PyCall::List.new(self)
 
       when LibPython.PyTuple_Type
         return Conversions.convert_to_tuple(self)
