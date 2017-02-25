@@ -238,6 +238,7 @@ module PyCall
 
     attach_function :PySequence_Size, [PyObject.by_ref], :ssize_t
     attach_function :PySequence_GetItem, [PyObject.by_ref, :ssize_t], PyObject.by_ref
+    attach_function :PySequence_Contains, [PyObject.by_ref, PyObject.by_ref], :int
 
     # Dict
 
