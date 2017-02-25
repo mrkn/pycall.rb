@@ -47,7 +47,18 @@ module PyCall
 
     def include?(value)
       value = Conversions.from_ruby(value)
-      LibPython.PyList_Contains(__pyobj__, value).to_ruby
+      value = LibPython.PySequence_Contains(__pyobj__, value)
+      raise PyError.fetch if value == -1
+      1 == value
+    end
+
+    def ==(other)
+      case other
+      when Array
+        self.to_a == other
+      else
+        super
+      end
     end
 
     def to_a
