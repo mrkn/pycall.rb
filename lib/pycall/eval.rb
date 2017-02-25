@@ -15,8 +15,12 @@ module PyCall
     class << self
       private
 
+      def main_module
+        @main_module ||= PyCall.import_module("__main__")
+      end
+
       def maindict_ptr
-        LibPython.PyModule_GetDict(PyCall.import_module("__main__"))
+        @maindict_ptr ||= LibPython.PyModule_GetDict(main_module)
       end
 
       def defer_sigint
