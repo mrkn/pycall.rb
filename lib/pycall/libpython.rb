@@ -286,6 +286,7 @@ module PyCall
 
     # Error
 
+    attach_function :PyErr_Clear, [], :void
     attach_function :PyErr_Print, [], :void
     attach_function :PyErr_Occurred, [], PyObject.by_ref
     attach_function :PyErr_Fetch, [:pointer, :pointer, :pointer], :void

@@ -17,9 +17,19 @@ module PyCall
       @type = type
       @value = value
       @traceback = traceback
-      super("#{@type.inspect}: #{PyCall.eval('str').(@value)}")
+      super("Error occurred in Python")
     end
 
     attr_reader :type, :value, :traceback
+
+    def message
+      "#{PyObject.new(type.to_ptr)}: #{value}".tap do |msg|
+        unless traceback.null?
+          if (o = PyCall.format_traceback(traceback))
+            msg.concat("\n", *o)
+          end
+        end
+      end
+    end
   end
 end
