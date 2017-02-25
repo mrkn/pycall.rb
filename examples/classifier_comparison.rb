@@ -2,8 +2,6 @@ require 'pycall/import'
 include PyCall::Import
 
 pyimport 'numpy', as: :np
-pyimport 'matplotlib.pyplot', as: :plt
-pyimport 'matplotlib.colors', as: :mplc
 pyfrom 'sklearn.cross_validation', import: :train_test_split
 pyfrom 'sklearn.preprocessing', import: :StandardScaler
 pyfrom 'sklearn.datasets', import: %i(make_moons make_circles make_classification)
@@ -13,6 +11,13 @@ pyfrom 'sklearn.tree', import: :DecisionTreeClassifier
 pyfrom 'sklearn.ensemble', import: %i(RandomForestClassifier AdaBoostClassifier)
 pyfrom 'sklearn.naive_bayes', import: :GaussianNB
 pyfrom 'sklearn.discriminant_analysis', import: %i(LinearDiscriminantAnalysis QuadraticDiscriminantAnalysis)
+
+# FIXME: MacOSX backend is not usable through pycall.  I want to fix this issue but the reason is unclear.
+pyimport 'matplotlib', as: :mp
+mp.rcParams[:backend] = 'TkAgg' if mp.rcParams[:backend] == 'MacOSX'
+
+pyimport 'matplotlib.pyplot', as: :plt
+pyimport 'matplotlib.colors', as: :mplc
 
 h = 0.02  # step size in the mesh
 

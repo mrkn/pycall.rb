@@ -2,6 +2,11 @@ require 'pycall/import'
 include PyCall::Import
 
 pyimport 'numpy', as: 'np'
+
+# FIXME: MacOSX backend is not usable through pycall.  I want to fix this issue but the reason is unclear.
+pyimport 'matplotlib', as: :mp
+mp.rcParams[:backend] = 'TkAgg' if mp.rcParams[:backend] == 'MacOSX'
+
 pyimport 'matplotlib.mlab', as: 'mlab'
 pyimport 'matplotlib.pyplot', as: 'plt'
 

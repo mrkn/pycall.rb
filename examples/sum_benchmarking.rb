@@ -3,6 +3,11 @@ include PyCall::Import
 
 require 'benchmark'
 pyimport :pandas, as: :pd
+
+# FIXME: MacOSX backend is not usable through pycall.  I want to fix this issue but the reason is unclear.
+pyimport 'matplotlib', as: :mp
+mp.rcParams[:backend] = 'TkAgg' if mp.rcParams[:backend] == 'MacOSX'
+
 pyimport :seaborn, as: :sns
 pyimport 'matplotlib.pyplot', as: :plt
 
