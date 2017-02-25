@@ -129,6 +129,7 @@ module PyCall
     attach_variable :PySet_Type, PyTypeObject
 
     attach_variable :PyFunction_Type, PyTypeObject
+    attach_variable :PyMethod_Type, PyTypeObject
 
     # --- functions ---
 
