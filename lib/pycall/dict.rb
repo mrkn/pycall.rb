@@ -68,7 +68,10 @@ module PyCall
     end
 
     def has_key?(key)
-      1 == LibPython.PyDict_Contains(__pyobj__, key).to_ruby
+      key = Conversions.from_ruby(key)
+      value = LibPython.PyDict_Contains(__pyobj__, key)
+      raise PyError.fetch if value == -1
+      1 == value
     end
 
     def default=(val)
