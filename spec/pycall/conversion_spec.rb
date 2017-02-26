@@ -2,6 +2,27 @@ require 'spec_helper'
 
 module PyCall
   describe Conversions do
+    describe '.python_type_mapping' do
+      around do |example|
+        original = Conversions.instance_variable_get(:@python_type_map)
+        Conversions.instance_variable_set(:@python_type_map, original.dup)
+        begin
+          example.run
+        ensure
+          Conversions.instance_variable_set(:@python_type_map, original)
+        end
+      end
+
+      it 'adds type map between python type and ruby type' do
+        array_module = PyCall.import_module('array')
+        expect {
+          Conversions.python_type_mapping(array_module.array, Array)
+        }.to change {
+          Conversions.instance_variable_get(:@python_type_map).length
+        }.from(0).to(1)
+      end
+    end
+
     describe '.from_ruby' do
       def from_ruby(obj)
         Conversions.from_ruby(obj)

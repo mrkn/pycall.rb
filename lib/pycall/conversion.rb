@@ -1,5 +1,18 @@
 module PyCall
   module Conversions
+    @python_type_map = []
+
+    TypePair = Struct.new(:pytype, :rbtype)
+
+    def self.python_type_mapping(pytype, rbtype)
+      @python_type_map.each_with_index do |type_pair, index|
+        next unless pytype == type_pair.pytype
+        type_pair.rbtype = rbtype
+        return
+      end
+      @python_type_map << TypePair.new(pytype, rbtype)
+    end
+
     def self.from_ruby(obj)
       case obj
       when PyObject
