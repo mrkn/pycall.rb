@@ -1,6 +1,7 @@
 module PyCall
   class List
     include PyObjectWrapper
+    include Enumerable
 
     def self.new(init=nil)
       case init
@@ -59,6 +60,16 @@ module PyCall
       else
         super
       end
+    end
+
+    def each
+      return enum_for unless block_given?
+      i, n = 0, size
+      while i < n
+        yield self[i]
+        i += 1
+      end
+      self
     end
 
     def to_a
