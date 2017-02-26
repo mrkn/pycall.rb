@@ -2,7 +2,11 @@ module PyCall
   module Conversions
     @python_type_map = []
 
-    TypePair = Struct.new(:pytype, :rbtype)
+    class TypePair < Struct.new(:pytype, :rbtype)
+      def to_a
+        [pytype, rbtype]
+      end
+    end
 
     def self.python_type_mapping(pytype, rbtype)
       @python_type_map.each_with_index do |type_pair, index|
@@ -11,6 +15,25 @@ module PyCall
         return
       end
       @python_type_map << TypePair.new(pytype, rbtype)
+    end
+
+    def self.to_ruby(pyobj)
+      unless pyobj.kind_of? PyObject
+        raise
+      end
+      @python_type_map.each do |tp|
+        pytype, rbtype = tp.to_a
+        next unless pyobj.kind_of?(pytype)
+        case
+        when rbtype.kind_of?(Proc)
+          return rbtype.(pyobj)
+        when rbtype.respond_to?(:from_python)
+          return rbtype.from_python(pyobj)
+        else
+          return rbtype.new(pyobj)
+        end
+      end
+      pyobj
     end
 
     def self.from_ruby(obj)
@@ -127,7 +150,7 @@ module PyCall
         return PyCall::Set.new(self)
       end
 
-      self
+      Conversions.to_ruby(self)
     end
   end
 end

@@ -39,7 +39,7 @@ module PyCall
 
     def kind_of?(klass)
       case klass
-      when PyTypeObject
+      when PyObject, PyTypeObject
         Types.pyisinstance(self, klass)
       else
         super
