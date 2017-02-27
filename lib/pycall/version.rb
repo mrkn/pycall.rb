@@ -1,3 +1,3 @@
 module PyCall
-  VERSION = "0.1.0.alpha.20170224b"
+  VERSION = "0.1.0.alpha.20170226"
 end
