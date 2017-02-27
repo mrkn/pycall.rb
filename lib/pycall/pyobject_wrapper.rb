@@ -1,7 +1,8 @@
 module PyCall
   module PyObjectWrapper
-    def initialize(pyobj, pytype)
+    def initialize(pyobj, pytype=nil)
       check_type pyobj, pytype
+      pytype ||= LibPython.PyObject_Type(pyobj)
       @__pyobj__ = pyobj
     end
 
@@ -41,7 +42,8 @@ module PyCall
     private
 
     def check_type(pyobj, pytype)
-      return if pyobj.kind_of?(PyObject) && pyobj.kind_of?(pytype)
+      return if pyobj.kind_of?(PyObject)
+      return if pytype.nil? || pyobj.kind_of?(pytype)
       raise TypeError, "the argument must be a PyObject of #{pytype}"
     end
   end
