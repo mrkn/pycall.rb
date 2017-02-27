@@ -135,6 +135,10 @@ module PyCall
     end
 
     alias inspect to_s
+
+    def type
+      LibPython.PyObject_Type(self)
+    end
   end
 
   class PyTypeObject < FFI::Struct
