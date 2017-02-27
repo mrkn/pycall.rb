@@ -203,9 +203,9 @@ module PyCall
     when libpython.find_symbol('PyUnicode_DecodeUTF8')
       attach_function :PyUnicode_DecodeUTF8, [:string, :ssize_t, :string], PyObject.by_ref
     when libpython.find_symbol('PyUnicodeUCS4_DecodeUTF8')
-      attach_function :PyUnicodeUCS4_DecodeUTF8, [:string, :ssize_t, :string], PyObject.by_ref
+      attach_function :PyUnicode_DecodeUTF8, :PyUnicodeUCS4_DecodeUTF8, [:string, :ssize_t, :string], PyObject.by_ref
     when libpython.find_symbol('PyUnicodeUCS2_DecodeUTF8')
-      attach_function :PyUnicodeUCS2_DecodeUTF8, [:string, :ssize_t, :string], PyObject.by_ref
+      attach_function :PyUnicode_DecodeUTF8, :PyUnicodeUCS2_DecodeUTF8, [:string, :ssize_t, :string], PyObject.by_ref
     end
 
     # PyUnicode_AsUTF8String
