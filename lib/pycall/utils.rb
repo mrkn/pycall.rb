@@ -1,5 +1,18 @@
 module PyCall
   module Utils
+    def callable?(pyobj)
+      case pyobj
+      when PyObject
+      when PyTypeObject
+        pyobj = PyObject.new(pyobj.to_ptr)
+      when PyObjectWrapper
+        pyobj = pyobj.__pyobj__
+      else
+        raise TypeError, "the argument must be a PyObject"
+      end
+      1 == LibPython.PyCallable_Check(pyobj)
+    end
+
     def dir(pyobj)
       value = LibPython.PyObject_Dir(pyobj)
       return value.to_ruby unless value.null?

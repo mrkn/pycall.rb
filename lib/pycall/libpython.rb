@@ -152,6 +152,7 @@ module PyCall
     attach_function :PyObject_Repr, [PyObject.by_ref], PyObject.by_ref
     attach_function :PyObject_Str, [PyObject.by_ref], PyObject.by_ref
     attach_function :PyObject_Type, [PyObject.by_ref], PyTypeObject.by_ref
+    attach_function :PyCallable_Check, [PyObject.by_ref], :int
 
     # Bool
 
