@@ -14,5 +14,11 @@ module PyCall
         expect(PyCall.int(10 * Math::PI)).to eq(31)
       end
     end
+
+    describe '#type' do
+      it 'returns python type' do
+        expect(PyCall::Conversions.from_ruby(1).type.inspect).to eq "pytype(int)"
+      end
+    end
   end
 end
