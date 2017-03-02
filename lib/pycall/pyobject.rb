@@ -78,24 +78,28 @@ module PyCall
     end
 
     def +(other)
+      other = Conversions.from_ruby(other)
       value = LibPython.PyNumber_Add(self, other)
       return value.to_ruby unless value.null?
       raise PyError.fetch
     end
 
     def -(other)
+      other = Conversions.from_ruby(other)
       value = LibPython.PyNumber_Subtract(self, other)
       return value.to_ruby unless value.null?
       raise PyError.fetch
     end
 
     def *(other)
+      other = Conversions.from_ruby(other)
       value = LibPython.PyNumber_Multiply(self, other)
       return value.to_ruby unless value.null?
       raise PyError.fetch
     end
 
     def /(other)
+      other = Conversions.from_ruby(other)
       value = LibPython.PyNumber_TrueDivide(self, other)
       return value.to_ruby unless value.null?
       raise PyError.fetch
