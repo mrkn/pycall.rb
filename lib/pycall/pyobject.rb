@@ -105,6 +105,13 @@ module PyCall
       raise PyError.fetch
     end
 
+    def **(other)
+      other = Conversions.from_ruby(other)
+      value = LibPython.PyNumber_Power(self, other, LibPython.Py_None)
+      return value.to_ruby unless value.null?
+      raise PyError.fetch
+    end
+
     def coerce(other)
       [Conversions.from_ruby(other), self]
     end

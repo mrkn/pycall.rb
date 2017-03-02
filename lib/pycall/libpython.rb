@@ -280,6 +280,7 @@ module PyCall
     attach_function :PyNumber_Subtract, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
     attach_function :PyNumber_Multiply, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
     attach_function :PyNumber_TrueDivide, [PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
+    attach_function :PyNumber_Power, [PyObject.by_ref, PyObject.by_ref, PyObject.by_ref], PyObject.by_ref
 
     # Compiler
 
