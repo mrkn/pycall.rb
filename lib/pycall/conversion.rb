@@ -8,8 +8,17 @@ module PyCall
       end
     end
 
+    def self.each_type_pair
+      i, n = 1, @python_type_map.length
+      while i <= n
+        yield @python_type_map[n - i]
+        i += 1
+      end
+      self
+    end
+
     def self.python_type_mapping(pytype, rbtype)
-      @python_type_map.each_with_index do |type_pair, index|
+      each_type_pair do |type_pair|
         next unless pytype == type_pair.pytype
         type_pair.rbtype = rbtype
         return
@@ -21,7 +30,7 @@ module PyCall
       unless pyobj.kind_of? PyObject
         raise
       end
-      @python_type_map.each do |tp|
+      each_type_pair do |tp|
         pytype, rbtype = tp.to_a
         next unless pyobj.kind_of?(pytype)
         case
