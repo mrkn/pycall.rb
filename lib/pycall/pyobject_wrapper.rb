@@ -1,5 +1,36 @@
 module PyCall
   module PyObjectWrapper
+    module ClassMethods
+      private
+
+      def wrap_class(pyobj)
+        define_singleton_method(:__pyobj__) { pyobj }
+
+        PyCall.dir(__pyobj__).each do |name|
+          obj = PyCall.getattr(__pyobj__, name)
+          next unless obj.kind_of?(PyCall::PyObject) || obj.kind_of?(PyCall::PyObjectWrapper)
+          next unless PyCall.callable?(obj)
+
+          define_method(name) do |*args, **kwargs|
+            PyCall.getattr(__pyobj__, name).(*args, **kwargs)
+          end
+        end
+
+        class << self
+          def method_missing(name, *args, **kwargs)
+            return super unless PyCall.hasattr?(__pyobj__, name)
+            PyCall.getattr(__pyobj__, name)
+          end
+        end
+
+        PyCall::Conversions.python_type_mapping(__pyobj__, self)
+      end
+    end
+
+    def self.included(mod)
+      mod.extend ClassMethods
+    end
+
     def initialize(pyobj, pytype=nil)
       check_type pyobj, pytype
       pytype ||= LibPython.PyObject_Type(pyobj)
