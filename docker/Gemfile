@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 gem 'pry'
 gem 'pry-doc'
 gem 'awesome_print'
-gem 'cztop', github: 'paddor/cztop'
+gem 'cztop', '< 0.3.0'
 gem 'iruby', github: 'sciruby/iruby'
 
 # PyCall related gems
