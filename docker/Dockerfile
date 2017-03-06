@@ -173,5 +173,5 @@ ADD docker/Gemfile /app
 RUN bundle install
 RUN bundle exec iruby register
 
+CMD bundle exec jupyter notebook --no-browser --ip=0.0.0.0 --port=8888
 EXPOSE 8888
-CMD bundle exec jupyter notebook --no-browser --ip=0.0.0.0
