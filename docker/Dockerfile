@@ -164,14 +164,12 @@ RUN pip3 install \
 	jupyter numpy scipy pandas matplotlib seaborn scikit-learn gensim nltk \
         statsmodels xray
 
-RUN mkdir /app
-
+RUN mkdir /app /notebooks
 WORKDIR /app
-
 ADD docker/Gemfile /app
 
 RUN bundle install
 RUN bundle exec iruby register
 
-CMD bundle exec jupyter notebook --no-browser --ip=0.0.0.0 --port=8888
+CMD bundle exec jupyter notebook --no-browser --ip=0.0.0.0 --port=8888 --notebook-dir=/notebooks
 EXPOSE 8888
