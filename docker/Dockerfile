@@ -174,3 +174,4 @@ RUN bundle install
 RUN bundle exec iruby register
 
 EXPOSE 8888
+CMD bundle exec jupyter notebook --no-browser --ip=0.0.0.0
