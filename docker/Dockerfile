@@ -164,7 +164,7 @@ RUN pip3 install \
 	jupyter numpy scipy pandas matplotlib seaborn scikit-learn gensim nltk \
         statsmodels xray
 
-RUN mkdir -p /app /notebooks/examples
+RUN mkdir -p /app /notebooks/examples /notebooks/local
 WORKDIR /app
 ADD docker/Gemfile /app
 
