@@ -164,12 +164,18 @@ RUN pip3 install \
 	jupyter numpy scipy pandas matplotlib seaborn scikit-learn gensim nltk \
         statsmodels xray
 
-RUN mkdir /app /notebooks
+RUN mkdir -p /app /notebooks/examples
 WORKDIR /app
 ADD docker/Gemfile /app
 
 RUN bundle install
 RUN bundle exec iruby register
+
+# Deploy matplotlib's examples
+RUN mkdir -p /tmp \
+	&& curl -fsSL https://github.com/mrkn/matplotlib.rb/archive/master.tar.gz | tar -xzf - -C /tmp \
+	&& mv /tmp/matplotlib.rb-master/examples /notebooks/examples/matplotlib \
+        && rm -rf /tmp/matplotlib.rb-master
 
 CMD bundle exec jupyter notebook --no-browser --ip=0.0.0.0 --port=8888 --notebook-dir=/notebooks
 EXPOSE 8888
