@@ -1,4 +1,5 @@
 FROM buildpack-deps:xenial
+MAINTAINER Kenta Murata mrkn
 
 ###############################################################
 # Ruby based on docker-library/ruby
