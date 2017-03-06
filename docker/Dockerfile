@@ -171,5 +171,6 @@ WORKDIR /app
 ADD docker/Gemfile /app
 
 RUN bundle install
+RUN bundle exec iruby register
 
 EXPOSE 8888
