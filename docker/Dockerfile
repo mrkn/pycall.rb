@@ -1,7 +1,5 @@
 FROM buildpack-deps:xenial
 
-RUN dpkg-query -l
-
 ###############################################################
 # Ruby based on docker-library/ruby
 ###############################################################
