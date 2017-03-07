@@ -137,6 +137,11 @@ module PyCall
     attach_function :Py_InitializeEx, [:int], :void
     attach_function :Py_IsInitialized, [], :int
 
+    # Reference count
+
+    attach_function :Py_IncRef, [PyObject.by_ref], :void
+    attach_function :Py_DecRef, [PyObject.by_ref], :void
+
     # Object
 
     attach_function :PyObject_RichCompare, [PyObject.by_ref, PyObject.by_ref, :int], PyObject.by_ref
