@@ -1,5 +1,10 @@
 module PyCall
   module Utils
+    def append_sys_path(path_str)
+      pyobj = LibPython.PyUnicode_DecodeUTF8(path_str, path_str.bytesize, nil)
+      sys.path.append.(pyobj)
+    end
+
     def callable?(pyobj)
       case pyobj
       when PyObject
@@ -36,6 +41,10 @@ module PyCall
     def str(pyobj)
       @str ||= PyCall.eval('str')
       @str.(pyobj)
+    end
+
+    def sys
+      @sys ||= PyCall.import_module('sys')
     end
 
     def tuple(*args)
