@@ -12,6 +12,14 @@ describe PyCall do
     end
   end
 
+  describe 'Eval.main_dict' do
+    subject(:main_dict) { PyCall::Eval.send :main_dict }
+
+    specify 'ob_refcnt >= 2' do
+      expect(main_dict.__aref__(:ob_refcnt)).to be >= 2
+    end
+  end
+
   describe '.import_module' do
     context 'without block' do
       it 'returns an imported module' do
