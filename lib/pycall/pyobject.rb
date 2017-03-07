@@ -34,7 +34,7 @@ module PyCall
     end
 
     def py_none?
-      to_ptr == LibPython.Py_None.to_ptr
+      to_ptr == PyCall.None.to_ptr
     end
 
     def kind_of?(klass)
@@ -107,7 +107,7 @@ module PyCall
 
     def **(other)
       other = Conversions.from_ruby(other)
-      value = LibPython.PyNumber_Power(self, other, LibPython.Py_None)
+      value = LibPython.PyNumber_Power(self, other, PyCall.None)
       return value.to_ruby unless value.null?
       raise PyError.fetch
     end

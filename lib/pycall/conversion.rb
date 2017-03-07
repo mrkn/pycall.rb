@@ -70,7 +70,7 @@ module PyCall
       when Array
         PyCall::List.new(obj).__pyobj__
       else
-        LibPython.Py_None
+        PyCall.None
       end
     end
 
