@@ -25,10 +25,17 @@ module PyCall
 
     def [](key)
       key = key.to_s if key.is_a? Symbol
-      if key.is_a? String
-        LibPython.PyDict_GetItemString(__pyobj__, key).to_ruby
-      else
-        LibPython.PyDict_GetItem(__pyobj__, key).to_ruby
+      value = if key.is_a? String
+                LibPython.PyDict_GetItemString(__pyobj__, key).to_ruby
+              else
+                LibPython.PyDict_GetItem(__pyobj__, key).to_ruby
+              end
+    ensure
+      case value
+      when PyObject
+        PyCall.incref(value)
+      when PyObjectWrapper
+        PyCall.incref(value.__pyobj__)
       end
     end
 
