@@ -34,6 +34,10 @@ module PyCall
       @len.(pyobj)
     end
 
+    def None
+      LibPython.Py_None
+    end
+
     def slice(*args)
       Slice.new(*args)
     end
