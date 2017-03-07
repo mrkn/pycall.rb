@@ -24,6 +24,17 @@ module PyCall
       raise PyError.fetch
     end
 
+    def incref(pyobj)
+      LibPython.Py_IncRef(pyobj)
+      pyobj
+    end
+
+    def decref(pyobj)
+      LibPython.Py_DecRef(pyobj)
+      pyobj.send :pointer=, FFI::Pointer::NULL
+      pyobj
+    end
+
     def int(pyobj)
       @int ||= PyCall.eval('int')
       @int.(pyobj)
