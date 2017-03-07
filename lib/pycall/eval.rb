@@ -35,7 +35,13 @@ module PyCall
     raise TypeError, "name must be a String" unless name.kind_of? String
     value = LibPython.PyImport_ImportModule(name)
     raise PyError.fetch if value.null?
-    value.to_ruby
+    value = value.to_ruby
+    return value unless block_given?
+    begin
+      yield value
+    ensure
+      PyCall.decref(value)
+    end
   end
 
   def self.eval(str, conversion: true)

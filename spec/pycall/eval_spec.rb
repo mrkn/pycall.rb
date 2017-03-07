@@ -12,6 +12,34 @@ describe PyCall do
     end
   end
 
+  describe '.import_module' do
+    context 'without block' do
+      it 'returns an imported module' do
+        begin
+          mod = PyCall.import_module('__main__')
+          expect(mod.type.inspect).to match(/module/)
+        ensure
+          PyCall.decref(mod)
+        end
+      end
+    end
+
+    context 'with block' do
+      it 'ensures to release python module object' do
+        cnt = {}
+        PyCall.import_module('__main__') { |outer_m|
+          cnt[:before] = outer_m.__aref__(:ob_refcnt)
+          PyCall.import_module('__main__') { |inner_m|
+            cnt[:inner] = inner_m.__aref__(:ob_refcnt)
+          }
+          cnt[:after] = outer_m.__aref__(:ob_refcnt)
+        }
+        expect(cnt[:inner]).to eq(cnt[:before] + 1)
+        expect(cnt[:after]).to eq(cnt[:before])
+      end
+    end
+  end
+
   describe_eval('None') do
     it { is_expected.to equal(nil) }
   end
