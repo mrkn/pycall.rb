@@ -38,7 +38,8 @@ module PyCall
     raise PyError.fetch
   end
 
-  def self.eval(str)
-    Eval.eval(str).to_ruby
+  def self.eval(str, conversion: true)
+    result = Eval.eval(str)
+    conversion ? result.to_ruby : result
   end
 end

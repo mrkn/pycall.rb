@@ -15,7 +15,7 @@ describe PyCall do
     subject { PyCall.None }
     it { is_expected.to be_py_none }
     it { is_expected.not_to be_nil }
-    it { is_expected.to eq(PyCall.eval('None')) }
+    it { is_expected.to eq(PyCall.eval('None', conversion: false)) }
   end
 
   describe '.callable?' do
