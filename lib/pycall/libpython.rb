@@ -6,12 +6,6 @@ module PyCall
            ob_type:   :pointer
   end
 
-  class PyTypeObject < FFI::Struct
-    layout ob_base: PyObject,
-           ob_size: :ssize_t,
-           tp_name: :string
-  end
-
   module LibPython
     extend FFI::Library
 
@@ -101,35 +95,37 @@ module PyCall
       _Py_NoneStruct
     end
 
+    attach_variable :PyType_Type, PyObject
+
     if libpython.find_variable('PyInt_Type')
       has_PyInt_Type = true
-      attach_variable :PyInt_Type, PyTypeObject
+      attach_variable :PyInt_Type, PyObject
     else
       has_PyInt_Type = false
-      attach_variable :PyInt_Type, :PyLong_Type, PyTypeObject
+      attach_variable :PyInt_Type, :PyLong_Type, PyObject
     end
 
-    attach_variable :PyLong_Type, PyTypeObject
-    attach_variable :PyBool_Type, PyTypeObject
-    attach_variable :PyFloat_Type, PyTypeObject
-    attach_variable :PyComplex_Type, PyTypeObject
-    attach_variable :PyUnicode_Type, PyTypeObject
+    attach_variable :PyLong_Type, PyObject
+    attach_variable :PyBool_Type, PyObject
+    attach_variable :PyFloat_Type, PyObject
+    attach_variable :PyComplex_Type, PyObject
+    attach_variable :PyUnicode_Type, PyObject
 
     if libpython.find_symbol('PyString_FromStringAndSize')
       string_as_bytes = false
-      attach_variable :PyString_Type, PyTypeObject
+      attach_variable :PyString_Type, PyObject
     else
       string_as_bytes = true
-      attach_variable :PyString_Type, :PyBytes_Type, PyTypeObject
+      attach_variable :PyString_Type, :PyBytes_Type, PyObject
     end
 
-    attach_variable :PyList_Type, PyTypeObject
-    attach_variable :PyTuple_Type, PyTypeObject
-    attach_variable :PyDict_Type, PyTypeObject
-    attach_variable :PySet_Type, PyTypeObject
+    attach_variable :PyList_Type, PyObject
+    attach_variable :PyTuple_Type, PyObject
+    attach_variable :PyDict_Type, PyObject
+    attach_variable :PySet_Type, PyObject
 
-    attach_variable :PyFunction_Type, PyTypeObject
-    attach_variable :PyMethod_Type, PyTypeObject
+    attach_variable :PyFunction_Type, PyObject
+    attach_variable :PyMethod_Type, PyObject
 
     # --- functions ---
 
@@ -156,7 +152,7 @@ module PyCall
     attach_function :PyObject_Dir, [PyObject.by_ref], PyObject.by_ref
     attach_function :PyObject_Repr, [PyObject.by_ref], PyObject.by_ref
     attach_function :PyObject_Str, [PyObject.by_ref], PyObject.by_ref
-    attach_function :PyObject_Type, [PyObject.by_ref], PyTypeObject.by_ref
+    attach_function :PyObject_Type, [PyObject.by_ref], PyObject.by_ref
     attach_function :PyCallable_Check, [PyObject.by_ref], :int
 
     # Bool

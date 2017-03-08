@@ -8,8 +8,6 @@ module PyCall
     def callable?(pyobj)
       case pyobj
       when PyObject
-      when PyTypeObject
-        pyobj = PyObject.new(pyobj.to_ptr)
       when PyObjectWrapper
         pyobj = pyobj.__pyobj__
       else

@@ -7,7 +7,7 @@ module PyCall
       ptraceback = ptrs + 2 * ptrs.type_size
       LibPython.PyErr_Fetch(ptype, pvalue, ptraceback)
       LibPython.PyErr_NormalizeException(ptype, pvalue, ptraceback)
-      type = PyTypeObject.new(ptype.read(:pointer))
+      type = PyObject.new(ptype.read(:pointer))
       value = PyObject.new(pvalue.read(:pointer))
       traceback = PyObject.new(ptraceback.read(:pointer))
       new(type, value, traceback)

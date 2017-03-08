@@ -122,40 +122,41 @@ module PyCall
   class PyObject
     def to_ruby
       return nil if self.null? || self.py_none?
+      return self if PyCall::Types.pyisinstance(self, LibPython.PyType_Type)
 
-      case self
-      when LibPython.PyBool_Type
+      case 
+      when PyCall::Types.pyisinstance(self, LibPython.PyBool_Type)
         return Conversions.convert_to_boolean(self)
 
-      when LibPython.PyInt_Type
+      when PyCall::Types.pyisinstance(self, LibPython.PyInt_Type)
         return Conversions.convert_to_integer(self)
 
-      when LibPython.PyLong_Type
+      when PyCall::Types.pyisinstance(self, LibPython.PyLong_Type)
         # TODO: should make Bignum
 
-      when LibPython.PyFloat_Type
+      when PyCall::Types.pyisinstance(self, LibPython.PyFloat_Type)
         return Conversions.convert_to_float(self)
 
-      when LibPython.PyComplex_Type
+      when PyCall::Types.pyisinstance(self, LibPython.PyComplex_Type)
         return Conversions.convert_to_complex(self)
 
-      when LibPython.PyString_Type
+      when PyCall::Types.pyisinstance(self, LibPython.PyString_Type)
         return Conversions.convert_to_string(self)
 
-      when LibPython.PyUnicode_Type
+      when PyCall::Types.pyisinstance(self, LibPython.PyUnicode_Type)
         py_str_ptr = LibPython.PyUnicode_AsUTF8String(self)
         return Conversions.convert_to_string(py_str_ptr).force_encoding(Encoding::UTF_8)
 
-      when LibPython.PyList_Type
+      when PyCall::Types.pyisinstance(self, LibPython.PyList_Type)
         return PyCall::List.new(self)
 
-      when LibPython.PyTuple_Type
+      when PyCall::Types.pyisinstance(self, LibPython.PyTuple_Type)
         return Conversions.convert_to_tuple(self)
 
-      when LibPython.PyDict_Type
+      when PyCall::Types.pyisinstance(self, LibPython.PyDict_Type)
         return PyCall::Dict.new(self)
 
-      when LibPython.PySet_Type
+      when PyCall::Types.pyisinstance(self, LibPython.PySet_Type)
         return PyCall::Set.new(self)
       end
 

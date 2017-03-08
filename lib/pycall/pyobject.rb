@@ -39,7 +39,7 @@ module PyCall
 
     def kind_of?(klass)
       case klass
-      when PyObject, PyTypeObject
+      when PyObject
         Types.pyisinstance(self, klass)
       else
         super
@@ -149,18 +149,6 @@ module PyCall
 
     def type
       LibPython.PyObject_Type(self)
-    end
-  end
-
-  class PyTypeObject < FFI::Struct
-    include PyObjectMethods
-
-    def ===(obj)
-      obj.kind_of? self
-    end
-
-    def inspect
-      "pytype(#{self[:tp_name]})"
     end
   end
 
