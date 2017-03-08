@@ -3,14 +3,10 @@ require 'spec_helper'
 module PyCall
   describe Conversions do
     shared_context 'Save original python type map' do
-      let(:original_python_type_map) do
-        Conversions.instance_variable_get(:@python_type_map)
-      end
-
       around do |example|
         begin
-          original = original_python_type_map
-          Conversions.instance_variable_set(:@python_type_map, original)
+          original = Conversions.instance_variable_get(:@python_type_map)
+          Conversions.instance_variable_set(:@python_type_map, original.dup)
           example.run
         ensure
           Conversions.instance_variable_set(:@python_type_map, original)
