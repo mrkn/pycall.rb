@@ -1,4 +1,20 @@
 module PyCall
+  Py_LT = 0
+  Py_LE = 1
+  Py_EQ = 2
+  Py_NE = 3
+  Py_GT = 4
+  Py_GE = 5
+
+  RICH_COMPARISON_OPCODES = {
+    :<  => Py_LT,
+    :<= => Py_LE,
+    :== => Py_EQ,
+    :!= => Py_NE,
+    :>  => Py_GT,
+    :>= => Py_GE
+  }.freeze
+
   module PyObjectWrapper
     module ClassMethods
       private
@@ -32,27 +48,123 @@ module PyCall
       mod.extend ClassMethods
     end
 
-    def initialize(pyobj, pytype=nil)
-      check_type pyobj, pytype
-      pytype ||= LibPython.PyObject_Type(pyobj)
+    def initialize(pyobj)
+      pyobj = pyobj.__pyobj__ unless pyobj.kind_of? LibPython::PyObjectStruct
       @__pyobj__ = pyobj
     end
 
     attr_reader :__pyobj__
 
-    def ==(other)
-      case other
-      when self.class
-        __pyobj__ == other.__pyobj__
-      when PyObject
-        __pyobj__ == other
+    def type
+      LibPython.PyObject_Type(__pyobj__).to_ruby
+    end
+
+    def null?
+      __pyobj__.null?
+    end
+
+    def to_ptr
+      __pyobj__.to_ptr
+    end
+
+    def py_none?
+      to_ptr == PyCall.None.to_ptr
+    end
+
+    def kind_of?(klass)
+      case klass
+      when PyObjectWrapper
+        __pyobj__.kind_of? klass.__pyobj__
+      when LibPython::PyObjectStruct
+        __pyobj__.kind_of? klass
       else
         super
       end
     end
 
+    def rich_compare(other, op)
+      opcode = RICH_COMPARISON_OPCODES[op]
+      raise ArgumentError, "Unknown comparison op: #{op}" unless opcode
+
+      other = other.__pyobj__ unless other.kind_of? LibPython::PyObjectStruct
+      other = Conversions.from_ruby(other) unless other.kind_of?(LibPython::PyObjectStruct)
+      return other.null? if __pyobj__.null?
+      return false if other.null?
+
+      value = LibPython.PyObject_RichCompare(__pyobj__, other, opcode)
+      raise "Unable to compare: #{self} #{op} #{other}" if value.null?
+      value.to_ruby
+    end
+
+    RICH_COMPARISON_OPCODES.keys.each do |op|
+      define_method(op) {|other| rich_compare(other, op) }
+    end
+
+    def [](*indices)
+      if indices.length == 1
+        indices = indices[0]
+      else
+        indices = PyCall.tuple(*indices)
+      end
+      PyCall.getitem(self, indices)
+    end
+
+    def []=(*indices_and_value)
+      value = indices_and_value.pop
+      indices = indices_and_value
+      if indices.length == 1
+        indices = indices[0]
+      else
+        indices = PyCall.tuple(*indices)
+      end
+      PyCall.setitem(self, indices, value)
+    end
+
+    def +(other)
+      other = Conversions.from_ruby(other)
+      value = LibPython.PyNumber_Add(self, other)
+      return value.to_ruby unless value.null?
+      raise PyError.fetch
+    end
+
+    def -(other)
+      other = Conversions.from_ruby(other)
+      value = LibPython.PyNumber_Subtract(self, other)
+      return value.to_ruby unless value.null?
+      raise PyError.fetch
+    end
+
+    def *(other)
+      other = Conversions.from_ruby(other)
+      value = LibPython.PyNumber_Multiply(self, other)
+      return value.to_ruby unless value.null?
+      raise PyError.fetch
+    end
+
+    def /(other)
+      other = Conversions.from_ruby(other)
+      value = LibPython.PyNumber_TrueDivide(self, other)
+      return value.to_ruby unless value.null?
+      raise PyError.fetch
+    end
+
+    def **(other)
+      other = Conversions.from_ruby(other)
+      value = LibPython.PyNumber_Power(self, other, PyCall.None)
+      return value.to_ruby unless value.null?
+      raise PyError.fetch
+    end
+
+    def coerce(other)
+      [Conversions.from_ruby(other), self]
+    end
+
     def call(*args, **kwargs)
-      __pyobj__.call(*args, **kwargs)
+      args = PyCall::Tuple[*args]
+      kwargs = kwargs.empty? ? PyObject.null : PyCall::Dict.new(kwargs)
+      res = LibPython.PyObject_Call(__pyobj__, args.__pyobj__, kwargs.__pyobj__)
+      return res.to_ruby if LibPython.PyErr_Occurred().null?
+      raise PyError.fetch
     end
 
     def method_missing(name, *args, **kwargs)
@@ -64,19 +176,18 @@ module PyCall
     end
 
     def to_s
-      __pyobj__.to_s
+      s = LibPython.PyObject_Repr(__pyobj__)
+      if s.null?
+        LibPython.PyErr_Clear()
+        s = LibPython.PyObject_Str(__pyobj__)
+        if s.null?
+          LibPython.PyErr_Clear()
+          return super
+        end
+      end
+      s.to_ruby
     end
 
-    def inspect
-      __pyobj__.inspect
-    end
-
-    private
-
-    def check_type(pyobj, pytype)
-      return if pyobj.kind_of?(PyObject)
-      return if pytype.nil? || pyobj.kind_of?(pytype)
-      raise TypeError, "the argument must be a PyObject of #{pytype}"
-    end
+    alias inspect to_s
   end
 end

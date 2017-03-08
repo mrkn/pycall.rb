@@ -5,7 +5,7 @@ module PyCall
 
     def self.new(init=nil)
       case init
-      when PyObject
+      when LibPython::PyObjectStruct
         super
       when nil
         new(0)
@@ -20,20 +20,6 @@ module PyCall
       else
         new(obj.to_ary)
       end
-    end
-
-    def initialize(pyobj)
-      super(pyobj, LibPython.PyList_Type)
-    end
-
-    def [](index)
-      LibPython.PyList_GetItem(__pyobj__, index).to_ruby
-    end
-
-    def []=(index, value)
-      value = Conversions.from_ruby(value)
-      LibPython.PyList_SetItem(__pyobj__, index, value)
-      value
     end
 
     def <<(value)

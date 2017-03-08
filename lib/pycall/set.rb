@@ -3,7 +3,7 @@ module PyCall
     include PyObjectWrapper
 
     def initialize(pyobj)
-      super(pyobj, LibPython.PySet_Type)
+      super(pyobj)
     end
 
     def length

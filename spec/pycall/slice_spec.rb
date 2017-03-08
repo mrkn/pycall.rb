@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module PyCall
   describe Slice do
-    let(:pylist) { PyCall::Conversions.from_ruby([1, 2, 3, 4, 5]) }
+    let(:pylist) { PyCall::List.new([1, 2, 3, 4, 5]) }
 
     context 'initialize with one nil' do
       subject { PyCall::Slice.new(nil) }

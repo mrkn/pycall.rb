@@ -15,7 +15,7 @@ module PyCall
       it 'increments the returned python object' do
         pyobj = PyCall.eval('object()')
         subject['o'] = pyobj
-        expect { subject['o'] }.to change { pyobj.__aref__(:ob_refcnt) }.from(2).to(3)
+        expect { subject['o'] }.to change { pyobj.__pyobj__[:ob_refcnt] }.from(2).to(3)
       end
     end
 

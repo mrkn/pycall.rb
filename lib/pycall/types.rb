@@ -1,7 +1,8 @@
 module PyCall
   module Types
     def self.pyisinstance(pyobj, pytype)
-      check_pyobject(pyobj)
+      pyobj = pyobj.__pyobj__ unless pyobj.kind_of? LibPython::PyObjectStruct
+      pytype = ptype.__pyobj__ unless pytype.kind_of? LibPython::PyObjectStruct
       LibPython.PyObject_IsInstance(pyobj, pytype) == 1
     end
 

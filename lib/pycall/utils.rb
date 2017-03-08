@@ -6,17 +6,15 @@ module PyCall
     end
 
     def callable?(pyobj)
-      case pyobj
-      when PyObject
-      when PyObjectWrapper
+      unless pyobj.kind_of? LibPython::PyObjectStruct
+        raise TypeError, "the argument must be a Python object" unless pyobj.respond_to? :__pyobj__
         pyobj = pyobj.__pyobj__
-      else
-        raise TypeError, "the argument must be a PyObject"
       end
       1 == LibPython.PyCallable_Check(pyobj)
     end
 
     def dir(pyobj)
+      pyobj = pyobj.__pyobj__ unless pyobj.kind_of? LibPython::PyObjectStruct
       value = LibPython.PyObject_Dir(pyobj)
       return value.to_ruby unless value.null?
       raise PyError.fetch
@@ -45,6 +43,11 @@ module PyCall
 
     def None
       LibPython.Py_None
+    end
+
+    def none?(pyobj)
+      pyobj = pyobj.__pyobj__ unless pyobj.kind_of? LibPython::PyObjectStruct
+      pyobj.to_ptr == self.None.to_ptr
     end
 
     def slice(*args)

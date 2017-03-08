@@ -2,6 +2,10 @@ require 'spec_helper'
 
 module PyCall
   describe Conversions do
+    describe 'for object()' do
+      specify { expect(PyCall.eval('object()')).to be_kind_of(PyObject) }
+    end
+
     shared_context 'Save original python type map' do
       around do |example|
         begin

@@ -7,7 +7,7 @@ module PyCall
       case args.length
       when 1
         stop = args[0]
-        return super(stop) if stop.kind_of?(PyObject)
+        return super(stop) if stop.kind_of?(LibPython::PyObjectStruct)
       when 2
         start, stop = args
       when 3
@@ -16,9 +16,9 @@ module PyCall
         much_or_few = args.length > 3 ? 'much' : 'few'
         raise ArgumentError, "too #{much_or_few} arguments (#{args.length} for 1..3)"
       end
-      start = start ? Conversions.from_ruby(start) : PyObject.null
-      stop = stop ? Conversions.from_ruby(stop) : PyObject.null
-      step = step ? Conversions.from_ruby(step) : PyObject.null
+      start = start ? Conversions.from_ruby(start) : LibPython::PyObjectStruct.null
+      stop = stop ? Conversions.from_ruby(stop) : LibPython::PyObjectStruct.null
+      step = step ? Conversions.from_ruby(step) : LibPython::PyObjectStruct.null
       pyobj = LibPython.PySlice_New(start, stop, step)
       return pyobj.to_ruby unless pyobj.null?
       raise PyError.fetch

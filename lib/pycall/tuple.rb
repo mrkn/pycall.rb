@@ -12,7 +12,7 @@ module PyCall
           tuple[index] = obj
         end
         tuple
-      when PyObject
+      when LibPython::PyObjectStruct
         super(init)
       end
     end
@@ -20,10 +20,6 @@ module PyCall
     # Make tuple from array
     def self.[](*ary)
       new(ary)
-    end
-
-    def initialize(pyobj)
-      super(pyobj, LibPython.PyTuple_Type)
     end
 
     def length

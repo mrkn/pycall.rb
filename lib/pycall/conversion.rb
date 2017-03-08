@@ -27,9 +27,7 @@ module PyCall
     end
 
     def self.to_ruby(pyobj)
-      unless pyobj.kind_of? PyObject
-        raise
-      end
+      pyobj = PyObject.new(pyobj) if pyobj.kind_of? LibPython::PyObjectStruct
       each_type_pair do |tp|
         pytype, rbtype = tp.to_a
         next unless pyobj.kind_of?(pytype)
@@ -47,9 +45,7 @@ module PyCall
 
     def self.from_ruby(obj)
       case obj
-      when PyObject
-        obj
-      when PyObjectWrapper
+      when PyObject, PyObjectWrapper
         obj.__pyobj__
       when TrueClass, FalseClass
         LibPython.PyBool_FromLong(obj ? 1 : 0)
@@ -119,9 +115,9 @@ module PyCall
     end
   end
 
-  class PyObject
+  class LibPython::PyObjectStruct
     def to_ruby
-      return nil if self.null? || self.py_none?
+      return nil if self.null? || PyCall.none?(self)
 
       case 
       when PyCall::Types.pyisinstance(self, LibPython.PyType_Type)

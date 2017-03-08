@@ -4,7 +4,7 @@ module PyCall
 
     def self.new(init=nil)
       case init
-      when PyObject
+      when LibPython::PyObjectStruct
         super
       when nil
         new(LibPython.PyDict_New())
@@ -19,10 +19,6 @@ module PyCall
       end
     end
 
-    def initialize(pyobj)
-      super(pyobj, LibPython.PyDict_Type)
-    end
-
     def [](key)
       key = key.to_s if key.is_a? Symbol
       value = if key.is_a? String
@@ -32,7 +28,7 @@ module PyCall
               end
     ensure
       case value
-      when PyObject
+      when LibPython::PyObjectStruct
         PyCall.incref(value)
       when PyObjectWrapper
         PyCall.incref(value.__pyobj__)
@@ -42,6 +38,7 @@ module PyCall
     def []=(key, value)
       key = key.to_s if key.is_a? Symbol
       value = Conversions.from_ruby(value)
+      value = value.__pyobj__ unless value.kind_of? LibPython::PyObjectStruct
       if key.is_a? String
         LibPython.PyDict_SetItemString(__pyobj__, key, value)
       else

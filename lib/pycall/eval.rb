@@ -3,8 +3,8 @@ module PyCall
     Py_eval_input = 258
 
     def self.eval(str, filename: "pycall")
-      globals_ptr = main_dict
-      locals_ptr = main_dict
+      globals_ptr = main_dict.__pyobj__
+      locals_ptr = main_dict.__pyobj__
       defer_sigint do
         py_code_ptr = LibPython.Py_CompileString(str, filename, Py_eval_input)
         raise PyError.fetch if py_code_ptr.null?
@@ -17,7 +17,7 @@ module PyCall
 
       def main_dict
         @main_dict ||= PyCall.import_module("__main__") do |main_module|
-          PyCall.incref(LibPython.PyModule_GetDict(main_module))
+          PyCall.incref(LibPython.PyModule_GetDict(main_module.__pyobj__)).to_ruby
         end
       end
 
@@ -38,7 +38,7 @@ module PyCall
     begin
       yield value
     ensure
-      PyCall.decref(value)
+      PyCall.decref(value.__pyobj__)
     end
   end
 
