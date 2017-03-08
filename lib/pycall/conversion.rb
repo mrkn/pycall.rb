@@ -122,9 +122,11 @@ module PyCall
   class PyObject
     def to_ruby
       return nil if self.null? || self.py_none?
-      return self if PyCall::Types.pyisinstance(self, LibPython.PyType_Type)
 
       case 
+      when PyCall::Types.pyisinstance(self, LibPython.PyType_Type)
+        return TypeObject.new(self)
+
       when PyCall::Types.pyisinstance(self, LibPython.PyBool_Type)
         return Conversions.convert_to_boolean(self)
 

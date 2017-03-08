@@ -51,7 +51,7 @@ module PyCall
           expect(mod).not_to be_respond_to(:foo)
           expect(mod).not_to be_respond_to(:bar)
           mod.pyfrom 'multiprocessing', import: { Process: :foo, Queue: :bar }
-          expect(mod.foo).to be_kind_of(PyObject)
+          expect(mod.foo).to be_kind_of(PyCall::TypeObject)
           expect(mod.bar).to be_kind_of(PyObject)
         end
       end
@@ -61,7 +61,7 @@ module PyCall
           expect(mod).not_to be_respond_to(:Process)
           expect(mod).not_to be_respond_to(:Queue)
           mod.pyfrom 'multiprocessing', import: %i[Process Queue]
-          expect(mod::Process).to be_kind_of(PyObject)
+          expect(mod::Process).to be_kind_of(PyCall::TypeObject)
           expect(mod::Queue).to be_kind_of(PyObject)
         end
       end

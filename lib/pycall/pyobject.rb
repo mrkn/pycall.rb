@@ -39,6 +39,8 @@ module PyCall
 
     def kind_of?(klass)
       case klass
+      when TypeObject
+        Types.pyisinstance(self, klass.__pyobj__)
       when PyObject
         Types.pyisinstance(self, klass)
       else
@@ -133,10 +135,6 @@ module PyCall
     end
 
     def to_s
-      if Types.pyisinstance(self, LibPython.PyType_Type)
-        return "pytype(#{self.__name__})"
-      end
-
       s = LibPython.PyObject_Repr(self)
       if s.null?
         LibPython.PyErr_Clear()
@@ -152,7 +150,7 @@ module PyCall
     alias inspect to_s
 
     def type
-      LibPython.PyObject_Type(self)
+      LibPython.PyObject_Type(self).to_ruby
     end
   end
 
