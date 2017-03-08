@@ -3,8 +3,9 @@ module PyCall
     module ClassMethods
       private
 
-      def wrap_class(pyobj)
-        define_singleton_method(:__pyobj__) { pyobj }
+      def wrap_class(pyclass)
+        pyclass__pyobj__ = pyclass.__pyobj__
+        define_singleton_method(:__pyobj__) { pyclass__pyobj__ }
 
         PyCall.dir(__pyobj__).each do |name|
           obj = PyCall.getattr(__pyobj__, name)
