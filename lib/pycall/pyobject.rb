@@ -133,6 +133,10 @@ module PyCall
     end
 
     def to_s
+      if Types.pyisinstance(self, LibPython.PyType_Type)
+        return "pytype(#{self.__name__})"
+      end
+
       s = LibPython.PyObject_Repr(self)
       if s.null?
         LibPython.PyErr_Clear()

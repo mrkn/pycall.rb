@@ -17,7 +17,7 @@ module PyCall
 
     describe '#type' do
       it 'returns python type' do
-        expect(PyCall::Conversions.from_ruby(1).type.inspect).to eq "<class 'int'>"
+        expect(PyCall::Conversions.from_ruby(1).type.inspect).to eq "pytype(int)"
       end
     end
   end
