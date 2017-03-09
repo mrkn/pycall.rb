@@ -75,6 +75,12 @@ module PyCall
         Conversions.from_ruby(obj)
       end
 
+      context 'for a PyObjectStruct' do
+        let(:pyobj) { PyCall.eval('object()') }
+        subject { from_ruby(pyobj.__pyobj__) }
+        it { is_expected.to equal(pyobj.__pyobj__) }
+      end
+
       context 'for true' do
         subject { from_ruby(true) }
         it { is_expected.to be_kind_of(LibPython.PyBool_Type) }

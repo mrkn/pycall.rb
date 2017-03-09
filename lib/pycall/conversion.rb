@@ -45,6 +45,8 @@ module PyCall
 
     def self.from_ruby(obj)
       case obj
+      when LibPython::PyObjectStruct
+        obj
       when PyObject, PyObjectWrapper
         obj.__pyobj__
       when TrueClass, FalseClass
