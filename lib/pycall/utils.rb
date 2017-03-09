@@ -2,7 +2,7 @@ module PyCall
   module Utils
     def append_sys_path(path_str)
       pyobj = LibPython.PyUnicode_DecodeUTF8(path_str, path_str.bytesize, nil)
-      sys.path.append.(pyobj)
+      sys.path << pyobj
     end
 
     def callable?(pyobj)
