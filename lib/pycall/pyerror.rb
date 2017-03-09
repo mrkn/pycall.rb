@@ -7,9 +7,9 @@ module PyCall
       ptraceback = ptrs + 2 * ptrs.type_size
       LibPython.PyErr_Fetch(ptype, pvalue, ptraceback)
       LibPython.PyErr_NormalizeException(ptype, pvalue, ptraceback)
-      type = PyObject.new(LibPython::PyObjectStruct.new(ptype.read(:pointer)))
-      value = PyObject.new(LibPython::PyObjectStruct.new(pvalue.read(:pointer)))
-      traceback = PyObject.new(LibPython::PyObjectStruct.new(ptraceback.read(:pointer)))
+      type = Conversions.to_ruby(LibPython::PyObjectStruct.new(ptype.read(:pointer)))
+      value = Conversions.to_ruby(LibPython::PyObjectStruct.new(pvalue.read(:pointer)))
+      traceback = Conversions.to_ruby(LibPython::PyObjectStruct.new(ptraceback.read(:pointer)))
       new(type, value, traceback)
     end
 
@@ -23,7 +23,7 @@ module PyCall
     attr_reader :type, :value, :traceback
 
     def message
-      "#{PyObject.new(type.to_ptr)}: #{value}".tap do |msg|
+      "#{type}: #{value}".tap do |msg|
         unless traceback.null?
           if (o = PyCall.format_traceback(traceback))
             msg.concat("\n", *o)
