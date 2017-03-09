@@ -86,8 +86,7 @@ module PyCall
       opcode = RICH_COMPARISON_OPCODES[op]
       raise ArgumentError, "Unknown comparison op: #{op}" unless opcode
 
-      other = other.__pyobj__ unless other.kind_of? LibPython::PyObjectStruct
-      other = Conversions.from_ruby(other) unless other.kind_of?(LibPython::PyObjectStruct)
+      other = Conversions.from_ruby(other)
       return other.null? if __pyobj__.null?
       return false if other.null?
 

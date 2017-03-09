@@ -32,5 +32,22 @@ module PyCall
         end
       end
     end
+
+    describe '#rich_compare' do
+      let(:fraction_class) { PyCall.import_module('fractions').Fraction }
+      subject { fraction_class.(1, 2) }
+
+      context 'when comparing with an Integer' do
+        specify do
+          expect { subject.rich_compare(42, :<) }.not_to raise_error
+        end
+      end
+
+      context 'when comparing with an PyObject' do
+        specify do
+          expect { subject.rich_compare(fraction_class.(2, 3), :<) }.not_to raise_error
+        end
+      end
+    end
   end
 end
