@@ -122,41 +122,41 @@ module PyCall
 
     def +(other)
       other = Conversions.from_ruby(other)
-      value = LibPython.PyNumber_Add(self, other)
+      value = LibPython.PyNumber_Add(__pyobj__, other)
       return value.to_ruby unless value.null?
       raise PyError.fetch
     end
 
     def -(other)
       other = Conversions.from_ruby(other)
-      value = LibPython.PyNumber_Subtract(self, other)
+      value = LibPython.PyNumber_Subtract(__pyobj__, other)
       return value.to_ruby unless value.null?
       raise PyError.fetch
     end
 
     def *(other)
       other = Conversions.from_ruby(other)
-      value = LibPython.PyNumber_Multiply(self, other)
+      value = LibPython.PyNumber_Multiply(__pyobj__, other)
       return value.to_ruby unless value.null?
       raise PyError.fetch
     end
 
     def /(other)
       other = Conversions.from_ruby(other)
-      value = LibPython.PyNumber_TrueDivide(self, other)
+      value = LibPython.PyNumber_TrueDivide(__pyobj__, other)
       return value.to_ruby unless value.null?
       raise PyError.fetch
     end
 
     def **(other)
       other = Conversions.from_ruby(other)
-      value = LibPython.PyNumber_Power(self, other, PyCall.None)
+      value = LibPython.PyNumber_Power(__pyobj__, other, PyCall.None)
       return value.to_ruby unless value.null?
       raise PyError.fetch
     end
 
     def coerce(other)
-      [Conversions.from_ruby(other), self]
+      [PyObject.new(Conversions.from_ruby(other)), self]
     end
 
     def call(*args, **kwargs)
