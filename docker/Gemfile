@@ -8,5 +8,5 @@ gem 'cztop', '< 0.3.0'
 gem 'iruby', github: 'sciruby/iruby'
 
 # PyCall related gems
-gem 'pycall', '>= 0.1.0.alpha.20170308'
-gem 'matplotlib', '>= 0.1.0.alpha.20170307'
+gem 'pycall', '>= 0.1.0.alpha.20170309'
+gem 'matplotlib', '>= 0.1.0.alpha.20170309'
