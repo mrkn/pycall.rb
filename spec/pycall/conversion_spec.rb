@@ -6,20 +6,8 @@ module PyCall
       specify { expect(PyCall.eval('object()')).to be_kind_of(PyObject) }
     end
 
-    shared_context 'Save original python type map' do
-      around do |example|
-        begin
-          original = Conversions.instance_variable_get(:@python_type_map)
-          Conversions.instance_variable_set(:@python_type_map, original.dup)
-          example.run
-        ensure
-          Conversions.instance_variable_set(:@python_type_map, original)
-        end
-      end
-    end
-
     describe '.python_type_mapping' do
-      include_context 'Save original python type map'
+      include_context 'Save and restore original python type map'
 
       it 'adds type map between python type and ruby type' do
         array_module = PyCall.import_module('array')
@@ -32,7 +20,7 @@ module PyCall
     end
 
     describe '.to_ruby' do
-      include_context 'Save original python type map'
+      include_context 'Save and restore original python type map'
 
       let(:fractions_module) do
         PyCall.import_module('fractions')
