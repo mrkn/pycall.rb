@@ -46,8 +46,15 @@ module PyCall
     end
 
     def none?(pyobj)
-      pyobj = pyobj.__pyobj__ unless pyobj.kind_of? LibPython::PyObjectStruct
-      pyobj.to_ptr == self.None.to_ptr
+      case pyobj
+      when FFI::Pointer
+        ptr = pyobj
+      when LibPython::PyObjectStruct
+        ptr = pyobj.to_ptr
+      else
+        pyobj = pyobj.__pyobj__.to_ptr
+      end
+      ptr == self.None.to_ptr
     end
 
     def slice(*args)

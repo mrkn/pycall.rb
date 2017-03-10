@@ -51,5 +51,13 @@ module PyCall
         end
       end
     end
+
+    describe '#call' do
+      context 'when less arguments' do
+        specify do
+          expect { PyCall.eval('len').() }.to raise_error(PyCall::PyError, /takes exactly one argument \(0 given\)/)
+        end
+      end
+    end
   end
 end

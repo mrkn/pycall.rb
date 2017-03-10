@@ -49,6 +49,7 @@ module PyCall
     end
 
     def initialize(pyobj)
+      pyobj = LibPython::PyObjectStruct.new(pyobj) if pyobj.kind_of? FFI::Pointer
       pyobj = pyobj.__pyobj__ unless pyobj.kind_of? LibPython::PyObjectStruct
       @__pyobj__ = pyobj
     end
