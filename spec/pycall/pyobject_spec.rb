@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module PyCall
-  describe PyObject do
+  ::RSpec.describe PyObject do
     describe '.null' do
       specify do
         expect(PyObject.null).to be_null

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module PyCall
-  describe Conversions do
+  ::RSpec.describe Conversions do
     describe 'for object()' do
       specify { expect(PyCall.eval('object()')).to be_kind_of(PyObject) }
     end

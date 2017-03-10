@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module PyCall
-  describe Slice do
+  ::RSpec.describe Slice do
     let(:pylist) { PyCall::List.new([1, 2, 3, 4, 5]) }
 
     context 'initialize with one nil' do

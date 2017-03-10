@@ -4,7 +4,7 @@ module PyCall
   module RSpec
   end
 
-  describe PyObjectWrapper do
+  ::RSpec.describe PyObjectWrapper do
     describe '.wrap_class' do
       before do
         class PyCall::RSpec::ClassForTest

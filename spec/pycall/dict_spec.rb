@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module PyCall
-  describe Dict do
+  ::RSpec.describe Dict do
     subject { Dict.new('a' => 1, 'b' => 2, 'c' => 3) }
 
     describe '#[]' do

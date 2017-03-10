@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module PyCall
-  describe Tuple do
+  ::RSpec.describe Tuple do
     subject { Tuple[1, 2, 3] }
 
     specify do

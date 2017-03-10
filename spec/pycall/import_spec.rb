@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'pycall/import'
 
 module PyCall
-  describe Import do
+  ::RSpec.describe Import do
     let(:mod) { Module.new }
 
     before { mod.extend PyCall::Import }

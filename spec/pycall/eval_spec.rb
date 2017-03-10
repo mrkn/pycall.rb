@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe PyCall do
+RSpec.describe PyCall do
   def py_eval(src)
     PyCall.eval(src)
   end
