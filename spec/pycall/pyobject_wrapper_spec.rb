@@ -6,6 +6,8 @@ module PyCall
 
   ::RSpec.describe PyObjectWrapper do
     describe '.wrap_class' do
+      include_context 'Save and restore original python type map'
+
       before do
         class PyCall::RSpec::ClassForTest
           include PyCall::PyObjectWrapper
