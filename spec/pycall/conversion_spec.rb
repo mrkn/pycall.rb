@@ -100,6 +100,13 @@ module PyCall
           end
         end
       end
+
+      context 'for a Hash' do
+        let(:hash) { { a: 1, b: 2, c: 3 } }
+        subject { from_ruby(hash) }
+        it { is_expected.to be_kind_of(LibPython.PyDict_Type) }
+        specify { expect(Conversions.to_ruby(subject)).to eq(hash) }
+      end
     end
   end
 end

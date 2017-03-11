@@ -113,6 +113,8 @@ module PyCall
         from_ruby(obj.to_s)
       when Array
         PyCall::List.new(obj).__pyobj__
+      when Hash
+        PyCall::Dict.new(obj).__pyobj__
       else
         PyCall.None
       end
