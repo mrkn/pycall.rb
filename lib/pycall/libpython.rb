@@ -41,7 +41,7 @@ module PyCall
       executable = python_config[:executable]
       libpaths = [ python_config[:LIBDIR] ]
       if FFI::Platform.windows?
-        libpaths << dirname(executable)
+        libpaths << File.dirname(executable)
       else
         libpaths << File.expand_path('../../lib', executable)
       end
