@@ -88,7 +88,7 @@ module PyCall
         {}.tap do |config|
           io.each_line do |line|
             key, value = line.chomp.split(': ', 2)
-            config[key.to_sym] = value
+            config[key.to_sym] = value if value != 'None'
           end
         end
       end
