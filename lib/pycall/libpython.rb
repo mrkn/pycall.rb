@@ -73,10 +73,16 @@ module PyCall
       libsuffix = FFI::Platform::LIBSUFFIX
       libs.each do |lib|
         libpaths.each do |libpath|
-          libpath_lib = File.join(libpath, lib)
+          next unless libpath
+          # NOTE: File.join doesn't use File::ALT_SEPARATOR
+          libpath_lib = [libpath, lib].join(File::ALT_SEPARATOR || File::SEPARATOR)
           if File.file?("#{libpath_lib}.#{libsuffix}")
-            libs = ffi_lib("#{libpath_lib}.#{libsuffix}")
-            return libs.first
+            begin
+              libs = ffi_lib("#{libpath_lib}.#{libsuffix}")
+              return libs.first
+            rescue LoadError
+              # skip load error
+            end
           end
         end
       end
