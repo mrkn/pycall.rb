@@ -24,7 +24,7 @@ module PyCall
 
     def to_s
       "#{type}: #{value}".tap do |msg|
-        unless traceback&.null?
+        unless traceback.nil? || traceback.null?
           if (o = PyCall.format_traceback(traceback))
             msg.concat("\n", *o)
           end
