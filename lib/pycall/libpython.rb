@@ -69,6 +69,16 @@ module PyCall
         end
       end
 
+      # Try LIBPYTHON environment variable first.
+      if ENV['LIBPYTHON'] && File.file?(ENV['LIBPYTHON'])
+        begin
+          libs = ffi_lib(ENV['LIBPYTHON'])
+          return libs.first
+        rescue LoadError
+          # skip load error
+        end
+      end
+
       # Find libpython (we hope):
       libsuffix = FFI::Platform::LIBSUFFIX
       libs.each do |lib|

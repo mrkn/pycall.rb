@@ -38,4 +38,8 @@ RSpec.describe PyCall do
   describe 'PYTHON environment variable' do
     pending
   end
+
+  describe 'LIBPYTHON environment variable' do
+    pending
+  end
 end
