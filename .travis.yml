@@ -11,6 +11,7 @@ rvm:
 env:
   - PYTHON=python
   - PYTHON=python3
+  - LIBPYTHON=/usr/lib/libpython3.2mu.so.1
 
 addons:
   apt:
