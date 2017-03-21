@@ -34,4 +34,8 @@ RSpec.describe PyCall do
       expect(PyCall.dir(PyCall.eval('object()'))).to include('__class__')
     end
   end
+
+  describe 'PYTHON environment variable' do
+    pending
+  end
 end
