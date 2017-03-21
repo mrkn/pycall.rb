@@ -70,13 +70,15 @@ module PyCall
       end
 
       # Try LIBPYTHON environment variable first.
-      if ENV['LIBPYTHON'] && File.file?(ENV['LIBPYTHON'])
-        begin
-          libs = ffi_lib(ENV['LIBPYTHON'])
-          return libs.first
-        rescue LoadError
-          # skip load error
+      if ENV['LIBPYTHON']
+        if File.file?(ENV['LIBPYTHON'])
+          begin
+            libs = ffi_lib(ENV['LIBPYTHON'])
+            return libs.first
+          rescue LoadError
+          end
         end
+        $stderr.puts '[WARN] Ignore the wrong libpython location specified in LIBPYTHON environment variable.'
       end
 
       # Find libpython (we hope):
