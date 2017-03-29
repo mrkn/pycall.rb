@@ -91,10 +91,10 @@ module PyCall
       dir_sep = File::ALT_SEPARATOR || File::SEPARATOR
       libs.each do |lib|
         libpaths.each do |libpath|
-          [ # NOTE: File.join doesn't use File::ALT_SEPARATOR
-            [libpath, lib].join(dir_sep),
-            [libpath, multiarch, lib].join(dir_sep)
-          ].each do |libpath_lib|
+          # NOTE: File.join doesn't use File::ALT_SEPARATOR
+          libpath_libs = [ [libpath, lib].join(dir_sep) ]
+          libpath_libs << [libpath, multiarch, lib].join(dir_sep) if multiarch
+          libpath_libs.each do |libpath_lib|
             [
               libpath_lib,
               "#{libpath_lib}.#{libsuffix}"
