@@ -83,14 +83,18 @@ module PyCall
 
       # Find libpython (we hope):
       libsuffix = FFI::Platform::LIBSUFFIX
+      multiarch = python_config[:MULTIARCH] || python_config[:multiarch]
+      dir_sep = File::ALT_SEPARATOR || File::SEPARATOR
       libs.each do |lib|
         libpaths.each do |libpath|
           next unless libpath
-          # NOTE: File.join doesn't use File::ALT_SEPARATOR
-          libpath_lib = [libpath, lib].join(File::ALT_SEPARATOR || File::SEPARATOR)
-          if File.file?("#{libpath_lib}.#{libsuffix}")
+          [ # NOTE: File.join doesn't use File::ALT_SEPARATOR
+            "#{[libpath, lib].join(dir_sep)}.#{libsuffix}",
+            "#{[libpath, multiarch, lib].join(dir_sep)}.#{libsuffix}"
+          ].each do |libpath_lib|
+            next unless File.file?(libpath_lib)
             begin
-              libs = ffi_lib("#{libpath_lib}.#{libsuffix}")
+              libs = ffi_lib(libpath_lib)
               return libs.first
             rescue LoadError
               # skip load error
