@@ -34,8 +34,10 @@ module PyCall
       libs = [ "#{libprefix}python#{v}", "#{libprefix}python" ]
       lib = python_config[:LIBRARY]
       libs.unshift(File.basename(lib, File.extname(lib))) if lib
-      lib = python_config[:LDLIBRARY]
-      libs.unshift(lib, File.basename(lib)) if lib
+      %i(INSTSONAME LDLIBRARY).each do |key|
+        lib = python_config[key]
+        libs.unshift(lib, File.basename(lib)) if lib
+      end
       libs.uniq!
 
       executable = python_config[:executable]
