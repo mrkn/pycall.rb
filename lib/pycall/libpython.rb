@@ -31,13 +31,15 @@ module PyCall
 
       v = python_config[:VERSION]
       libprefix = FFI::Platform::LIBPREFIX
-      libs = [ "#{libprefix}python#{v}", "#{libprefix}python" ]
-      lib = python_config[:LIBRARY]
-      libs.unshift(File.basename(lib, File.extname(lib))) if lib
+      libs = []
       %i(INSTSONAME LDLIBRARY).each do |key|
         lib = python_config[key]
-        libs.unshift(lib, File.basename(lib)) if lib
+        libs << lib << File.basename(lib) if lib
       end
+      if (lib = python_config[:LIBRARY])
+        libs << File.basename(lib, File.extname(lib))
+      end
+      libs << "#{libprefix}python#{v}" << "#{libprefix}python"
       libs.uniq!
 
       executable = python_config[:executable]
@@ -48,9 +50,9 @@ module PyCall
         libpaths << File.expand_path('../../lib', executable)
       end
       libpaths << python_config[:PYTHONFRAMEWORKPREFIX] if FFI::Platform.mac?
-
       exec_prefix = python_config[:exec_prefix]
       libpaths << exec_prefix << File.join(exec_prefix, 'lib')
+      libpaths.compact!
 
       unless ENV['PYTHONHOME']
         # PYTHONHOME tells python where to look for both pure python and binary modules.
@@ -89,17 +91,21 @@ module PyCall
       dir_sep = File::ALT_SEPARATOR || File::SEPARATOR
       libs.each do |lib|
         libpaths.each do |libpath|
-          next unless libpath
           [ # NOTE: File.join doesn't use File::ALT_SEPARATOR
-            "#{[libpath, lib].join(dir_sep)}.#{libsuffix}",
-            "#{[libpath, multiarch, lib].join(dir_sep)}.#{libsuffix}"
+            [libpath, lib].join(dir_sep),
+            [libpath, multiarch, lib].join(dir_sep)
           ].each do |libpath_lib|
-            next unless File.file?(libpath_lib)
-            begin
-              libs = ffi_lib(libpath_lib)
-              return libs.first
-            rescue LoadError
-              # skip load error
+            [
+              libpath_lib,
+              "#{libpath_lib}.#{libsuffix}"
+            ].each do |fullname|
+              next unless File.file?(fullname)
+              begin
+                libs = ffi_lib(fullname)
+                return libs.first
+              rescue LoadError
+                # skip load error
+              end
             end
           end
         end
