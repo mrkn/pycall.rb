@@ -31,11 +31,15 @@ module PyCall
 
       v = python_config[:VERSION]
       libprefix = FFI::Platform::LIBPREFIX
-      libs = [ "#{libprefix}python#{v}", "#{libprefix}python" ]
-      lib = python_config[:LIBRARY]
-      libs.unshift(File.basename(lib, File.extname(lib))) if lib
-      lib = python_config[:LDLIBRARY]
-      libs.unshift(lib, File.basename(lib)) if lib
+      libs = []
+      %i(INSTSONAME LDLIBRARY).each do |key|
+        lib = python_config[key]
+        libs << lib << File.basename(lib) if lib
+      end
+      if (lib = python_config[:LIBRARY])
+        libs << File.basename(lib, File.extname(lib))
+      end
+      libs << "#{libprefix}python#{v}" << "#{libprefix}python"
       libs.uniq!
 
       executable = python_config[:executable]
@@ -46,9 +50,9 @@ module PyCall
         libpaths << File.expand_path('../../lib', executable)
       end
       libpaths << python_config[:PYTHONFRAMEWORKPREFIX] if FFI::Platform.mac?
-
       exec_prefix = python_config[:exec_prefix]
       libpaths << exec_prefix << File.join(exec_prefix, 'lib')
+      libpaths.compact!
 
       unless ENV['PYTHONHOME']
         # PYTHONHOME tells python where to look for both pure python and binary modules.
@@ -83,17 +87,25 @@ module PyCall
 
       # Find libpython (we hope):
       libsuffix = FFI::Platform::LIBSUFFIX
+      multiarch = python_config[:MULTIARCH] || python_config[:multiarch]
+      dir_sep = File::ALT_SEPARATOR || File::SEPARATOR
       libs.each do |lib|
         libpaths.each do |libpath|
-          next unless libpath
           # NOTE: File.join doesn't use File::ALT_SEPARATOR
-          libpath_lib = [libpath, lib].join(File::ALT_SEPARATOR || File::SEPARATOR)
-          if File.file?("#{libpath_lib}.#{libsuffix}")
-            begin
-              libs = ffi_lib("#{libpath_lib}.#{libsuffix}")
-              return libs.first
-            rescue LoadError
-              # skip load error
+          libpath_libs = [ [libpath, lib].join(dir_sep) ]
+          libpath_libs << [libpath, multiarch, lib].join(dir_sep) if multiarch
+          libpath_libs.each do |libpath_lib|
+            [
+              libpath_lib,
+              "#{libpath_lib}.#{libsuffix}"
+            ].each do |fullname|
+              next unless File.file?(fullname)
+              begin
+                libs = ffi_lib(fullname)
+                return libs.first
+              rescue LoadError
+                # skip load error
+              end
             end
           end
         end
