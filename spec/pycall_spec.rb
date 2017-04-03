@@ -35,6 +35,11 @@ RSpec.describe PyCall do
     end
   end
 
+  describe 'sys.argv' do
+    subject { PyCall.sys.argv }
+    it { is_expected.to eq(['']) }
+  end
+
   describe 'PYTHON environment variable' do
     pending
   end

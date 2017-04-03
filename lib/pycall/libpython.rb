@@ -176,6 +176,7 @@ module PyCall
     attach_function :Py_GetVersion, [], :string
     attach_function :Py_InitializeEx, [:int], :void
     attach_function :Py_IsInitialized, [], :int
+    attach_function :PySys_SetArgvEx, [:int, :pointer, :int], :void
 
     # Reference count
 
