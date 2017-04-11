@@ -21,24 +21,18 @@ module PyCall
 
     def [](key)
       key = key.to_s if key.is_a? Symbol
-      value = if key.is_a? String
-                LibPython.PyDict_GetItemString(__pyobj__, key).to_ruby
-              else
-                LibPython.PyDict_GetItem(__pyobj__, key).to_ruby
-              end
-    ensure
-      case value
-      when LibPython::PyObjectStruct
-        PyCall.incref(value)
-      when PyObjectWrapper
-        PyCall.incref(value.__pyobj__)
+      key = key.__pyobj__ if key.is_a? PyObjectWrapper
+      if key.is_a? String
+        PyCall.incref(LibPython.PyDict_GetItemString(__pyobj__, key)).to_ruby
+      else
+        PyCall.incref(LibPython.PyDict_GetItem(__pyobj__, key)).to_ruby
       end
     end
 
     def []=(key, value)
       key = key.to_s if key.is_a? Symbol
+      key = key.__pyobj__ if key.is_a? PyObjectWrapper
       value = Conversions.from_ruby(value)
-      value = value.__pyobj__ unless value.kind_of? LibPython::PyObjectStruct
       if key.is_a? String
         LibPython.PyDict_SetItemString(__pyobj__, key, value)
       else
@@ -49,6 +43,7 @@ module PyCall
 
     def delete(key)
       key = key.to_s if key.is_a? Symbol
+      key = key.__pyobj__ if key.is_a? PyObjectWrapper
       if key.is_a? String
         value = LibPython.PyDict_GetItemString(__pyobj__, key).to_ruby
         LibPython.PyDict_DelItemString(__pyobj__, key)
