@@ -1,8 +1,23 @@
 require 'spec_helper'
+require 'pycall/import'
 
 module PyCall
   ::RSpec.describe Dict do
     subject { Dict.new('a' => 1, 'b' => 2, 'c' => 3) }
+
+    describe '.new' do
+      let(:mod) { Module.new }
+      let(:key) { mod.time.localtime.() }
+
+      before do
+        mod.extend PyCall::Import
+        mod.pyimport 'time'
+      end
+
+      it 'accepts python object as a key' do
+        expect{ Dict.new(key => 1) }.not_to raise_error
+      end
+    end
 
     describe '#[]' do
       it 'returns a value corresponding to a given key' do
