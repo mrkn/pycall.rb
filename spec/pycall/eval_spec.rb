@@ -105,7 +105,7 @@ RSpec.describe PyCall do
     it { is_expected.not_to include(0, 4) }
   end
 
-  describe_eval("a = [True]\nif a[0]:\n  raise Exception('abcdef')\n", input_type: :file) do
+  describe_eval("raise Exception('abcdef')\n", input_type: :file) do
     specify do
       expect { subject }.not_to raise_error
       pyerror = PyCall::PyError.fetch
