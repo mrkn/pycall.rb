@@ -1,13 +1,13 @@
 require 'spec_helper'
 
 RSpec.describe PyCall do
-  def py_eval(src)
-    PyCall.eval(src)
+  def py_eval(src, input_type: :eval)
+    PyCall.eval(src, input_type: input_type)
   end
 
-  def self.describe_eval(src, &block)
-    describe ".eval(#{src.inspect})" do
-      subject { py_eval(src) }
+  def self.describe_eval(src, input_type: :eval, &block)
+    describe ".eval(#{src.inspect}, input_type: #{input_type.inspect})" do
+      subject { py_eval(src, input_type: input_type) }
       module_eval &block
     end
   end
@@ -103,5 +103,13 @@ RSpec.describe PyCall do
 
     it { is_expected.to include(1, 2, 3) }
     it { is_expected.not_to include(0, 4) }
+  end
+
+  describe_eval("a = [True]\nif a[0]:\n  raise Exception('abcdef')\n", input_type: :file) do
+    specify do
+      expect { subject }.not_to raise_error
+      pyerror = PyCall::PyError.fetch
+      expect(pyerror.message).to match(/abcdef/)
+    end
   end
 end

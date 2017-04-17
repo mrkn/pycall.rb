@@ -1,12 +1,20 @@
 module PyCall
   module Eval
+    Py_file_input = 257
     Py_eval_input = 258
 
-    def self.eval(str, filename: "pycall")
+    def self.input_type(sym)
+      return Py_file_input if sym == :file
+      return Py_eval_input if sym == :eval
+      raise ArgumentError, "Unknown input_type for compile Python code"
+    end
+
+    def self.eval(str, filename: "pycall", input_type: :eval)
+      input_type = self.input_type(input_type)
       globals_ptr = main_dict.__pyobj__
       locals_ptr = main_dict.__pyobj__
       defer_sigint do
-        py_code_ptr = LibPython.Py_CompileString(str, filename, Py_eval_input)
+        py_code_ptr = LibPython.Py_CompileString(str, filename, input_type)
         raise PyError.fetch if py_code_ptr.null?
         LibPython.PyEval_EvalCode(py_code_ptr, globals_ptr, locals_ptr)
       end
@@ -42,8 +50,8 @@ module PyCall
     end
   end
 
-  def self.eval(str, conversion: true)
-    result = Eval.eval(str)
+  def self.eval(str, conversion: true, filename: "pycall", input_type: :eval)
+    result = Eval.eval(str, filename: filename, input_type: input_type)
     conversion ? result.to_ruby : result
   end
 end
