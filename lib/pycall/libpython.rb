@@ -191,7 +191,6 @@ module PyCall
     attach_function :PyObject_HasAttrString, [PyObjectStruct.by_ref, :string], :int
     attach_function :PyObject_GetItem, [PyObjectStruct.by_ref, PyObjectStruct.by_ref], PyObjectStruct.by_ref
     attach_function :PyObject_SetItem, [PyObjectStruct.by_ref, PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
-    attach_function :PyObject_DelItem, [PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
     attach_function :PyObject_Call, [PyObjectStruct.by_ref, PyObjectStruct.by_ref, PyObjectStruct.by_ref], PyObjectStruct.by_ref
     attach_function :PyObject_IsInstance, [PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
     attach_function :PyObject_Dir, [PyObjectStruct.by_ref], PyObjectStruct.by_ref
@@ -280,8 +279,6 @@ module PyCall
 
     attach_function :PyList_New, [:ssize_t], PyObjectStruct.by_ref
     attach_function :PyList_Size, [PyObjectStruct.by_ref], :ssize_t
-    attach_function :PyList_GetItem, [PyObjectStruct.by_ref, :ssize_t], PyObjectStruct.by_ref
-    attach_function :PyList_SetItem, [PyObjectStruct.by_ref, :ssize_t, PyObjectStruct.by_ref], :int
     attach_function :PyList_Append, [PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
 
     # Sequence
@@ -309,8 +306,6 @@ module PyCall
 
     attach_function :PySet_Size, [PyObjectStruct.by_ref], :ssize_t
     attach_function :PySet_Contains, [PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
-    attach_function :PySet_Add, [PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
-    attach_function :PySet_Discard, [PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
 
     # Module
 
