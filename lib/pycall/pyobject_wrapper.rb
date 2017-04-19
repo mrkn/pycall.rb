@@ -168,7 +168,15 @@ module PyCall
     end
 
     def method_missing(name, *args, **kwargs)
-      if PyCall.hasattr?(__pyobj__, name.to_s)
+      name_s = name.to_s
+      if name_s.end_with? '='
+        name = name_s[0..-2]
+        if PyCall.hasattr?(__pyobj__, name.to_s)
+          PyCall.setattr(__pyobj__, name, args.first)
+        else
+          raise NameError, "object has no attribute `#{name}'"
+        end
+      elsif PyCall.hasattr?(__pyobj__, name.to_s)
         PyCall.getattr(__pyobj__, name)
       else
         super

@@ -81,9 +81,19 @@ module PyCall
 
     def with(ctx)
       __exit__ = PyCall.getattr(ctx, :__exit__)
-      yield PyCall.getattr(ctx,:__enter__).()
-    ensure
-      __exit__.()
+      begin
+        yield PyCall.getattr(ctx,:__enter__).()
+      rescue Exception => err
+        if err.kind_of? PyError
+          exit_value = __exit__.(err.type, err.value, err.traceback)
+        else
+          # TODO: support telling what exception has been catched
+          exit_value = __exit__.(PyCall.None, PyCall.None, PyCall.None)
+        end
+        raise err unless exit_value.equal? true
+      else
+       __exit__.(PyCall.None, PyCall.None, PyCall.None)
+      end
     end
 
     def format_traceback(pyobj)
