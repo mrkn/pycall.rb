@@ -2,22 +2,22 @@ require 'spec_helper'
 
 RSpec.describe PyCall, '.with' do
   before :all do
-    PyCall.eval(<<~PYTHON, input_type: :file)
-      class test_context(object):
-        def __init__(self, value):
-          self.enter_called = False
-          self.exit_called = False
-          self.value = value
-          pass
+    PyCall.eval(<<PYTHON, input_type: :file)
+class test_context(object):
+  def __init__(self, value):
+    self.enter_called = False
+    self.exit_called = False
+    self.value = value
+    pass
 
-        def __enter__(self):
-          self.enter_called = True
-          return self.value
+  def __enter__(self):
+    self.enter_called = True
+    return self.value
 
-        def __exit__(self):
-          self.exit_called = True
-          pass
-    PYTHON
+  def __exit__(self):
+    self.exit_called = True
+    pass
+PYTHON
   end
 
   after :all do
