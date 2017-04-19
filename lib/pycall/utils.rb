@@ -79,6 +79,13 @@ module PyCall
       @type.(pyobj)
     end
 
+    def with(ctx)
+      __exit__ = PyCall.getattr(ctx, :__exit__)
+      yield PyCall.getattr(ctx,:__enter__).()
+    ensure
+      __exit__.()
+    end
+
     def format_traceback(pyobj)
       @format_tb ||= import_module('traceback').format_tb
       @format_tb.(pyobj)
