@@ -341,4 +341,8 @@ module PyCall
 
   PYTHON_DESCRIPTION = LibPython.Py_GetVersion().freeze
   PYTHON_VERSION = PYTHON_DESCRIPTION.split(' ', 2)[0].freeze
+
+  def self.unicode_literals?
+    @unicode_literals ||= (PYTHON_VERSION >= '3.0')
+  end
 end

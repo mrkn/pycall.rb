@@ -102,13 +102,11 @@ module PyCall
       when Float
         LibPython.PyFloat_FromDouble(obj)
       when String
-        case obj.encoding
-        when Encoding::US_ASCII, Encoding::BINARY
-          LibPython.PyString_FromStringAndSize(obj, obj.bytesize)
-        else
-          obj = obj.encode(Encoding::UTF_8)
-          LibPython.PyUnicode_DecodeUTF8(obj, obj.bytesize, nil)
+        if obj.encoding != Encoding::BINARY && (PyCall.unicode_literals? || !obj.ascii_only?)
+          obj = obj.encode(Encoding::UTF_8) if obj.encoding != Encoding::UTF_8
+          return LibPython.PyUnicode_DecodeUTF8(obj, obj.bytesize, nil)
         end
+        LibPython.PyString_FromStringAndSize(obj, obj.bytesize)
       when Symbol
         from_ruby(obj.to_s)
       when Array

@@ -107,6 +107,39 @@ module PyCall
         it { is_expected.to be_kind_of(LibPython.PyDict_Type) }
         specify { expect(Conversions.to_ruby(subject)).to eq(hash) }
       end
+
+      context 'for :ascii_symbol' do
+        subject { from_ruby(:ascii_symbol) }
+        if PyCall.unicode_literals?
+          it { is_expected.to be_kind_of(LibPython.PyUnicode_Type) }
+        else
+          it { is_expected.to be_kind_of(LibPython.PyString_Type) }
+        end
+      end
+
+      context 'for :マルチバイトシンボル' do
+        subject { from_ruby(:マルチバイトシンボル) }
+        it { is_expected.to be_kind_of(LibPython.PyUnicode_Type) }
+      end
+
+      context 'for an ascii string' do
+        subject { from_ruby('ascii string') }
+        if PyCall.unicode_literals?
+          it { is_expected.to be_kind_of(LibPython.PyUnicode_Type) }
+        else
+          it { is_expected.to be_kind_of(LibPython.PyString_Type) }
+        end
+      end
+
+      context 'for a unicode string' do
+        subject { from_ruby('ユニコード') }
+        it { is_expected.to be_kind_of(LibPython.PyUnicode_Type) }
+      end
+
+      context 'for a binary string' do
+        subject { from_ruby("binary string".force_encoding(Encoding::BINARY)) }
+        it { is_expected.to be_kind_of(LibPython.PyString_Type) }
+      end
     end
   end
 end
