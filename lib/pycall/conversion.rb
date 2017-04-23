@@ -93,7 +93,7 @@ module PyCall
       case obj
       when LibPython::PyObjectStruct
         obj
-      when PyObject, PyObjectWrapper
+      when PyObjectWrapper
         obj.__pyobj__
       when TrueClass, FalseClass
         LibPython.PyBool_FromLong(obj ? 1 : 0)
