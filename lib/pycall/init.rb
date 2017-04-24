@@ -10,7 +10,7 @@ module PyCall
       PyCall::LibPython.PySys_SetArgvEx(0, argv, 0)
     end
 
-    @builtin = LibPython.PyImport_ImportModule(PYTHON_VERSION < '3.0.0' ? '__builtin__' : 'builtins')
+    @builtin = LibPython.PyImport_ImportModule(PYTHON_VERSION < '3.0.0' ? '__builtin__' : 'builtins').to_ruby
   end
 
   class << self
