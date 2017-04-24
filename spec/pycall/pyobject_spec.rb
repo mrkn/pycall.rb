@@ -22,5 +22,61 @@ module PyCall
         expect(subject.type.inspect).to eq "pytype(int)"
       end
     end
+
+    describe '#hash' do
+      before do
+        PyCall.eval(<<PYTHON, input_type: :file)
+class TestClass:
+  def __init__(self):
+    self.hash_called = False
+    pass
+
+  def __hash__(self):
+    self.hash_called = True
+    return 42
+PYTHON
+      end
+
+      after do
+        PyCall.eval('del TestClass', input_type: :file)
+      end
+
+      specify do
+        test_obj = PyCall.eval('TestClass()')
+        expect {
+          test_obj.hash
+        }.to change {
+          test_obj.hash_called
+        }.from(false).to(true)
+      end
+    end
+
+    describe '#eql?' do
+      before do
+        PyCall.eval(<<PYTHON, input_type: :file)
+class TestClass:
+  def __init__(self):
+    self.eq_called = False
+
+  def __eq__(self, other):
+    self.eq_called = True
+    return False
+PYTHON
+      end
+
+      after do
+        PyCall.eval('del TestClass', input_type: :file)
+      end
+
+      specify do
+        test_obj = PyCall.eval('TestClass()')
+        hash = {}
+        expect {
+          expect(test_obj.eql?(test_obj)).to eq(false)
+        }.to change {
+          test_obj.eq_called
+        }.from(false).to(true)
+      end
+    end
   end
 end

@@ -131,6 +131,18 @@ module PyCall
     ffi_lib_flags :lazy, :global
     libpython = find_libpython ENV['PYTHON']
 
+    attach_function :Py_GetVersion, [], :string
+    PYTHON_DESCRIPTION = LibPython.Py_GetVersion().freeze
+    PYTHON_VERSION = PYTHON_DESCRIPTION.split(' ', 2)[0].freeze
+
+    # --- types ---
+
+    if PYTHON_VERSION < '3.2'
+      typedef :long, :Py_hash_t
+    else
+      typedef :ssize_t, :Py_hash_t
+    end
+
     # --- global variables ---
 
     attach_variable :_Py_NoneStruct, PyObjectStruct
@@ -173,7 +185,6 @@ module PyCall
 
     # --- functions ---
 
-    attach_function :Py_GetVersion, [], :string
     attach_function :Py_InitializeEx, [:int], :void
     attach_function :Py_IsInitialized, [], :int
     attach_function :PySys_SetArgvEx, [:int, :pointer, :int], :void
@@ -194,6 +205,7 @@ module PyCall
     attach_function :PyObject_Call, [PyObjectStruct.by_ref, PyObjectStruct.by_ref, PyObjectStruct.by_ref], PyObjectStruct.by_ref
     attach_function :PyObject_IsInstance, [PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
     attach_function :PyObject_Dir, [PyObjectStruct.by_ref], PyObjectStruct.by_ref
+    attach_function :PyObject_Hash, [PyObjectStruct.by_ref], :Py_hash_t
     attach_function :PyObject_Repr, [PyObjectStruct.by_ref], PyObjectStruct.by_ref
     attach_function :PyObject_Str, [PyObjectStruct.by_ref], PyObjectStruct.by_ref
     attach_function :PyObject_Type, [PyObjectStruct.by_ref], PyObjectStruct.by_ref
@@ -339,8 +351,8 @@ module PyCall
     public_class_method
   end
 
-  PYTHON_DESCRIPTION = LibPython.Py_GetVersion().freeze
-  PYTHON_VERSION = PYTHON_DESCRIPTION.split(' ', 2)[0].freeze
+  PYTHON_DESCRIPTION = LibPython::PYTHON_DESCRIPTION
+  PYTHON_VERSION = LibPython::PYTHON_VERSION
 
   def self.unicode_literals?
     @unicode_literals ||= (PYTHON_VERSION >= '3.0')

@@ -56,6 +56,16 @@ module PyCall
 
     attr_reader :__pyobj__
 
+    def eql?(other)
+      rich_compare(other, :==)
+    end
+
+    def hash
+      hash_value = LibPython.PyObject_Hash(__pyobj__)
+      return super if hash_value == -1
+      hash_value
+    end
+
     def type
       LibPython.PyObject_Type(__pyobj__).to_ruby
     end
