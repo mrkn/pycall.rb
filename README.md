@@ -3,9 +3,7 @@
 [![Build Status](https://travis-ci.org/mrkn/pycall.svg?branch=master)](https://travis-ci.org/mrkn/pycall)
 [![Build status](https://ci.appveyor.com/api/projects/status/071is0f4iu0vy8lp/branch/master?svg=true)](https://ci.appveyor.com/project/mrkn/pycall/branch/master)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pycall`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This library provides the features to directly call and partially interoperate with Python from the Ruby language.  You can import arbitrary Python modules into Ruby modules, call Python functions with automatic type conversion from Ruby to Python.
 
 ## Installation
 
@@ -21,11 +19,64 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install pycall
+    $ gem install --pre pycall
 
 ## Usage
 
-TODO: Write usage instructions here
+Here is a simple example to call Python's `math.sin` function and compare it to the `Math.sin` in Ruby:
+
+    require 'pycall/import'
+    include PyCall::Import
+    pyimport :math
+    math.sin.(math.pi / 4) - Math.sin(Math::PI / 4)   # => 0.0
+    #       ^ This period is necessary
+
+Type conversions from Ruby to Python are automatically performed for numeric, boolean, string, arrays, and hashes.
+
+### Python function call
+
+In this version of pycall, the all of functions and methods in Python is wrapped as callable objects in Ruby.  It means we need to put a priod between the name of function and `(` like `math.sin.(...)` in the above example.
+
+This unnatural notation is a temporary specification, so we should be able to write `math.sin(...)` in the future.
+
+## Wrapping Python classes
+
+Using `PyCall::PyObjectWrapper` module, we can create incarnation classes for Python classes in Ruby language.  For example, the following script defines a incarnation class for `numpy.ndarray` class.
+
+```ruby
+require 'pycall'
+
+class Ndarray
+  import PyCall::PyObjectWrapper
+  wrap_class PyCall.import_module('numpy').ndarray
+end
+```
+
+Defineing incarnation classes using `wrap_class` registeres automatic type conversion, so it changes the class of wrapper object.  For example:
+
+    require 'pycall/import'
+    include PyCall::Import
+    pyimport :numpy, as: :np
+    x1 = np.array(PyCall.tuple(10))
+    x1.class   # => PyCall::PyObject
+
+    class Ndarray
+      import PyCall::PyObjectWrapper
+      wrap_class PyCall.import_module('numpy').ndarray
+      # NOTE: From here, numpy.ndarray objects are converted to Ndarray objects
+    end
+
+    x2 = np.array(PyCall.tuple(10))
+    x2.class   # => Ndarray
+
+
+**NOTE: Currently I'm trying to rewrite class wrapping system, so the content of this section will be changed.**
+
+**NOTE: I will write an efficient wrapper for numpy by RubyKaigi 2017.**
+
+### Specifying the Python version
+
+If you want to use a specific version of Python instead of the default, you can change the Python version by setting the `PYTHON` environment variable to the path of the `python` executable.
 
 ## Development
 
