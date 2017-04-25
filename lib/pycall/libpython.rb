@@ -109,9 +109,9 @@ module PyCall
                 next
               end
               begin
-                libs = ffi_lib(fullname)
-                $stderr.puts "DEBUG(find_libpython) ffi_lib(#{fullname.inspect}) = #{libs.inspect}" if debug
-                return libs.first
+                dynlibs = ffi_lib(fullname)
+                $stderr.puts "DEBUG(find_libpython) ffi_lib(#{fullname.inspect}) = #{dynlibs.inspect}" if debug
+                return dynlibs.first
               rescue LoadError
                 # skip load error
               end
@@ -123,9 +123,9 @@ module PyCall
       # Find libpython in the system path
       libs.each do |lib|
         begin
-          libs = ffi_lib(fullname)
-          $stderr.puts "DEBUG(find_libpython) ffi_lib(#{fullname.inspect}) = #{libs.inspect}" if debug
-          return libs.first
+          dynlibs = ffi_lib(lib)
+          $stderr.puts "DEBUG(find_libpython) ffi_lib(#{lib.inspect}) = #{dynlibs.inspect}" if debug
+          return dynlibs.first
         rescue LoadError
           # skip load error
         end
