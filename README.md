@@ -41,6 +41,8 @@ This unnatural notation is a temporary specification, so we should be able to wr
 
 ## Wrapping Python classes
 
+**NOTE: Currently I'm trying to rewrite class wrapping system, so the content of this section will be changed.**
+
 Using `PyCall::PyObjectWrapper` module, we can create incarnation classes for Python classes in Ruby language.  For example, the following script defines a incarnation class for `numpy.ndarray` class.
 
 ```ruby
@@ -69,8 +71,6 @@ Defineing incarnation classes using `wrap_class` registeres automatic type conve
     x2 = np.array(PyCall.tuple(10))
     x2.class   # => Ndarray
 
-
-**NOTE: Currently I'm trying to rewrite class wrapping system, so the content of this section will be changed.**
 
 **NOTE: I will write an efficient wrapper for numpy by RubyKaigi 2017.**
 
