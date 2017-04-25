@@ -1,6 +1,7 @@
-# PyCall
+# PyCall -- Calling Python functions from the Ruby language
 
 [![Build Status](https://travis-ci.org/mrkn/pycall.svg?branch=master)](https://travis-ci.org/mrkn/pycall)
+[![Build status](https://ci.appveyor.com/api/projects/status/071is0f4iu0vy8lp/branch/master?svg=true)](https://ci.appveyor.com/project/mrkn/pycall/branch/master)
 
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pycall`. To experiment with that code, run `bin/console` for an interactive prompt.
 
