@@ -1,0 +1,150 @@
+---
+environment:
+  matrix:
+  # Ruby 2.1 (32bit)
+  - ruby_version: "21"
+    PYTHONDIR: "C:\\Python27"
+    PYTHON: "C:\\Python27\\python.exe"
+
+  - ruby_version: "21"
+    PYTHONDIR: "C:\\Python33"
+    PYTHON: "C:\\Python33\\python.exe"
+
+  - ruby_version: "21"
+    PYTHONDIR: "C:\\Python34"
+    PYTHON: "C:\\Python34\\python.exe"
+
+  - ruby_version: "21"
+    PYTHONDIR: "C:\\Python35"
+    PYTHON: "C:\\Python34\\python.exe"
+
+  - ruby_version: "21"
+    PYTHONDIR: "C:\\Python36"
+    PYTHON: "C:\\Python36\\python.exe"
+
+  # Ruby 2.1 (64bit)
+  - ruby_version: "21-x64"
+    PYTHONDIR: "C:\\Python27-x64"
+    PYTHON: "C:\\Python27-x64\\python.exe"
+
+  - ruby_version: "21-x64"
+    PYTHONDIR: "C:\\Python33-x64"
+    PYTHON: "C:\\Python33-x64\\python.exe"
+
+  - ruby_version: "21-x64"
+    PYTHONDIR: "C:\\Python34-x64"
+    PYTHON: "C:\\Python34-x64\\python.exe"
+
+  - ruby_version: "21-x64"
+    PYTHONDIR: "C:\\Python35-x64"
+    PYTHON: "C:\\Python35-x64\\python.exe"
+
+  - ruby_version: "21-x64"
+    PYTHONDIR: "C:\\Python36-x64"
+    PYTHON: "C:\\Python36-x64\\python.exe"
+
+  # Ruby 2.2 (32bit)
+  - ruby_version: "22"
+    PYTHONDIR: "C:\\Python27"
+    PYTHON: "C:\\Python27\\python.exe"
+
+  - ruby_version: "22"
+    PYTHONDIR: "C:\\Python33"
+    PYTHON: "C:\\Python33\\python.exe"
+
+  - ruby_version: "22"
+    PYTHONDIR: "C:\\Python34"
+    PYTHON: "C:\\Python34\\python.exe"
+
+  - ruby_version: "22"
+    PYTHONDIR: "C:\\Python35"
+    PYTHON: "C:\\Python35\\python.exe"
+
+  - ruby_version: "22"
+    PYTHONDIR: "C:\\Python36"
+    PYTHON: "C:\\Python36\\python.exe"
+
+  # Ruby 2.2 (64bit)
+  - ruby_version: "22-x64"
+    PYTHONDIR: "C:\\Python27-x64"
+    PYTHON: "C:\\Python27-x64\\python.exe"
+
+  - ruby_version: "22-x64"
+    PYTHONDIR: "C:\\Python33-x64"
+    PYTHON: "C:\\Python33-x64\\python.exe"
+
+  - ruby_version: "22-x64"
+    PYTHONDIR: "C:\\Python34-x64"
+    PYTHON: "C:\\Python34-x64\\python.exe"
+
+  - ruby_version: "22-x64"
+    PYTHONDIR: "C:\\Python35-x64"
+    PYTHON: "C:\\Python35-x64\\python.exe"
+
+  - ruby_version: "22-x64"
+    PYTHONDIR: "C:\\Python36-x64"
+    PYTHON: "C:\\Python36-x64\\python.exe"
+
+  # Ruby 2.3 (32bit)
+  - ruby_version: "23"
+    PYTHONDIR: "C:\\Python27"
+    PYTHON: "C:\\Python27\\python.exe"
+
+  - ruby_version: "23"
+    PYTHONDIR: "C:\\Python33"
+    PYTHON: "C:\\Python33\\python.exe"
+
+  - ruby_version: "23"
+    PYTHONDIR: "C:\\Python34"
+    PYTHON: "C:\\Python34\\python.exe"
+
+  - ruby_version: "23"
+    PYTHONDIR: "C:\\Python35"
+    PYTHON: "C:\\Python35\\python.exe"
+
+  - ruby_version: "23"
+    PYTHONDIR: "C:\\Python36"
+    PYTHON: "C:\\Python36\\python.exe"
+
+  # Ruby 2.3 (64bit)
+  - ruby_version: "23-x64"
+    PYTHONDIR: "C:\\Python27-x64"
+    PYTHON: "C:\\Python27-x64\\python.exe"
+
+  - ruby_version: "23-x64"
+    PYTHONDIR: "C:\\Python33-x64"
+    PYTHON: "C:\\Python33-x64\\python.exe"
+
+  - ruby_version: "23-x64"
+    PYTHONDIR: "C:\\Python34-x64"
+    PYTHON: "C:\\Python34-x64\\python.exe"
+
+  - ruby_version: "23-x64"
+    PYTHONDIR: "C:\\Python35-x64"
+    PYTHON: "C:\\Python35-x64\\python.exe"
+
+  - ruby_version: "23-x64"
+    PYTHONDIR: "C:\\Python36-x64"
+    PYTHON: "C:\\Python36-x64\\python.exe"
+
+branches:
+  only:
+    - master
+    - /release-.*/
+
+notifications:
+  - provider: Email
+    on_build_success: false
+    on_build_failure: false
+    on_build_status_changed: false
+
+deploy: off
+build: off
+
+install:
+  - "SET PATH=%PYTHONDIR%;%PYTHONDIR%\\Scripts;%PATH%"
+  - "SET PATH=C:\\Ruby%ruby_version%\\bin;%PATH%"
+  - bundle install
+
+test_script:
+  - rake test
