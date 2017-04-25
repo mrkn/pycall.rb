@@ -26,6 +26,7 @@ module PyCall
     private_class_method
 
     def self.find_libpython(python = nil)
+      debug = (ENV['DEBUG_FIND_LIBPYTHON'] == '1')
       python ||= 'python'
       python_config = investigate_python_config(python)
 
@@ -42,6 +43,8 @@ module PyCall
       libs << "#{libprefix}python#{v}" << "#{libprefix}python"
       libs.uniq!
 
+      $stderr.puts "DEBUG(find_libpython) libs: #{libs.inspect}" if debug
+
       executable = python_config[:executable]
       libpaths = [ python_config[:LIBDIR] ]
       if FFI::Platform.windows?
@@ -53,6 +56,8 @@ module PyCall
       exec_prefix = python_config[:exec_prefix]
       libpaths << exec_prefix << File.join(exec_prefix, 'lib')
       libpaths.compact!
+
+      $stderr.puts "DEBUG(find_libpython) libpaths: #{libpaths.inspect}" if debug
 
       unless ENV['PYTHONHOME']
         # PYTHONHOME tells python where to look for both pure python and binary modules.
@@ -99,9 +104,13 @@ module PyCall
               libpath_lib,
               "#{libpath_lib}.#{libsuffix}"
             ].each do |fullname|
-              next unless File.file?(fullname)
+              unless File.file?(fullname)
+                $stderr.puts "DEBUG(find_libpython) Unable to find #{fullname}" if debug
+                next
+              end
               begin
                 libs = ffi_lib(fullname)
+                $stderr.puts "DEBUG(find_libpython) ffi_lib(#{fullname.inspect}) = #{libs.inspect}" if debug
                 return libs.first
               rescue LoadError
                 # skip load error

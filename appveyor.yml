@@ -151,4 +151,5 @@ before_test:
   - "python lib\\pycall\\python\\investigator.py"
 
 test_script:
+  - "SET DEBUG_FIND_LIBPYTHON=1"
   - rake
