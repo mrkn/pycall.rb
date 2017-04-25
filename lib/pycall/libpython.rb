@@ -27,6 +27,7 @@ module PyCall
 
     def self.find_libpython(python = nil)
       debug = (ENV['DEBUG_FIND_LIBPYTHON'] == '1')
+      dir_sep = File::ALT_SEPARATOR || File::SEPARATOR
       python ||= 'python'
       python_config = investigate_python_config(python)
 
@@ -54,7 +55,7 @@ module PyCall
       end
       libpaths << python_config[:PYTHONFRAMEWORKPREFIX] if FFI::Platform.mac?
       exec_prefix = python_config[:exec_prefix]
-      libpaths << exec_prefix << File.join(exec_prefix, 'lib')
+      libpaths << exec_prefix << [exec_prefix, 'lib'].join(dir_sep)
       libpaths.compact!
 
       $stderr.puts "DEBUG(find_libpython) libpaths: #{libpaths.inspect}" if debug
@@ -93,7 +94,6 @@ module PyCall
       # Find libpython (we hope):
       libsuffix = FFI::Platform::LIBSUFFIX
       multiarch = python_config[:MULTIARCH] || python_config[:multiarch]
-      dir_sep = File::ALT_SEPARATOR || File::SEPARATOR
       libs.each do |lib|
         libpaths.each do |libpath|
           # NOTE: File.join doesn't use File::ALT_SEPARATOR
