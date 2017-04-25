@@ -23,3 +23,7 @@ addons:
 before_install:
   - gem update --system
   - gem update bundler
+
+before_script:
+  - echo === python investigator.py ===
+  - python lib/pycall/python/investigator.py

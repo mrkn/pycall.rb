@@ -146,5 +146,9 @@ install:
   - "SET PATH=C:\\Ruby%ruby_version%\\bin;%PATH%"
   - bundle install
 
+before_test:
+  - ECHO "=== python investigator.py ==="
+  - "python lib\\pycall\\python\\investigator.py"
+
 test_script:
-  - rake spec
+  - rake
