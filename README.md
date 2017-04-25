@@ -1,4 +1,4 @@
-# PyCall -- Calling Python functions from the Ruby language
+# PyCall: Calling Python functions from the Ruby language
 
 [![Build Status](https://travis-ci.org/mrkn/pycall.svg?branch=master)](https://travis-ci.org/mrkn/pycall)
 [![Build status](https://ci.appveyor.com/api/projects/status/071is0f4iu0vy8lp/branch/master?svg=true)](https://ci.appveyor.com/project/mrkn/pycall/branch/master)
