@@ -16,7 +16,7 @@ environment:
 
   - ruby_version: "21"
     PYTHONDIR: "C:\\Python35"
-    PYTHON: "C:\\Python34\\python.exe"
+    PYTHON: "C:\\Python35\\python.exe"
 
   - ruby_version: "21"
     PYTHONDIR: "C:\\Python36"
