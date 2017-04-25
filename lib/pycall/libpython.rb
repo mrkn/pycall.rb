@@ -119,6 +119,17 @@ module PyCall
           end
         end
       end
+
+      # Find libpython in the system path
+      libs.each do |lib|
+        begin
+          libs = ffi_lib(fullname)
+          $stderr.puts "DEBUG(find_libpython) ffi_lib(#{fullname.inspect}) = #{libs.inspect}" if debug
+          return libs.first
+        rescue LoadError
+          # skip load error
+        end
+      end
     end
 
     def self.investigate_python_config(python)
