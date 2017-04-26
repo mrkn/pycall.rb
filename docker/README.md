@@ -5,7 +5,7 @@
 Execute the following command.
 
 ```
-docker run -it -p 8888:8888 --rm --name jupyter rubydata/pycall
+rake docker:run
 ```
 
 You can access to a local directory from jupyter notebook in the container by attaching the local directory to `/notebooks/local` in the container using `-v` option.
@@ -21,5 +21,5 @@ You can build your own docker image if you modify pycall.
 Execute the following command to build it.
 
 ```
-docker build -f docker/Dockerfile .
+rake docker:build
 ```
