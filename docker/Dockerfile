@@ -161,13 +161,22 @@ RUN cd /usr/local/bin \
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends libczmq-dev
 
-RUN pip3 install \
-	jupyter numpy scipy pandas matplotlib seaborn scikit-learn gensim nltk \
-        statsmodels xray
+RUN pip3 install jupyter
+RUN pip3 install numpy
+RUN pip3 install scipy
+RUN pip3 install pandas
+RUN pip3 install matplotlib
+RUN pip3 install seaborn
+RUN pip3 install scikit-learn
+RUN pip3 install gensim
+RUN pip3 install nltk
+RUN pip3 install statsmodels
+RUN pip3 install xray
 
 RUN mkdir -p /app /notebooks/examples /notebooks/local
 WORKDIR /app
 ADD docker/Gemfile /app
+ADD docker/start.sh /app
 
 RUN bundle install
 RUN bundle exec iruby register
@@ -178,5 +187,5 @@ RUN mkdir -p /tmp \
 	&& mv /tmp/matplotlib.rb-master/examples /notebooks/examples/matplotlib \
         && rm -rf /tmp/matplotlib.rb-master
 
-CMD bundle exec jupyter notebook --no-browser --ip=0.0.0.0 --port=8888 --notebook-dir=/notebooks
+CMD sh /app/start.sh
 EXPOSE 8888
