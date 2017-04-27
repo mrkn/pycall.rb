@@ -5,15 +5,16 @@ module PyCall
   ::RSpec.describe Dict do
     let(:key) { 'a' }
     let(:mod) { Module.new }
+
     subject { Dict.new(key => 1, 'b' => 2, 'c' => 3) }
+
+    before do
+      mod.extend PyCall::Import
+      mod.pyimport 'time'
+    end
 
     describe '.new' do
       let(:key) { mod.time.localtime.() }
-
-      before do
-        mod.extend PyCall::Import
-        mod.pyimport 'time'
-      end
 
       it 'accepts python object as a key' do
         expect{ Dict.new(key => 1) }.not_to raise_error
@@ -36,10 +37,7 @@ module PyCall
 
       context 'when key is a python object' do
         let(:key) { mod.time.localtime.() }
-        before do
-          mod.extend PyCall::Import
-          mod.pyimport 'time'
-        end
+
         it 'returns a value corresponding to a given key' do
           expect(subject[key]).to eq(1)
         end
@@ -57,12 +55,10 @@ module PyCall
         subject['c'] *= 10
         expect(subject['c']).to eq(30)
       end
+
       context 'when key is a python object' do
         let(:key) { mod.time.localtime.() }
-        before do
-          mod.extend PyCall::Import
-          mod.pyimport 'time'
-        end
+
         it 'stores a given value for a given key' do
           subject[key] *= 10
           expect(subject[key]).to eq(10)
@@ -80,10 +76,7 @@ module PyCall
 
       context 'when key is a python object' do
         let(:key) { mod.time.localtime.() }
-        before do
-          mod.extend PyCall::Import
-          mod.pyimport 'time'
-        end
+
         it 'deletes a value for a given key'do
           expect(subject.delete(key)).to eq(1)
           expect(subject['b']).to eq(2)
@@ -100,12 +93,10 @@ module PyCall
         expect(subject).to have_key('c')
         expect(subject).not_to have_key('d')
       end
+
       context 'when key is a python object' do
         let(:key) { mod.time.localtime.() }
-        before do
-          mod.extend PyCall::Import
-          mod.pyimport 'time'
-        end
+
         specify do
           expect(subject).to have_key(key)
           non_key = mod.time.localtime.(mod.time.time.() + 1)
