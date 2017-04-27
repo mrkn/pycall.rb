@@ -21,6 +21,7 @@ module PyCall
 
     def [](key)
       key = key.to_s if key.is_a? Symbol
+      key = key.__pyobj__ if key.respond_to?(:__pyobj__)
       value = if key.is_a? String
                 LibPython.PyDict_GetItemString(__pyobj__, key).to_ruby
               else

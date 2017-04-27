@@ -3,10 +3,11 @@ require 'pycall/import'
 
 module PyCall
   ::RSpec.describe Dict do
-    subject { Dict.new('a' => 1, 'b' => 2, 'c' => 3) }
+    let(:key) { 'a' }
+    let(:mod) { Module.new }
+    subject { Dict.new(key => 1, 'b' => 2, 'c' => 3) }
 
     describe '.new' do
-      let(:mod) { Module.new }
       let(:key) { mod.time.localtime.() }
 
       before do
@@ -31,6 +32,17 @@ module PyCall
         pyobj = PyCall.eval('object()')
         subject['o'] = pyobj
         expect { subject['o'] }.to change { pyobj.__pyobj__[:ob_refcnt] }.from(2).to(3)
+      end
+
+      context 'key is a python object' do
+        let(:key) { mod.time.localtime.() }
+        before do
+          mod.extend PyCall::Import
+          mod.pyimport 'time'
+        end
+        it 'returns a value corresponding to a given key' do
+          expect(subject[key]).to eq(1)
+        end
       end
     end
 
