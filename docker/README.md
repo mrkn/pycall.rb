@@ -5,15 +5,12 @@
 Execute the following command.
 
 ```
-rake docker:run
+rake docker:run [port=<PORT>] [attach_local=<DIRECTORY>]
 ```
 
-You can access to a local directory from jupyter notebook in the container by attaching the local directory to `/notebooks/local` in the container using `-v` option.
-For example, the following command attaches the current directory to `/notebooks/local`.
+The `port` option is for specifying the port number connecting to iruby notebook.
 
-```
-docker run -it -p 8888:8888 --rm --name jupyter -v $(pwd):/notebooks/local rubydata/pycall
-```
+You can access to a local directory from jupyter notebook in the container by attaching the local directory to `/notebooks/local` in the container using `attach_local` option.  The default value is the current directory, that should be pycall directory.
 
 ## Build
 
