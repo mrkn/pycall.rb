@@ -1,0 +1,12 @@
+source 'https://rubygems.org'
+
+# IRuby dependencies
+gem 'pry'
+gem 'pry-doc'
+gem 'awesome_print'
+gem 'cztop', '< 0.3.0'
+gem 'iruby', github: 'sciruby/iruby'
+
+# PyCall related gems
+gem 'pycall', '>= 0.1.0.alpha.20170426'
+gem 'matplotlib', '>= 0.1.0.alpha.20170426'
