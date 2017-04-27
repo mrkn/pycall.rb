@@ -70,6 +70,29 @@ module PyCall
       end
     end
 
+    describe '#delete' do
+      it 'deletes a value for a given key'do
+        expect(subject.delete('a')).to eq(1)
+        expect(subject['b']).to eq(2)
+        expect(subject['c']).to eq(3)
+        expect(subject['a']).to eq(nil)
+      end
+
+      context 'when key is a python object' do
+        let(:key) { mod.time.localtime.() }
+        before do
+          mod.extend PyCall::Import
+          mod.pyimport 'time'
+        end
+        it 'deletes a value for a given key'do
+          expect(subject.delete(key)).to eq(1)
+          expect(subject['b']).to eq(2)
+          expect(subject['c']).to eq(3)
+          expect(subject[key]).to eq(nil)
+        end
+      end
+    end
+
     describe '#has_key?' do
       specify do
         expect(subject).to have_key('a')

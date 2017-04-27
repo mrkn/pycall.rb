@@ -51,6 +51,7 @@ module PyCall
 
     def delete(key)
       key = key.to_s if key.is_a? Symbol
+      key = key.__pyobj__ if key.respond_to?(:__pyobj__)
       if key.is_a? String
         value = LibPython.PyDict_GetItemString(__pyobj__, key).to_ruby
         LibPython.PyDict_DelItemString(__pyobj__, key)
