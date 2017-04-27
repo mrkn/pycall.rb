@@ -34,7 +34,7 @@ module PyCall
         expect { subject['o'] }.to change { pyobj.__pyobj__[:ob_refcnt] }.from(2).to(3)
       end
 
-      context 'key is a python object' do
+      context 'when key is a python object' do
         let(:key) { mod.time.localtime.() }
         before do
           mod.extend PyCall::Import
@@ -57,6 +57,17 @@ module PyCall
         subject['c'] *= 10
         expect(subject['c']).to eq(30)
       end
+      context 'when key is a python object' do
+        let(:key) { mod.time.localtime.() }
+        before do
+          mod.extend PyCall::Import
+          mod.pyimport 'time'
+        end
+        it 'stores a given value for a given key' do
+          subject[key] *= 10
+          expect(subject[key]).to eq(10)
+        end
+      end
     end
 
     describe '#has_key?' do
@@ -65,6 +76,18 @@ module PyCall
         expect(subject).to have_key('b')
         expect(subject).to have_key('c')
         expect(subject).not_to have_key('d')
+      end
+      context 'when key is a python object' do
+        let(:key) { mod.time.localtime.() }
+        before do
+          mod.extend PyCall::Import
+          mod.pyimport 'time'
+        end
+        specify do
+          expect(subject).to have_key(key)
+          non_key = mod.time.localtime.(mod.time.time.() + 1)
+          expect(subject).not_to have_key(non_key)
+        end
       end
     end
   end
