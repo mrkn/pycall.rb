@@ -327,7 +327,7 @@ module PyCall
     attach_function :PyDict_SetItem, [PyObjectStruct.by_ref, PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
     attach_function :PyDict_SetItemString, [PyObjectStruct.by_ref, :string, PyObjectStruct.by_ref], :int
     attach_function :PyDict_DelItem, [PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
-    attach_function :PyDict_DelItem, [PyObjectStruct.by_ref, :string], :int
+    attach_function :PyDict_DelItemString, [PyObjectStruct.by_ref, :string], :int
     attach_function :PyDict_Size, [PyObjectStruct.by_ref], :ssize_t
     attach_function :PyDict_Keys, [PyObjectStruct.by_ref], PyObjectStruct.by_ref
     attach_function :PyDict_Values, [PyObjectStruct.by_ref], PyObjectStruct.by_ref

@@ -21,6 +21,7 @@ module PyCall
 
     def [](key)
       key = key.to_s if key.is_a? Symbol
+      key = key.__pyobj__ if key.respond_to?(:__pyobj__)
       value = if key.is_a? String
                 LibPython.PyDict_GetItemString(__pyobj__, key).to_ruby
               else
@@ -37,6 +38,7 @@ module PyCall
 
     def []=(key, value)
       key = key.to_s if key.is_a? Symbol
+      key = key.__pyobj__ if key.respond_to?(:__pyobj__)
       value = Conversions.from_ruby(value)
       value = value.__pyobj__ unless value.kind_of? LibPython::PyObjectStruct
       if key.is_a? String
@@ -49,6 +51,7 @@ module PyCall
 
     def delete(key)
       key = key.to_s if key.is_a? Symbol
+      key = key.__pyobj__ if key.respond_to?(:__pyobj__)
       if key.is_a? String
         value = LibPython.PyDict_GetItemString(__pyobj__, key).to_ruby
         LibPython.PyDict_DelItemString(__pyobj__, key)
