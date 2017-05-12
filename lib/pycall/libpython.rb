@@ -1,118 +1,10 @@
 require 'ffi'
 require 'pycall/libpython/pyobject_struct'
+require 'pycall/libpython/pytypeobject_struct'
 
 module PyCall
   module LibPython
     extend FFI::Library
-
-    class PyMethodDef < FFI::Struct
-      layout ml_name:  :string,
-             ml_meth:  :pointer,
-             ml_flags: :int,
-             ml_doc:   :string   # may be NULL
-    end
-
-    class PyGetSetDef < FFI::Struct
-      layout name:    :string,
-             get:     :pointer,
-             set:     :pointer,  # may be NULL for read-only members
-             doc:     :string,
-             closure: :pointer
-    end
-
-    class PyTypeObjectStruct < FFI::Struct
-      layout ob_refcnt: :ssize_t,
-             ob_type:   PyObjectStruct.by_ref,
-             ob_size:   :ssize_t,
-
-             tp_name: :string, # For printing, in format "<module>.<name>"
-
-             # For allocation
-             tp_basicsize: :ssize_t,
-             tp_itemsize: :ssize_t,
-
-             # Methods to implement standard operations
-
-             tp_dealloc: :pointer,
-             tp_print: :pointer,
-             tp_getattr: :pointer,
-             tp_setattr: :pointer,
-             tp_as_async: :pointer, # formerly known as tp_compare (Python 2) or tp_reserved (Python 3)
-             tp_repr: :pointer,
-
-             # Method suites for standard classes
-
-             tp_as_number: :pointer,
-             tp_as_sequence: :pointer,
-             tp_as_mapping: :pointer,
-
-             # More standard operations (here for binary compatibility)
-
-             tp_hash: :pointer,
-             tp_call: :pointer,
-             tp_str: :pointer,
-             tp_getattro: :pointer,
-             tp_setattro: :pointer,
-
-             # Functions to access object as input/output buffer
-             tp_as_buffer: :pointer,
-
-             # Flags to define presence of optional/expanded features
-             tp_flags: :ulong,
-
-             tp_doc: :string, # Documentation string
-
-             # Assigned meaning in release 2.0
-             # call function for all accessible objects
-             tp_traverse: :pointer,
-
-             # delete references to contained objects
-             tp_clear: :pointer,
-
-             # Assigned meaning in release 2.1
-             # rich comparisons
-             tp_richcompare: :pointer,
-
-             # weak reference enabler
-             tp_weaklistoffset: :ssize_t,
-
-             # Iterators
-             tp_iter: :pointer,
-             tp_iternext: :pointer,
-
-             # Attribute descriptor and subclassing stuff
-             tp_methods: PyMethodDef.by_ref,
-             tp_members: PyMethodDef.by_ref,
-             tp_getset: PyGetSetDef.by_ref,
-             tp_base: :pointer,
-             tp_dict: PyObjectStruct.by_ref,
-             tp_descr_get: :pointer,
-             tp_descr_set: :pointer,
-             tp_dictoffset: :ssize_t,
-             tp_init: :pointer,
-             tp_alloc: :pointer,
-             tp_new: :pointer,
-             tp_free: :pointer, # Low-level free-memory routine
-             tp_is_gc: :pointer, # For PyObject_IS_GC
-             tp_bases: PyObjectStruct.by_ref,
-             tp_mro: PyObjectStruct.by_ref, # method resolution order
-             tp_cache: PyObjectStruct.by_ref,
-             tp_subclasses: PyObjectStruct.by_ref,
-             tp_weaklist: PyObjectStruct.by_ref,
-             tp_del: :pointer,
-
-             # Type attribute cache version tag. Added in version 2.6
-             tp_version_tag: :uint,
-
-             tp_finalize: :pointer,
-
-             # The following members are only used for COUNT_ALLOCS builds of Python
-             tp_allocs: :ssize_t,
-             tp_frees: :ssize_t,
-             tp_maxalloc: :ssize_t,
-             tp_prev: :pointer,
-             tp_next: :pointer
-    end
 
     private_class_method
 
@@ -241,6 +133,8 @@ module PyCall
 
     ffi_lib_flags :lazy, :global
     libpython = find_libpython ENV['PYTHON']
+
+    define_singleton_method(:find_symbol) {|name| libpython.find_symbol(name.to_s) }
 
     attach_function :Py_GetVersion, [], :string
     PYTHON_DESCRIPTION = LibPython.Py_GetVersion().freeze
