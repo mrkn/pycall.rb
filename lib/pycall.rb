@@ -1,5 +1,6 @@
 require "pycall/version"
 require "pycall/libpython"
+require "pycall/exception"
 require "pycall/pyobject_wrapper"
 require "pycall/pyobject"
 require "pycall/pyerror"

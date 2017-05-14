@@ -188,6 +188,11 @@ module PyCall
     attach_variable :PyFunction_Type, PyObjectStruct
     attach_variable :PyMethod_Type, PyObjectStruct
 
+    # --- exceptions ---
+
+    attach_variable :PyExc_RuntimeError, PyObjectStruct.ptr
+    attach_variable :PyExc_TypeError, PyObjectStruct.ptr
+
     # --- functions ---
 
     attach_function :Py_InitializeEx, [:int], :void
@@ -352,6 +357,7 @@ module PyCall
     attach_function :PyErr_Occurred, [], PyObjectStruct.by_ref
     attach_function :PyErr_Fetch, [:pointer, :pointer, :pointer], :void
     attach_function :PyErr_NormalizeException, [:pointer, :pointer, :pointer], :void
+    attach_function :PyErr_SetString, [PyObjectStruct.ptr, :string], :void
 
     public_class_method
   end
