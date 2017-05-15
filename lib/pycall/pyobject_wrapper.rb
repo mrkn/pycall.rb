@@ -1,4 +1,6 @@
 module PyCall
+  HASH_SALT = "PyCall::PyObject".hash
+
   Py_LT = 0
   Py_LE = 1
   Py_EQ = 2

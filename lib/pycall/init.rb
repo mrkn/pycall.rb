@@ -18,6 +18,8 @@ module PyCall
     rescue PyError
       @has_stackless_extension = false
     end
+
+    __initialize_ruby_wrapper__
   end
 
   class << self
