@@ -1,4 +1,4 @@
-require 'ffi'
+require 'pycall/libpython/pyobject_struct'
 
 module PyCall
   module LibPython
@@ -71,7 +71,7 @@ module PyCall
 
     class PyTypeObjectStruct < PyObjectStruct
       layout ob_refcnt: :ssize_t,
-             ob_type:   PyObjectStruct.by_ref,
+             ob_type:   PyTypeObjectStruct.by_ref,
              ob_size:   :ssize_t,
 
              tp_name: :string, # For printing, in format "<module>.<name>"

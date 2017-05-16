@@ -3,8 +3,14 @@ require 'ffi'
 module PyCall
   module LibPython
     class PyObjectStruct < FFI::Struct
+    end
+
+    class PyTypeObjectStruct < PyObjectStruct
+    end
+
+    class PyObjectStruct < FFI::Struct
       layout ob_refcnt: :ssize_t,
-             ob_type:   PyObjectStruct.by_ref
+             ob_type:   PyTypeObjectStruct.by_ref
 
       def self.null
         new(FFI::Pointer::NULL)
