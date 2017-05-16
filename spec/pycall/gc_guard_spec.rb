@@ -39,6 +39,20 @@ module PyCall
           GCGuard.unregister(Object.new)
         }.to raise_error(TypeError)
       end
+
+      it 'uses the object pointers for the equality of Python objects' do
+        obj = Object.new
+        GCGuard.register(pyobj, obj)
+        expect(GCGuard.guarded_object_count).to eq(1)
+
+        GCGuard.unregister(LibPython::PyObjectStruct.new(pyobj.__pyobj__.pointer))
+        expect(GCGuard.guarded_object_count).to eq(0)
+
+        obj_id = obj.object_id
+        obj = nil
+        GC.start
+        expect { ObjectSpace._id2ref(obj_id) }.to raise_error(RangeError)
+      end
     end
   end
 end
