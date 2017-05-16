@@ -206,6 +206,7 @@ module PyCall
 
     # Object
 
+    attach_function :_PyObject_New, [PyTypeObjectStruct.ptr], PyObjectStruct.ptr
     attach_function :PyObject_RichCompare, [PyObjectStruct.by_ref, PyObjectStruct.by_ref, :int], PyObjectStruct.by_ref
     attach_function :PyObject_GetAttrString, [PyObjectStruct.by_ref, :string], PyObjectStruct.by_ref
     attach_function :PyObject_SetAttrString, [PyObjectStruct.by_ref, :string, PyObjectStruct.by_ref], :int
@@ -220,6 +221,10 @@ module PyCall
     attach_function :PyObject_Str, [PyObjectStruct.by_ref], PyObjectStruct.by_ref
     attach_function :PyObject_Type, [PyObjectStruct.by_ref], PyObjectStruct.by_ref
     attach_function :PyCallable_Check, [PyObjectStruct.by_ref], :int
+
+    # Type
+
+    attach_function :PyType_Ready, [PyTypeObjectStruct.ptr], :int
 
     # Bool
 

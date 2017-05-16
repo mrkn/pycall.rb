@@ -69,7 +69,7 @@ module PyCall
       end
     end
 
-    class PyTypeObjectStruct < FFI::Struct
+    class PyTypeObjectStruct < PyObjectStruct
       layout ob_refcnt: :ssize_t,
              ob_type:   PyObjectStruct.by_ref,
              ob_size:   :ssize_t,
@@ -168,25 +168,28 @@ module PyCall
           super
         else
           name, basic_size = *args
-          t = super()
-          t[:tp_basicsize] = basic_size
-          stackless_extension_flag = PyCall.has_stackless_extension ? Py_TPFLAGS_HAVE_STACKLESS_EXTENSION_ : 0
-          t[:tp_flags] = if PYTHON_VERSION >= '3'
-                           stackless_extension_flag | Py_TPFLAGS_HAVE_VERSION_TAG
-                         else
-                           Py_TPFLAGS_HAVE_GETCHARBUFFER |
-                             Py_TPFLAGS_HAVE_SEQUENCE_IN |
-                             Py_TPFLAGS_HAVE_INPLACEOPS |
-                             Py_TPFLAGS_HAVE_RICHCOMPARE |
-                             Py_TPFLAGS_HAVE_WEAKREFS |
-                             Py_TPFLAGS_HAVE_ITER |
-                             Py_TPFLAGS_HAVE_CLASS |
-                             stackless_extension_flag |
-                             Py_TPFLAGS_HAVE_INDEX
-                         end
-          t.tp_name = name
-          yield t if block_given?
-          t[:tp_new] = LibPython.find_symbol(:PyType_GenericNew) if t[:tp_new] == FFI::Pointer::NULL
+          super().tap do |t|
+            t[:tp_basicsize] = basic_size
+            stackless_extension_flag = PyCall.has_stackless_extension ? Py_TPFLAGS_HAVE_STACKLESS_EXTENSION_ : 0
+            t[:tp_flags] = if PYTHON_VERSION >= '3'
+                             stackless_extension_flag | Py_TPFLAGS_HAVE_VERSION_TAG
+                           else
+                             Py_TPFLAGS_HAVE_GETCHARBUFFER |
+                               Py_TPFLAGS_HAVE_SEQUENCE_IN |
+                               Py_TPFLAGS_HAVE_INPLACEOPS |
+                               Py_TPFLAGS_HAVE_RICHCOMPARE |
+                               Py_TPFLAGS_HAVE_WEAKREFS |
+                               Py_TPFLAGS_HAVE_ITER |
+                               Py_TPFLAGS_HAVE_CLASS |
+                               stackless_extension_flag |
+                               Py_TPFLAGS_HAVE_INDEX
+                           end
+            t.tp_name = name
+            yield t if block_given?
+            t[:tp_new] = LibPython.find_symbol(:PyType_GenericNew) if t[:tp_new] == FFI::Pointer::NULL
+            raise PyError.fetch if LibPython.PyType_Ready(t) < 0
+            LibPython.Py_IncRef(t)
+          end
         end
       end
 
