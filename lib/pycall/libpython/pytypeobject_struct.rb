@@ -53,6 +53,22 @@ module PyCall
              closure: :pointer
     end
 
+    class PyMemberDef < FFI::Struct
+      layout name:   :string,
+             type:   :int,
+             offset: :ssize_t,
+             flags:  :int,
+             doc:    :string
+
+      [:name, :doc].each do |field|
+        define_method(:"#{field}=") do |str|
+          saved_str = FFI::MemoryPointer.from_string(str)
+          instance_variable_set(:"@saved_#{field}", saved_str)
+          self.pointer.put_pointer(offset_of(field), saved_str)
+        end
+      end
+    end
+
     class PyTypeObjectStruct < FFI::Struct
       layout ob_refcnt: :ssize_t,
              ob_type:   PyObjectStruct.by_ref,
@@ -115,7 +131,7 @@ module PyCall
 
              # Attribute descriptor and subclassing stuff
              tp_methods: PyMethodDef.by_ref,
-             tp_members: PyMethodDef.by_ref,
+             tp_members: PyMemberDef.by_ref,
              tp_getset: PyGetSetDef.by_ref,
              tp_base: :pointer,
              tp_dict: PyObjectStruct.by_ref,
