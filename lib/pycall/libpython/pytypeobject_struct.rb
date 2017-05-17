@@ -2,6 +2,34 @@ require 'pycall/libpython/pyobject_struct'
 
 module PyCall
   module LibPython
+    # types:
+    T_SHORT  = 0
+    T_INT    = 1
+    T_LONG   = 2
+    T_FLOAT  = 3
+    T_DOUBLE = 4
+    T_STRING = 5
+    T_OBJECT = 6
+    T_CHAR   = 7
+    T_BYTE   = 8
+    T_UBYTE  = 9
+    T_USHORT = 10
+    T_UINT   = 11
+    T_ULONG  = 12
+    T_STRING_INPLACE = 13
+    T_BOOL      = 14
+    T_OBJECT_EX = 16
+    T_LONGLONG  = 17 # added in Python 2.5
+    T_ULONGLONG = 18 # added in Python 2.5
+    T_PYSSIZET  = 19 # added in Python 2.6
+    T_NONE      = 20 # added in Python 3.0
+
+    # flags:
+    READONLY = 1
+    READ_RESTRICTED = 2
+    PY_WRITE_RESTRICTED = 4
+    RESTRICTED = (READ_RESTRICTED | PY_WRITE_RESTRICTED)
+
     # Python 2.7
     Py_TPFLAGS_HAVE_GETCHARBUFFER  = 0x00000001<<0
     Py_TPFLAGS_HAVE_SEQUENCE_IN    = 0x00000001<<1
