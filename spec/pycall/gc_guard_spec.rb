@@ -6,10 +6,10 @@ module PyCall
 
     it 'guards Ruby object from GC during the corresponding Python object is registered' do
       obj = Object.new
-      obj_id = obj.object_id
       GCGuard.register(pyobj, obj)
       expect(GCGuard.guarded_object_count).to eq(1)
 
+      obj_id = obj.object_id
       obj = nil
       GC.start
       expect { ObjectSpace._id2ref(obj_id) }.not_to raise_error
@@ -50,6 +50,49 @@ module PyCall
 
         obj_id = obj.object_id
         obj = nil
+        GC.start
+        expect { ObjectSpace._id2ref(obj_id) }.to raise_error(RangeError)
+      end
+    end
+
+    describe '.embed' do
+      before do
+        PyCall.eval(<<PYTHON, input_type: :file)
+class Obj:
+  pass
+PYTHON
+      end
+
+      after do
+        PyCall.eval('del Obj', input_type: :file)
+      end
+
+      it 'guards a ruby object during the corresponding Python object is alive' do
+        pyptr = PyCall.eval('Obj()').__pyobj__
+        obj = Object.new
+        obj_id = obj.object_id
+
+        # NOTE: DO NOT USE THE FOLLOWING FORM.
+        #
+        #     expect { GCGuard.embed(pyptr, obj) }.to change { GCGuard.guarded_object_count }.by(1)
+        #
+        # This form holds the reference of the value of `obj`.
+        # It makes the last expectation in this example to be failed.
+        before_count = GCGuard.guarded_object_count
+        GCGuard.embed(pyptr, obj)
+        expect(GCGuard.guarded_object_count).to eq(before_count + 1)
+
+        obj_id = obj.object_id
+        obj = nil
+        GC.start
+        expect { ObjectSpace._id2ref(obj_id) }.not_to raise_error
+
+        expect {
+          PyCall::LibPython.Py_DecRef(pyptr)
+        }.to change {
+          GCGuard.guarded_object_count
+        }.by(-1)
+
         GC.start
         expect { ObjectSpace._id2ref(obj_id) }.to raise_error(RangeError)
       end

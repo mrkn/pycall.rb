@@ -334,6 +334,14 @@ module PyCall
     attach_function :PySet_Size, [PyObjectStruct.by_ref], :ssize_t
     attach_function :PySet_Contains, [PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
 
+    # Method
+
+    attach_function :PyCFunction_NewEx, [PyMethodDef.ptr, :pointer, :pointer], PyObjectStruct.ptr
+
+    # Weakref
+
+    attach_function :PyWeakref_NewRef, [PyObjectStruct.ptr, PyObjectStruct.ptr], PyObjectStruct.ptr
+
     # Module
 
     attach_function :PyModule_GetDict, [PyObjectStruct.by_ref], PyObjectStruct.by_ref

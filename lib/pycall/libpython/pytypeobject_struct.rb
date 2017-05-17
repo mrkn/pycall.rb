@@ -71,7 +71,41 @@ module PyCall
              ml_meth:  :pointer,
              ml_flags: :int,
              ml_doc:   :string   # may be NULL
+
+      def initialize(*args)
+        case args.length
+        when 3, 4
+          name, meth, flags, doc = *args
+          super()
+          self.ml_name = name
+          self[:ml_meth] = meth
+          self[:ml_flags] = flags
+          self.ml_doc = doc
+        else
+          super
+        end
+      end
+
+      def ml_name=(str)
+        @saved_name = FFI::MemoryPointer.from_string(str || '')
+        self.pointer.put_pointer(offset_of(:ml_name), @saved_name)
+      end
+
+      def ml_doc=(str)
+        @saved_doc = FFI::MemoryPointer.from_string(str || '')
+        self.pointer.put_pointer(offset_of(:ml_name), @saved_doc)
+      end
     end
+
+    # ml_flags should be one of:
+    METH_VARARGS = 0x0001   # args are a tuple of arguments
+    METH_KEYWORDS = 0x0002  # two arguments: the varargs and the kwargs
+    METH_NOARGS = 0x0004    # no arguments (NULL argument pointer)
+    METH_O = 0x0008         # single argument (not wrapped in tuple)
+
+    # not sure when these are needed:
+    METH_CLASS = 0x0010 # for class methods
+    METH_STATIC = 0x0020 # for static methods
 
     class PyGetSetDef < FFI::Struct
       layout name:    :string,
