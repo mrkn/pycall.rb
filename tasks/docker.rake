@@ -5,6 +5,7 @@ namespace :docker do
     end
   end
 
+  desc 'Run docker container [port=8888] [attach_local=$(pwd)]'
   task :run do
     require 'securerandom'
     require 'launchy'
