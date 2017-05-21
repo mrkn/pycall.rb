@@ -231,6 +231,11 @@ module PyCall
         else
           name, basic_size = *args
           super().tap do |t|
+            # PyVarObject_HEAD_INIT(&PyType_Type, 0)
+            t[:ob_refcnt] = 1
+            t[:ob_type] = LibPython.PyType_Type
+            t[:ob_size] = 0
+
             t[:tp_basicsize] = basic_size
             stackless_extension_flag = PyCall.has_stackless_extension ? Py_TPFLAGS_HAVE_STACKLESS_EXTENSION_ : 0
             t[:tp_flags] = if PYTHON_VERSION >= '3'
