@@ -230,7 +230,7 @@ module PyCall
           super
         else
           name, basic_size = *args
-          super().tap do |t|
+          new.tap do |t|
             # PyVarObject_HEAD_INIT(&PyType_Type, 0)
             t[:ob_refcnt] = 1
             t[:ob_type] = LibPython.PyType_Type
