@@ -156,37 +156,37 @@ module PyCall
       _Py_NoneStruct
     end
 
-    attach_variable :PyType_Type, PyObjectStruct
+    attach_variable :PyType_Type, PyTypeObjectStruct
 
     if libpython.find_variable('PyInt_Type')
       has_PyInt_Type = true
-      attach_variable :PyInt_Type, PyObjectStruct
+      attach_variable :PyInt_Type, PyTypeObjectStruct
     else
       has_PyInt_Type = false
-      attach_variable :PyInt_Type, :PyLong_Type, PyObjectStruct
+      attach_variable :PyInt_Type, :PyLong_Type, PyTypeObjectStruct
     end
 
-    attach_variable :PyLong_Type, PyObjectStruct
-    attach_variable :PyBool_Type, PyObjectStruct
-    attach_variable :PyFloat_Type, PyObjectStruct
-    attach_variable :PyComplex_Type, PyObjectStruct
-    attach_variable :PyUnicode_Type, PyObjectStruct
+    attach_variable :PyLong_Type, PyTypeObjectStruct
+    attach_variable :PyBool_Type, PyTypeObjectStruct
+    attach_variable :PyFloat_Type, PyTypeObjectStruct
+    attach_variable :PyComplex_Type, PyTypeObjectStruct
+    attach_variable :PyUnicode_Type, PyTypeObjectStruct
 
     if libpython.find_symbol('PyString_FromStringAndSize')
       string_as_bytes = false
-      attach_variable :PyString_Type, PyObjectStruct
+      attach_variable :PyString_Type, PyTypeObjectStruct
     else
       string_as_bytes = true
-      attach_variable :PyString_Type, :PyBytes_Type, PyObjectStruct
+      attach_variable :PyString_Type, :PyBytes_Type, PyTypeObjectStruct
     end
 
-    attach_variable :PyList_Type, PyObjectStruct
-    attach_variable :PyTuple_Type, PyObjectStruct
-    attach_variable :PyDict_Type, PyObjectStruct
-    attach_variable :PySet_Type, PyObjectStruct
+    attach_variable :PyList_Type, PyTypeObjectStruct
+    attach_variable :PyTuple_Type, PyTypeObjectStruct
+    attach_variable :PyDict_Type, PyTypeObjectStruct
+    attach_variable :PySet_Type, PyTypeObjectStruct
 
-    attach_variable :PyFunction_Type, PyObjectStruct
-    attach_variable :PyMethod_Type, PyObjectStruct
+    attach_variable :PyFunction_Type, PyTypeObjectStruct
+    attach_variable :PyMethod_Type, PyTypeObjectStruct
 
     # --- exceptions ---
 
