@@ -1,27 +1,10 @@
 require 'ffi'
+require 'pycall/libpython/pyobject_struct'
+require 'pycall/libpython/pytypeobject_struct'
 
 module PyCall
   module LibPython
     extend FFI::Library
-
-    class PyObjectStruct < FFI::Struct
-      layout ob_refcnt: :ssize_t,
-             ob_type:   PyObjectStruct.by_ref
-
-      def self.null
-        new(FFI::Pointer::NULL)
-      end
-
-      def py_none?
-        PyCall.none?(self)
-      end
-
-      def kind_of?(klass)
-        klass = klass.__pyobj__ if klass.kind_of? PyObjectWrapper
-        return super unless klass.kind_of? PyObjectStruct
-        PyCall::Types.pyisinstance(self, klass)
-      end
-    end
 
     private_class_method
 
@@ -151,6 +134,8 @@ module PyCall
     ffi_lib_flags :lazy, :global
     libpython = find_libpython ENV['PYTHON']
 
+    define_singleton_method(:find_symbol) {|name| libpython.find_symbol(name.to_s) }
+
     attach_function :Py_GetVersion, [], :string
     PYTHON_DESCRIPTION = LibPython.Py_GetVersion().freeze
     PYTHON_VERSION = PYTHON_DESCRIPTION.split(' ', 2)[0].freeze
@@ -171,37 +156,42 @@ module PyCall
       _Py_NoneStruct
     end
 
-    attach_variable :PyType_Type, PyObjectStruct
+    attach_variable :PyType_Type, PyTypeObjectStruct
 
     if libpython.find_variable('PyInt_Type')
       has_PyInt_Type = true
-      attach_variable :PyInt_Type, PyObjectStruct
+      attach_variable :PyInt_Type, PyTypeObjectStruct
     else
       has_PyInt_Type = false
-      attach_variable :PyInt_Type, :PyLong_Type, PyObjectStruct
+      attach_variable :PyInt_Type, :PyLong_Type, PyTypeObjectStruct
     end
 
-    attach_variable :PyLong_Type, PyObjectStruct
-    attach_variable :PyBool_Type, PyObjectStruct
-    attach_variable :PyFloat_Type, PyObjectStruct
-    attach_variable :PyComplex_Type, PyObjectStruct
-    attach_variable :PyUnicode_Type, PyObjectStruct
+    attach_variable :PyLong_Type, PyTypeObjectStruct
+    attach_variable :PyBool_Type, PyTypeObjectStruct
+    attach_variable :PyFloat_Type, PyTypeObjectStruct
+    attach_variable :PyComplex_Type, PyTypeObjectStruct
+    attach_variable :PyUnicode_Type, PyTypeObjectStruct
 
     if libpython.find_symbol('PyString_FromStringAndSize')
       string_as_bytes = false
-      attach_variable :PyString_Type, PyObjectStruct
+      attach_variable :PyString_Type, PyTypeObjectStruct
     else
       string_as_bytes = true
-      attach_variable :PyString_Type, :PyBytes_Type, PyObjectStruct
+      attach_variable :PyString_Type, :PyBytes_Type, PyTypeObjectStruct
     end
 
-    attach_variable :PyList_Type, PyObjectStruct
-    attach_variable :PyTuple_Type, PyObjectStruct
-    attach_variable :PyDict_Type, PyObjectStruct
-    attach_variable :PySet_Type, PyObjectStruct
+    attach_variable :PyList_Type, PyTypeObjectStruct
+    attach_variable :PyTuple_Type, PyTypeObjectStruct
+    attach_variable :PyDict_Type, PyTypeObjectStruct
+    attach_variable :PySet_Type, PyTypeObjectStruct
 
-    attach_variable :PyFunction_Type, PyObjectStruct
-    attach_variable :PyMethod_Type, PyObjectStruct
+    attach_variable :PyFunction_Type, PyTypeObjectStruct
+    attach_variable :PyMethod_Type, PyTypeObjectStruct
+
+    # --- exceptions ---
+
+    attach_variable :PyExc_RuntimeError, PyObjectStruct.ptr
+    attach_variable :PyExc_TypeError, PyObjectStruct.ptr
 
     # --- functions ---
 
@@ -216,6 +206,7 @@ module PyCall
 
     # Object
 
+    attach_function :_PyObject_New, [PyTypeObjectStruct.ptr], PyObjectStruct.ptr
     attach_function :PyObject_RichCompare, [PyObjectStruct.by_ref, PyObjectStruct.by_ref, :int], PyObjectStruct.by_ref
     attach_function :PyObject_GetAttrString, [PyObjectStruct.by_ref, :string], PyObjectStruct.by_ref
     attach_function :PyObject_SetAttrString, [PyObjectStruct.by_ref, :string, PyObjectStruct.by_ref], :int
@@ -230,6 +221,10 @@ module PyCall
     attach_function :PyObject_Str, [PyObjectStruct.by_ref], PyObjectStruct.by_ref
     attach_function :PyObject_Type, [PyObjectStruct.by_ref], PyObjectStruct.by_ref
     attach_function :PyCallable_Check, [PyObjectStruct.by_ref], :int
+
+    # Type
+
+    attach_function :PyType_Ready, [PyTypeObjectStruct.ptr], :int
 
     # Bool
 
@@ -339,6 +334,14 @@ module PyCall
     attach_function :PySet_Size, [PyObjectStruct.by_ref], :ssize_t
     attach_function :PySet_Contains, [PyObjectStruct.by_ref, PyObjectStruct.by_ref], :int
 
+    # Method
+
+    attach_function :PyCFunction_NewEx, [PyMethodDef.ptr, :pointer, :pointer], PyObjectStruct.ptr
+
+    # Weakref
+
+    attach_function :PyWeakref_NewRef, [PyObjectStruct.ptr, PyObjectStruct.ptr], PyObjectStruct.ptr
+
     # Module
 
     attach_function :PyModule_GetDict, [PyObjectStruct.by_ref], PyObjectStruct.by_ref
@@ -367,6 +370,7 @@ module PyCall
     attach_function :PyErr_Occurred, [], PyObjectStruct.by_ref
     attach_function :PyErr_Fetch, [:pointer, :pointer, :pointer], :void
     attach_function :PyErr_NormalizeException, [:pointer, :pointer, :pointer], :void
+    attach_function :PyErr_SetString, [PyObjectStruct.ptr, :string], :void
 
     public_class_method
   end
