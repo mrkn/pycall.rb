@@ -140,6 +140,12 @@ module PyCall
         subject { from_ruby("binary string".force_encoding(Encoding::BINARY)) }
         it { is_expected.to be_kind_of(LibPython.PyString_Type) }
       end
+
+      context 'for a Proc object' do
+        let(:proc_object) { ->() {} }
+        subject { from_ruby(proc_object) }
+        it { is_expected.to be_kind_of(RubyWrapStruct) }
+      end
     end
   end
 end

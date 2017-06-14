@@ -113,6 +113,8 @@ module PyCall
         PyCall::List.new(obj).__pyobj__
       when Hash
         PyCall::Dict.new(obj).__pyobj__
+      when Proc
+        PyCall.wrap_ruby_callable(obj)
       else
         PyCall.None
       end
