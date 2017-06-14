@@ -121,7 +121,6 @@ module PyCall
 
   def self.ruby_wrapper_new(type, obj)
     pyobj = LibPython._PyObject_New(type)
-    p rw_refcnt: pyobj[:ob_refcnt]
     RubyWrapStruct.new(pyobj.pointer).tap do |rw|
       rw[:rb_object_id] = obj.object_id
       GCGuard.register(rw, obj)
