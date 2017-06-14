@@ -32,6 +32,8 @@ module PyCall
       LibPython.PyList_Size(__pyobj__)
     end
 
+    alias length size
+
     def include?(value)
       value = Conversions.from_ruby(value)
       value = LibPython.PySequence_Contains(__pyobj__, value)
