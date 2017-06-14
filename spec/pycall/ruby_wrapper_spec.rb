@@ -2,10 +2,12 @@ require 'spec_helper'
 
 RSpec.describe PyCall do
   describe '.wrap_ruby_object' do
+    let!(:guarded_object_count_origin) { PyCall.const_get(:GCGuard).guarded_object_count }
+
     it 'registers the wrapped ruby object into GCGuard table' do
       obj = Object.new
       wrapped = PyCall.wrap_ruby_object(obj)
-      expect(PyCall.const_get(:GCGuard).guarded_object_count).to eq(1)
+      expect(PyCall.const_get(:GCGuard).guarded_object_count).to eq(guarded_object_count_origin + 1)
 
       obj_id, obj = obj.object_id, nil
       GC.start
@@ -13,7 +15,7 @@ RSpec.describe PyCall do
 
       PyCall::LibPython.Py_DecRef(wrapped)
       wrapped = nil
-      expect(PyCall.const_get(:GCGuard).guarded_object_count).to eq(0)
+      expect(PyCall.const_get(:GCGuard).guarded_object_count).to eq(guarded_object_count_origin + 0)
 
       # TODO: I want to ensure the obj should be collected by the following
       #       GC.start, but it's sometimes not collected, so currently the

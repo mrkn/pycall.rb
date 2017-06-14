@@ -4,10 +4,12 @@ module PyCall
   RSpec.describe GCGuard do
     let(:pyobj) { PyCall.eval('object()') }
 
+    let!(:guarded_object_count_origin) { GCGuard.guarded_object_count }
+
     it 'guards Ruby object from GC during the corresponding Python object is registered' do
       obj = Object.new
       GCGuard.register(pyobj, obj)
-      expect(GCGuard.guarded_object_count).to eq(1)
+      expect(GCGuard.guarded_object_count).to eq(guarded_object_count_origin + 1)
 
       obj_id = obj.object_id
       obj = nil
@@ -15,7 +17,7 @@ module PyCall
       expect { ObjectSpace._id2ref(obj_id) }.not_to raise_error
 
       GCGuard.unregister(pyobj)
-      expect(GCGuard.guarded_object_count).to eq(0)
+      expect(GCGuard.guarded_object_count).to eq(guarded_object_count_origin + 0)
 
       # TODO: I want to ensure the obj should be collected by the following
       #       GC.start, but it's sometimes not collected, so currently the
@@ -46,10 +48,10 @@ module PyCall
       it 'uses the object pointers for the equality of Python objects' do
         obj = Object.new
         GCGuard.register(pyobj, obj)
-        expect(GCGuard.guarded_object_count).to eq(1)
+        expect(GCGuard.guarded_object_count).to eq(guarded_object_count_origin + 1)
 
         GCGuard.unregister(LibPython::PyObjectStruct.new(pyobj.__pyobj__.pointer))
-        expect(GCGuard.guarded_object_count).to eq(0)
+        expect(GCGuard.guarded_object_count).to eq(guarded_object_count_origin + 0)
 
         obj_id = obj.object_id
         obj = nil
@@ -86,9 +88,8 @@ PYTHON
         #
         # This form holds the reference of the value of `obj`.
         # It makes the last expectation in this example to be failed.
-        before_count = GCGuard.guarded_object_count
         GCGuard.embed(pyptr, obj)
-        expect(GCGuard.guarded_object_count).to eq(before_count + 1)
+        expect(GCGuard.guarded_object_count).to eq(guarded_object_count_origin + 1)
 
         obj_id = obj.object_id
         obj = nil
