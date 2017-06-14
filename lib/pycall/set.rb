@@ -6,9 +6,11 @@ module PyCall
       super(pyobj)
     end
 
-    def length
+    def size
       LibPython.PySet_Size(__pyobj__)
     end
+
+    alias length size
 
     def include?(obj)
       1 == LibPython.PySet_Contains(__pyobj__, Conversions.from_ruby(obj))
