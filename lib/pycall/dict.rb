@@ -66,6 +66,8 @@ module PyCall
       LibPython.PyDict_Size(__pyobj__)
     end
 
+    alias length size
+
     def keys
       LibPython.PyDict_Keys(__pyobj__).to_ruby
     end

@@ -6,7 +6,7 @@ module PyCall
     let(:key) { 'a' }
     let(:mod) { Module.new }
 
-    subject { Dict.new(key => 1, 'b' => 2, 'c' => 3) }
+    subject(:dict) { Dict.new(key => 1, 'b' => 2, 'c' => 3) }
 
     before do
       mod.extend PyCall::Import
@@ -103,6 +103,11 @@ module PyCall
           expect(subject).not_to have_key(non_key)
         end
       end
+    end
+
+    describe '#length' do
+      subject { dict.length }
+      it { is_expected.to eq(3) }
     end
   end
 end
