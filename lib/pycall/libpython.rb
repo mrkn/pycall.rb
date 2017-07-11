@@ -348,7 +348,9 @@ module PyCall
 
     # Import
 
+    attach_function :PyImport_GetModuleDict, [], PyObjectStruct.by_ref
     attach_function :PyImport_ImportModule, [:string], PyObjectStruct.by_ref
+    attach_function :PyImport_ImportModuleLevel, [:string, PyObjectStruct.by_ref, PyObjectStruct.by_ref, PyObjectStruct.by_ref, :int], PyObjectStruct.by_ref
 
     # Operators
 

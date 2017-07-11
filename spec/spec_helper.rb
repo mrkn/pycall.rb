@@ -1,6 +1,8 @@
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
 require "pycall"
 
+PyCall.append_sys_path(File.expand_path('../python', __FILE__))
+
 Dir.glob(File.expand_path('../support/**/*.rb', __FILE__)) do |file|
   require file
 end

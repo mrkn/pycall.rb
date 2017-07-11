@@ -81,6 +81,17 @@ module PyCall
           }.to raise_error(PyCall::PyError)
         end
       end
+
+      context 'there is not the attribute specified in import: argument' do
+        context 'but there is a module with the same name and it has the attribute with the same name' do
+          it 'imports the attribute' do
+            expect(mod).not_to be_respond_to(:TestClass)
+            mod.pyfrom :pycall_test, import: :TestClass
+            expect(mod).to be_const_defined(:TestClass)
+            expect(mod::TestClass.TestClass.(42).test.()).to eq('42')
+          end
+        end
+      end
     end
   end
 end
