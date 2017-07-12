@@ -8,3 +8,6 @@
 /spec/reports/
 /tmp/
 __pycache__
+*.bundle
+*.so
+*.o
