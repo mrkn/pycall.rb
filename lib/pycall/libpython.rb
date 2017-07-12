@@ -144,8 +144,11 @@ module PyCall
     # --- PyPtr ---
 
     ::PyCall::PyPtr.__initialize__({}.tap { |hash|
-      [:Py_IncRef, :Py_DecRef, :_PySys_GetSizeOf].each do |name|
-        hash[name] = find_symbol(name).address
+      [ [:Py_None, :_Py_NoneStruct],
+        :Py_IncRef, :Py_DecRef, :_PySys_GetSizeOf
+      ].each do |key|
+        key, name = Array(key)
+        hash[key] = find_symbol(name || key).address
       end
     })
 

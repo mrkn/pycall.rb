@@ -255,6 +255,11 @@ typedef struct _typeobject {
 #endif
 } PyTypeObject;
 
+PyObject* pycall_pyptr_get_pyobj_ptr(VALUE obj);
+VALUE pycall_pyptr_new(PyObject *pyobj);
+VALUE pycall_pyptr_incref(VALUE pyptr);
+VALUE pycall_pyptr_decref(VALUE pyptr);
+
 #if defined(__cplusplus)
 #if 0
 { /* satisfy cc-mode */

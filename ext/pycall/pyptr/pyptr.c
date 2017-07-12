@@ -11,6 +11,8 @@
 static VALUE mPyCall;
 static VALUE cPyPtr;
 
+static PyObject *Py_None = NULL;
+
 static void (* Py_IncRef)(PyObject *) = NULL;
 static void (* Py_DecRef)(PyObject *) = NULL;
 static size_t (* _PySys_GetSizeOf)(PyObject *) = NULL;
@@ -39,9 +41,16 @@ pycall_pyptr_s_initialize(VALUE klass, VALUE args)
 
   Check_Type(args, T_HASH);
 
+  INIT_PYTHON_API(PyObject *, Py_None);
   INIT_PYTHON_API(void (*)(PyObject *), Py_IncRef);
   INIT_PYTHON_API(void (*)(PyObject *), Py_DecRef);
   INIT_PYTHON_API(size_t (*)(PyObject *), _PySys_GetSizeOf);
+
+  {
+    VALUE pyptr_none = pycall_pyptr_new(Py_None);
+    Py_IncRef(Py_None);
+    rb_define_const(cPyPtr, "None", pyptr_none);
+  }
 
   initialized = 1;
   return Qnil;
@@ -99,8 +108,8 @@ raise_not_initialized(void)
   rb_raise(rb_eRuntimeError, "PyCall::PyPtr initialization is incomplete");
 }
 
-static VALUE
-pycall_pyptr_s_incref(VALUE klass, VALUE pyptr)
+VALUE
+pycall_pyptr_incref(VALUE pyptr)
 {
   PyObject *pyobj;
 
@@ -113,7 +122,13 @@ pycall_pyptr_s_incref(VALUE klass, VALUE pyptr)
 }
 
 static VALUE
-pycall_pyptr_s_decref(VALUE klass, VALUE pyptr)
+pycall_pyptr_s_incref(VALUE klass, VALUE pyptr)
+{
+  return pycall_pyptr_incref(pyptr);
+}
+
+VALUE
+pycall_pyptr_decref(VALUE pyptr)
 {
   PyObject *pyobj;
 
@@ -123,6 +138,12 @@ pycall_pyptr_s_decref(VALUE klass, VALUE pyptr)
   if (pyobj)
     (* Py_DecRef)(pyobj);
   return pyptr;
+}
+
+static VALUE
+pycall_pyptr_s_decref(VALUE klass, VALUE pyptr)
+{
+  return pycall_pyptr_decref(pyptr);
 }
 
 static VALUE
@@ -182,6 +203,13 @@ pycall_pyptr_is_null(VALUE obj)
 }
 
 static VALUE
+pycall_pyptr_is_none(VALUE obj)
+{
+  PyObject* pyobj = get_pyobj_ptr(obj);
+  return pyobj == Py_None ? Qtrue : Qfalse;
+}
+
+static VALUE
 pycall_pyptr_get_address(VALUE obj)
 {
   PyObject* pyobj = get_pyobj_ptr(obj);
@@ -225,6 +253,7 @@ Init_pyptr(void)
 
   rb_define_singleton_method(cPyPtr, "new", pycall_pyptr_s_new, 1);
   rb_define_method(cPyPtr, "null?", pycall_pyptr_is_null, 0);
+  rb_define_method(cPyPtr, "none?", pycall_pyptr_is_none, 0);
   rb_define_method(cPyPtr, "__address__", pycall_pyptr_get_address, 0);
   rb_define_method(cPyPtr, "__refcnt__", pycall_pyptr_get_refcnt, 0);
   rb_define_method(cPyPtr, "inspect", pycall_pyptr_inspect, 0);

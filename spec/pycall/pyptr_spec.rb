@@ -28,6 +28,20 @@ module PyCall
       it 'returns true for NULL' do
         expect(PyPtr::NULL.null?).to eq(true)
       end
+
+      it 'returns false for None' do
+        expect(PyPtr::None.null?).to eq(false)
+      end
+    end
+
+    describe '#none?' do
+      it 'returns true for None' do
+        expect(PyPtr::None.none?).to eq(true)
+      end
+
+      it 'returns false for NULL' do
+        expect(PyPtr::NULL.none?).to eq(false)
+      end
     end
   end
 end
