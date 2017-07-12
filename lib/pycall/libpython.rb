@@ -1,6 +1,7 @@
 require 'ffi'
 require 'pycall/libpython/pyobject_struct'
 require 'pycall/libpython/pytypeobject_struct'
+require 'pycall/pyptr'
 
 module PyCall
   module LibPython
@@ -139,6 +140,14 @@ module PyCall
     attach_function :Py_GetVersion, [], :string
     PYTHON_DESCRIPTION = LibPython.Py_GetVersion().freeze
     PYTHON_VERSION = PYTHON_DESCRIPTION.split(' ', 2)[0].freeze
+
+    # --- PyPtr ---
+
+    ::PyCall::PyPtr.__initialize__({}.tap { |hash|
+      [:Py_IncRef, :Py_DecRef, :_PySys_GetSizeOf].each do |name|
+        hash[name] = find_symbol(name).address
+      end
+    })
 
     # --- types ---
 
