@@ -262,14 +262,14 @@ pycall_pyptr_is_none(VALUE obj)
 }
 
 static VALUE
-pycall_pyptr_get_address(VALUE obj)
+pycall_pyptr_get_ptr_address(VALUE obj)
 {
   PyObject* pyobj = get_pyobj_ptr(obj);
   return PTR2NUM(pyobj);
 }
 
 static VALUE
-pycall_pyptr_get_refcnt(VALUE obj)
+pycall_pyptr_get_ob_refcnt(VALUE obj)
 {
   PyObject* pyobj = get_pyobj_ptr(obj);
   if (pyobj)
@@ -278,7 +278,7 @@ pycall_pyptr_get_refcnt(VALUE obj)
 }
 
 static VALUE
-pycall_pyptr_get_type(VALUE obj)
+pycall_pyptr_get_ob_type(VALUE obj)
 {
   PyObject* pyobj = get_pyobj_ptr(obj);
   if (pyobj) {
@@ -333,9 +333,9 @@ Init_pyptr(void)
   rb_define_singleton_method(cPyPtr, "new", pycall_pyptr_s_new, 1);
   rb_define_method(cPyPtr, "null?", pycall_pyptr_is_null, 0);
   rb_define_method(cPyPtr, "none?", pycall_pyptr_is_none, 0);
-  rb_define_method(cPyPtr, "__address__", pycall_pyptr_get_address, 0);
-  rb_define_method(cPyPtr, "__refcnt__", pycall_pyptr_get_refcnt, 0);
-  rb_define_method(cPyPtr, "__type__", pycall_pyptr_get_type, 0);
+  rb_define_method(cPyPtr, "__address__", pycall_pyptr_get_ptr_address, 0);
+  rb_define_method(cPyPtr, "__ob_refcnt__", pycall_pyptr_get_ob_refcnt, 0);
+  rb_define_method(cPyPtr, "__ob_type__", pycall_pyptr_get_ob_type, 0);
   rb_define_method(cPyPtr, "inspect", pycall_pyptr_inspect, 0);
   rb_define_method(cPyPtr, "kind_of?", pycall_pyptr_is_kind_of, 1);
   rb_define_method(cPyPtr, "is_a?", pycall_pyptr_is_kind_of, 1);
