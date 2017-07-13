@@ -59,7 +59,7 @@ module PyCall
       end
 
       it 'works for Python type objects' do
-        pynone_type = PyPtr.incref(PyPtr.new(LibPython._PyNone_Type.to_ptr.address))
+        pynone_type = PyPtr.incref(PyPtr.new(LibPython.PyNone_Type.to_ptr.address))
         pylong_type = PyPtr.incref(PyPtr.new(LibPython.PyLong_Type.to_ptr.address))
 
         expect(PyPtr::None.kind_of?(pynone_type)).to eq(true)
