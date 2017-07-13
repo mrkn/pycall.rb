@@ -148,7 +148,10 @@ module PyCall
         :Py_IncRef, :Py_DecRef, :_PySys_GetSizeOf
       ].each do |key|
         key, name = Array(key)
-        hash[key] = find_symbol(name || key).address
+        name ||= key
+        symbol = find_symbol(name)
+        raise "Unable to find symbol: #{name}" unless symbol
+        hash[key] = symbol.address
       end
     })
 
