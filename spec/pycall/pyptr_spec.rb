@@ -49,5 +49,24 @@ module PyCall
         expect(PyPtr::None.__type__).to be_a(PyPtr)
       end
     end
+
+    describe '#kind_of?' do
+      it 'works normally for Ruby class objects' do
+        expect(PyPtr::None.kind_of?(PyPtr)).to eq(true)
+        expect(PyPtr::None.kind_of?(Object)).to eq(true)
+        expect(PyPtr::None.kind_of?(Array)).to eq(false)
+        expect { PyPtr::None.kind_of?(Object.new) }.to raise_error(TypeError)
+      end
+
+      it 'works for Python type objects' do
+        pynone_type = PyPtr.incref(PyPtr.new(LibPython._PyNone_Type.to_ptr.address))
+        pylong_type = PyPtr.incref(PyPtr.new(LibPython.PyLong_Type.to_ptr.address))
+
+        expect(PyPtr::None.kind_of?(pynone_type)).to eq(true)
+        expect(PyPtr::None.kind_of?(pylong_type)).to eq(false)
+
+        expect { PyPtr::None.kind_of?(PyPtr::None) }.to raise_error(TypeError)
+      end
+    end
   end
 end

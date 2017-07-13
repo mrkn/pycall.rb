@@ -12,6 +12,7 @@ static VALUE mPyCall;
 static VALUE cPyPtr;
 
 static PyObject *Py_None = NULL;
+static PyTypeObject *PyType_Type = NULL;
 
 #define DEF_PYTHON_FUNCTION_SLOT(return_type, fname, arguments) \
   typedef return_type (* fname ## _fptr_t) arguments; \
@@ -21,6 +22,7 @@ DEF_PYTHON_FUNCTION_SLOT(void, Py_IncRef, (PyObject *));
 DEF_PYTHON_FUNCTION_SLOT(void, Py_DecRef, (PyObject *));
 DEF_PYTHON_FUNCTION_SLOT(int, PyType_Ready, (PyTypeObject *));
 DEF_PYTHON_FUNCTION_SLOT(PyObject *, PyObject_CallMethod, (PyObject *, char const *, char const *, ...));
+DEF_PYTHON_FUNCTION_SLOT(int, PyObject_IsInstance, (PyObject *, PyObject *));
 DEF_PYTHON_FUNCTION_SLOT(Py_ssize_t, PyLong_AsSsize_t, (PyObject *));
 DEF_PYTHON_FUNCTION_SLOT(PyObject *, PyErr_Occurred, ());
 
@@ -53,11 +55,13 @@ pycall_pyptr_s_initialize(VALUE klass, VALUE args)
   Check_Type(args, T_HASH);
 
   INIT_PYTHON_VARIABLE(PyObject *, Py_None);
+  INIT_PYTHON_VARIABLE(PyTypeObject *, PyType_Type);
 
   INIT_PYTHON_FUNCTION(Py_IncRef);
   INIT_PYTHON_FUNCTION(Py_DecRef);
   INIT_PYTHON_FUNCTION(PyType_Ready);
   INIT_PYTHON_FUNCTION(PyObject_CallMethod);
+  INIT_PYTHON_FUNCTION(PyObject_IsInstance);
   INIT_PYTHON_FUNCTION(PyLong_AsSsize_t);
   INIT_PYTHON_FUNCTION(PyErr_Occurred);
 
@@ -124,6 +128,12 @@ static const rb_data_type_t pycall_pyptr_data_type = {
 #endif
 };
 
+static inline int
+is_pycall_pyptr(VALUE obj)
+{
+  return rb_typeddata_is_kind_of(obj, &pycall_pyptr_data_type);
+}
+
 static inline PyObject*
 get_pyobj_ptr(VALUE obj)
 {
@@ -135,7 +145,7 @@ get_pyobj_ptr(VALUE obj)
 static inline PyObject*
 try_get_pyobj_ptr(VALUE obj)
 {
-  if (!rb_typeddata_is_kind_of(obj, &pycall_pyptr_data_type)) return NULL;
+  if (is_pycall_pyptr(obj)) return NULL;
   return (PyObject*)DATA_PTR(obj);
 }
 
@@ -291,6 +301,22 @@ pycall_pyptr_inspect(VALUE obj)
   return str;
 }
 
+static VALUE
+pycall_pyptr_is_kind_of(VALUE obj, VALUE klass)
+{
+  PyObject* pyobj = get_pyobj_ptr(obj);
+
+  if (is_pycall_pyptr(klass)) {
+    PyObject* pyobj_klass = get_pyobj_ptr(klass);
+    if (Py_TYPE(pyobj_klass) == PyType_Type) {
+      int res = PyObject_IsInstance(pyobj, pyobj_klass);
+      return res ? Qtrue : Qfalse;
+    }
+  }
+
+  return rb_call_super(1, &klass);
+}
+
 void
 Init_pyptr(void)
 {
@@ -311,6 +337,8 @@ Init_pyptr(void)
   rb_define_method(cPyPtr, "__refcnt__", pycall_pyptr_get_refcnt, 0);
   rb_define_method(cPyPtr, "__type__", pycall_pyptr_get_type, 0);
   rb_define_method(cPyPtr, "inspect", pycall_pyptr_inspect, 0);
+  rb_define_method(cPyPtr, "kind_of?", pycall_pyptr_is_kind_of, 1);
+  rb_define_method(cPyPtr, "is_a?", pycall_pyptr_is_kind_of, 1);
 
   {
     VALUE pyptr_null = pycall_pyptr_new(NULL);

@@ -144,8 +144,8 @@ module PyCall
     # --- PyPtr ---
 
     ::PyCall::PyPtr.__initialize__({}.tap { |hash|
-      [ [:Py_None, :_Py_NoneStruct],
-        :Py_IncRef, :Py_DecRef, :PyType_Ready, :PyObject_CallMethod, :PyErr_Occurred
+      [ [:Py_None, :_Py_NoneStruct], :PyType_Type,
+        :Py_IncRef, :Py_DecRef, :PyType_Ready, :PyObject_CallMethod, :PyObject_IsInstance, :PyErr_Occurred
       ].each do |key|
         key, name = Array(key)
         name ||= key
@@ -174,6 +174,7 @@ module PyCall
     end
 
     attach_variable :PyType_Type, PyTypeObjectStruct
+    attach_variable :_PyNone_Type, PyTypeObjectStruct
 
     if libpython.find_variable('PyInt_Type')
       has_PyInt_Type = true
