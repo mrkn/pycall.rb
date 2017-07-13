@@ -175,12 +175,6 @@ module PyCall
 
     attach_variable :PyType_Type, PyTypeObjectStruct
 
-    if libpython.find_variable('_PyNone_Type')
-      attach_variable :PyNone_Type, :_PyNone_Type, PyTypeObjectStruct
-    else
-      attach_variable :PyNone_Type, PyTypeObjectStruct
-    end
-
     if libpython.find_variable('PyInt_Type')
       has_PyInt_Type = true
       attach_variable :PyInt_Type, PyTypeObjectStruct
