@@ -25,5 +25,6 @@ before_install:
   - gem update bundler
 
 before_script:
+  - bundle exec rake clobber compile
   - echo === python investigator.py ===
   - python lib/pycall/python/investigator.py
