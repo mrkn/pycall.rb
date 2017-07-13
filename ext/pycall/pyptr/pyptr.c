@@ -268,6 +268,17 @@ pycall_pyptr_get_refcnt(VALUE obj)
 }
 
 static VALUE
+pycall_pyptr_get_type(VALUE obj)
+{
+  PyObject* pyobj = get_pyobj_ptr(obj);
+  if (pyobj) {
+    VALUE pytypeobj = pycall_pyptr_new((PyObject *)pyobj->ob_type);
+    return pytypeobj;
+  }
+  return Qnil;
+}
+
+static VALUE
 pycall_pyptr_inspect(VALUE obj)
 {
   VALUE cname, str;
@@ -298,6 +309,7 @@ Init_pyptr(void)
   rb_define_method(cPyPtr, "none?", pycall_pyptr_is_none, 0);
   rb_define_method(cPyPtr, "__address__", pycall_pyptr_get_address, 0);
   rb_define_method(cPyPtr, "__refcnt__", pycall_pyptr_get_refcnt, 0);
+  rb_define_method(cPyPtr, "__type__", pycall_pyptr_get_type, 0);
   rb_define_method(cPyPtr, "inspect", pycall_pyptr_inspect, 0);
 
   {

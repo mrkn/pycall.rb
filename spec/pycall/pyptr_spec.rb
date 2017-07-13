@@ -43,5 +43,11 @@ module PyCall
         expect(PyPtr::NULL.none?).to eq(false)
       end
     end
+
+    describe '#__type__' do
+      it 'returns a PyPtr for None' do
+        expect(PyPtr::None.__type__).to be_a(PyPtr)
+      end
+    end
   end
 end
