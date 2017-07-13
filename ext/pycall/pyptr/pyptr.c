@@ -13,12 +13,18 @@ static VALUE cPyPtr;
 
 static PyObject *Py_None = NULL;
 
-static void (* Py_IncRef)(PyObject *) = NULL;
-static void (* Py_DecRef)(PyObject *) = NULL;
-static int (* PyType_Ready)(PyTypeObject *) = NULL;
-static PyObject *(* PyObject_CallMethod)(PyObject *, char const *method, char const *format, ...) = NULL;
-static Py_ssize_t (* PyLong_AsSsize_t)(PyObject *) = NULL;
-static PyObject *(* PyErr_Occurred)() = NULL;
+#define DEF_PYTHON_FUNCTION_SLOT(return_type, fname, arguments) \
+  typedef return_type (* fname ## _fptr_t) arguments; \
+  static fname ## _fptr_t fname = NULL;
+
+DEF_PYTHON_FUNCTION_SLOT(void, Py_IncRef, (PyObject *));
+DEF_PYTHON_FUNCTION_SLOT(void, Py_DecRef, (PyObject *));
+DEF_PYTHON_FUNCTION_SLOT(int, PyType_Ready, (PyTypeObject *));
+DEF_PYTHON_FUNCTION_SLOT(PyObject *, PyObject_CallMethod, (PyObject *, char const *, char const *, ...));
+DEF_PYTHON_FUNCTION_SLOT(Py_ssize_t, PyLong_AsSsize_t, (PyObject *));
+DEF_PYTHON_FUNCTION_SLOT(PyObject *, PyErr_Occurred, ());
+
+#undef DEF_PYTHON_FUNCTION_SLOT
 
 static int initialized = 0;
 
@@ -28,14 +34,16 @@ pycall_pyptr_s_get_initialized(VALUE klass)
   return initialized ? Qtrue : Qfalse;
 }
 
-#define INIT_PYTHON_API(type, fname) do { \
-  VALUE val = rb_hash_lookup(args, ID2SYM(rb_intern(#fname))); \
+#define INIT_PYTHON_VARIABLE(type, name) do { \
+  VALUE val = rb_hash_lookup(args, ID2SYM(rb_intern(#name))); \
   VALUE addr = rb_check_to_integer(val, "to_int"); \
   if (NIL_P(addr)) { \
-    rb_raise(rb_eTypeError, "Unexpected value is given for " #fname); \
+    rb_raise(rb_eTypeError, "Unexpected value is given for " #name); \
   } \
-  fname = ((type)NUM2PTR(val)); \
+  name = ((type)NUM2PTR(val)); \
 } while (0)
+
+#define INIT_PYTHON_FUNCTION(fname) INIT_PYTHON_VARIABLE(fname ## _fptr_t, fname)
 
 static VALUE
 pycall_pyptr_s_initialize(VALUE klass, VALUE args)
@@ -44,13 +52,14 @@ pycall_pyptr_s_initialize(VALUE klass, VALUE args)
 
   Check_Type(args, T_HASH);
 
-  INIT_PYTHON_API(PyObject *, Py_None);
-  INIT_PYTHON_API(void (*)(PyObject *), Py_IncRef);
-  INIT_PYTHON_API(void (*)(PyObject *), Py_DecRef);
-  INIT_PYTHON_API(int (*)(PyTypeObject *), PyType_Ready);
-  INIT_PYTHON_API(PyObject * (*)(PyObject *, char const *, char const *, ...), PyObject_CallMethod);
-  INIT_PYTHON_API(Py_ssize_t (*)(PyObject *), PyLong_AsSsize_t);
-  INIT_PYTHON_API(PyObject * (*)(), PyErr_Occurred);
+  INIT_PYTHON_VARIABLE(PyObject *, Py_None);
+
+  INIT_PYTHON_FUNCTION(Py_IncRef);
+  INIT_PYTHON_FUNCTION(Py_DecRef);
+  INIT_PYTHON_FUNCTION(PyType_Ready);
+  INIT_PYTHON_FUNCTION(PyObject_CallMethod);
+  INIT_PYTHON_FUNCTION(PyLong_AsSsize_t);
+  INIT_PYTHON_FUNCTION(PyErr_Occurred);
 
   {
     VALUE pyptr_none = pycall_pyptr_new(Py_None);
@@ -62,7 +71,8 @@ pycall_pyptr_s_initialize(VALUE klass, VALUE args)
   return Qnil;
 }
 
-#undef INIT_PYTHON_API
+#undef INIT_PYTHON_VARIABLE
+#undef INIT_PYTHON_FUNCTION
 
 static size_t
 _PySys_GetSizeOf(PyObject *o)
