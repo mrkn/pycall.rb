@@ -145,7 +145,7 @@ module PyCall
 
     ::PyCall::PyPtr.__initialize__({}.tap { |hash|
       [ [:Py_None, :_Py_NoneStruct],
-        :Py_IncRef, :Py_DecRef, :_PySys_GetSizeOf
+        :Py_IncRef, :Py_DecRef, :PyType_Ready, :PyObject_CallMethod, :PyErr_Occurred
       ].each do |key|
         key, name = Array(key)
         name ||= key
@@ -153,7 +153,9 @@ module PyCall
         raise "Unable to find symbol: #{name}" unless symbol
         hash[key] = symbol.address
       end
-    })
+    }.update(
+      PyLong_AsSsize_t: (find_symbol(:PyInt_AsSsize_t) || find_symbol(:PyLong_AsSsize_t)).address
+    ))
 
     # --- types ---
 

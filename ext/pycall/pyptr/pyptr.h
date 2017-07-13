@@ -37,6 +37,10 @@ typedef struct {
   Py_ssize_t ob_size; /* Number of items in variable part */
 } PyVarObject;
 
+#define Py_REFCNT(ob)           (((PyObject*)(ob))->ob_refcnt)
+#define Py_TYPE(ob)             (((PyObject*)(ob))->ob_type)
+#define Py_SIZE(ob)             (((PyVarObject*)(ob))->ob_size)
+
 typedef PyObject * (*unaryfunc)(PyObject *);
 typedef PyObject * (*binaryfunc)(PyObject *, PyObject *);
 typedef PyObject * (*ternaryfunc)(PyObject *, PyObject *, PyObject *);
@@ -254,6 +258,42 @@ typedef struct _typeobject {
   struct _typeobject *tp_next;
 #endif
 } PyTypeObject;
+
+#define Py_TPFLAGS_HAVE_GC (1L<<14)
+
+/* Type is abstract and cannot be instantiated */
+#define Py_TPFLAGS_IS_ABSTRACT (1L<<20)
+
+/* These flags are used to determine if a type is a subclass. */
+#define Py_TPFLAGS_INT_SUBCLASS         (1L<<23)
+#define Py_TPFLAGS_LONG_SUBCLASS        (1L<<24)
+#define Py_TPFLAGS_LIST_SUBCLASS        (1L<<25)
+#define Py_TPFLAGS_TUPLE_SUBCLASS       (1L<<26)
+#define Py_TPFLAGS_BYTES_SUBCLASS       (1L<<27)
+#define Py_TPFLAGS_UNICODE_SUBCLASS     (1L<<28)
+#define Py_TPFLAGS_DICT_SUBCLASS        (1L<<29)
+#define Py_TPFLAGS_BASE_EXC_SUBCLASS    (1L<<30)
+#define Py_TPFLAGS_TYPE_SUBCLASS        (1L<<31)
+
+#define Py_TPFLAGS_DEFAULT  ( \
+                 Py_TPFLAGS_HAVE_STACKLESS_EXTENSION | \
+                 Py_TPFLAGS_HAVE_VERSION_TAG | \
+                0)
+
+#define PyType_HasFeature(t, f)  (((t)->tp_flags & (f)) != 0)
+
+#define PyType_IS_GC(t) PyType_HasFeature((t), Py_TPFLAGS_HAVE_GC)
+#define PyObject_IS_GC(o) (PyType_IS_GC(Py_TYPE(o)) && \
+    (Py_TYPE(o)->tp_is_gc == NULL || Py_TYPE(o)->tp_is_gc(o)))
+
+typedef union _gc_head {
+  struct {
+    union _gc_head *gc_next;
+    union _gc_head *gc_prev;
+    Py_ssize_t gc_refs;
+  } gc;
+  long double dummy;  /* force worst-case alignment */
+} PyGC_Head;
 
 PyObject* pycall_pyptr_get_pyobj_ptr(VALUE obj);
 VALUE pycall_pyptr_new(PyObject *pyobj);

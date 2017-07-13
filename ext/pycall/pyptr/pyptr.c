@@ -15,7 +15,10 @@ static PyObject *Py_None = NULL;
 
 static void (* Py_IncRef)(PyObject *) = NULL;
 static void (* Py_DecRef)(PyObject *) = NULL;
-static size_t (* _PySys_GetSizeOf)(PyObject *) = NULL;
+static int (* PyType_Ready)(PyTypeObject *) = NULL;
+static PyObject *(* PyObject_CallMethod)(PyObject *, char const *method, char const *format, ...) = NULL;
+static Py_ssize_t (* PyLong_AsSsize_t)(PyObject *) = NULL;
+static PyObject *(* PyErr_Occurred)() = NULL;
 
 static int initialized = 0;
 
@@ -44,7 +47,10 @@ pycall_pyptr_s_initialize(VALUE klass, VALUE args)
   INIT_PYTHON_API(PyObject *, Py_None);
   INIT_PYTHON_API(void (*)(PyObject *), Py_IncRef);
   INIT_PYTHON_API(void (*)(PyObject *), Py_DecRef);
-  INIT_PYTHON_API(size_t (*)(PyObject *), _PySys_GetSizeOf);
+  INIT_PYTHON_API(int (*)(PyTypeObject *), PyType_Ready);
+  INIT_PYTHON_API(PyObject * (*)(PyObject *, char const *, char const *, ...), PyObject_CallMethod);
+  INIT_PYTHON_API(Py_ssize_t (*)(PyObject *), PyLong_AsSsize_t);
+  INIT_PYTHON_API(PyObject * (*)(), PyErr_Occurred);
 
   {
     VALUE pyptr_none = pycall_pyptr_new(Py_None);
@@ -58,6 +64,33 @@ pycall_pyptr_s_initialize(VALUE klass, VALUE args)
 
 #undef INIT_PYTHON_API
 
+static size_t
+_PySys_GetSizeOf(PyObject *o)
+{
+  PyObject *res = NULL;
+  Py_ssize_t size;
+
+  if ((* PyType_Ready)(Py_TYPE(o)) < 0)
+    return (size_t)-1;
+
+  res = (* PyObject_CallMethod)(o, "__sizeof__", "");
+  if (res == NULL)
+    return (size_t)-1;
+
+  size = (* PyLong_AsSsize_t)(res);
+  (* Py_DecRef)(res);
+  if (size == -1 && (* PyErr_Occurred)())
+    return (size_t)-1;
+
+  if (size < 0)
+    return (size_t)-1;
+
+  if (PyObject_IS_GC(o)) {
+    size += sizeof(PyGC_Head);
+  }
+  return (size_t)size;
+}
+
 static void
 pycall_pyptr_free(void *ptr)
 {
@@ -67,7 +100,7 @@ pycall_pyptr_free(void *ptr)
 static size_t
 pycall_pyptr_memsize(void const *ptr)
 {
-  if (_PySys_GetSizeOf && ptr)
+  if (ptr)
     return _PySys_GetSizeOf((PyObject *)ptr);
 
   return 0;
@@ -151,12 +184,11 @@ pycall_pyptr_s_sizeof(VALUE klass, VALUE pyptr)
 {
   size_t size;
   PyObject *pyobj;
-  if (_PySys_GetSizeOf == NULL) raise_not_initialized();
 
   pyobj = try_get_pyobj_ptr(pyptr);
   if (pyobj == NULL) return Qnil;
 
-  size = (* _PySys_GetSizeOf)(pyobj);
+  size = _PySys_GetSizeOf(pyobj);
   return SIZET2NUM(size);
 }
 
