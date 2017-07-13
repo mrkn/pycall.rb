@@ -147,7 +147,7 @@ install:
   - bundle install
 
 before_test:
-  - "bundle exec rake clobber compile"
+  - "bundle exec rake -rdevkit clobber compile"
   - ECHO "=== python investigator.py ==="
   - "python lib\\pycall\\python\\investigator.py"
 
