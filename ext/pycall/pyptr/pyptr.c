@@ -10,6 +10,7 @@
 
 static VALUE mPyCall;
 static VALUE cPyPtr;
+static VALUE cPyTypePtr;
 
 static PyObject *Py_None = NULL;
 static PyTypeObject *PyType_Type = NULL;
@@ -233,7 +234,7 @@ pycall_pyptr_new(PyObject *pyobj)
 }
 
 static VALUE
-pycall_pyptr_s_new(VALUE klass, VALUE val)
+pycall_pyptr_initialize(VALUE pyptr, VALUE val)
 {
   VALUE addr;
   PyObject *pyobj;
@@ -244,7 +245,8 @@ pycall_pyptr_s_new(VALUE klass, VALUE val)
   }
 
   pyobj = (PyObject *)NUM2PTR(addr);
-  return pycall_pyptr_new_with_klass(klass, pyobj);
+  DATA_PTR(pyptr) = pyobj;
+  return pyptr;
 }
 
 static VALUE
@@ -302,9 +304,27 @@ pycall_pyptr_inspect(VALUE obj)
 }
 
 static VALUE
+class_or_module_required(VALUE klass)
+{
+  if (SPECIAL_CONST_P(klass)) goto not_class;
+  switch (BUILTIN_TYPE(klass)) {
+    case T_MODULE:
+    case T_CLASS:
+    case T_ICLASS:
+      break;
+
+    default:
+    not_class:
+      rb_raise(rb_eTypeError, "class or module required");
+  }
+  return klass;
+}
+
+static VALUE
 pycall_pyptr_is_kind_of(VALUE obj, VALUE klass)
 {
   PyObject* pyobj = get_pyobj_ptr(obj);
+  VALUE res;
 
   if (is_pycall_pyptr(klass)) {
     PyObject* pyobj_klass = get_pyobj_ptr(klass);
@@ -314,14 +334,94 @@ pycall_pyptr_is_kind_of(VALUE obj, VALUE klass)
     }
   }
 
-  return rb_call_super(1, &klass);
+  klass = class_or_module_required(klass);
+  res = rb_class_inherited_p(CLASS_OF(obj), klass);
+  return NIL_P(res) ? Qfalse : res;
+}
+
+
+static const rb_data_type_t pycall_pytypeptr_data_type = {
+  "PyCall::PyTypePtr",
+  { 0, pycall_pyptr_free, pycall_pyptr_memsize, },
+#ifdef RUBY_TYPED_FREE_IMMEDIATELY
+  &pycall_pyptr_data_type, 0, RUBY_TYPED_FREE_IMMEDIATELY
+#endif
+};
+
+static inline int
+is_pycall_pytypeptr(VALUE obj)
+{
+  return rb_typeddata_is_kind_of(obj, &pycall_pytypeptr_data_type);
+}
+
+static inline PyTypeObject*
+get_pytype_ptr(VALUE obj)
+{
+  PyTypeObject *pytype;
+  TypedData_Get_Struct(obj, PyTypeObject, &pycall_pytypeptr_data_type, pytype);
+  return pytype;
+}
+
+static inline PyTypeObject*
+try_get_pytype_ptr(VALUE obj)
+{
+  if (is_pycall_pytypeptr(obj)) return NULL;
+  return (PyTypeObject*)DATA_PTR(obj);
+}
+
+PyTypeObject*
+pycall_pytypeptr_get_pytype_ptr(VALUE obj)
+{
+  return try_get_pytype_ptr(obj);
+}
+
+static VALUE
+pycall_pytypeptr_allocate(VALUE klass)
+{
+  return TypedData_Wrap_Struct(klass, &pycall_pytypeptr_data_type, NULL);
+}
+
+static VALUE
+pycall_pytypeptr_get_ob_size(VALUE obj)
+{
+  PyTypeObject* pytype = get_pytype_ptr(obj);
+  if (pytype)
+    return SSIZET2NUM(pytype->ob_base.ob_size);
+  return Qnil;
+}
+
+static VALUE
+pycall_pytypeptr_get_tp_name(VALUE obj)
+{
+  PyTypeObject* pytype = get_pytype_ptr(obj);
+  if (pytype)
+    return rb_str_new2(pytype->tp_name);
+  return Qnil;
+}
+
+static VALUE
+pycall_pytypeptr_get_tp_basicsize(VALUE obj)
+{
+  PyTypeObject* pytype = get_pytype_ptr(obj);
+  if (pytype)
+    return SSIZET2NUM(pytype->tp_basicsize);
+  return Qnil;
+}
+
+static VALUE
+pycall_pytypeptr_get_tp_flags(VALUE obj)
+{
+  PyTypeObject* pytype = get_pytype_ptr(obj);
+  if (pytype)
+    return ULONG2NUM(pytype->tp_flags);
+  return Qnil;
 }
 
 void
 Init_pyptr(void)
 {
   mPyCall = rb_define_module("PyCall");
-  cPyPtr = rb_define_class_under(mPyCall, "PyPtr", rb_cData);
+  cPyPtr = rb_define_class_under(mPyCall, "PyPtr", rb_cBasicObject);
 
   rb_define_singleton_method(cPyPtr, "__initialize__", pycall_pyptr_s_initialize, 1);
   rb_define_singleton_method(cPyPtr, "__initialized__", pycall_pyptr_s_get_initialized, 0);
@@ -330,7 +430,8 @@ Init_pyptr(void)
   rb_define_singleton_method(cPyPtr, "decref", pycall_pyptr_s_decref, 1);
   rb_define_singleton_method(cPyPtr, "sizeof", pycall_pyptr_s_sizeof, 1);
 
-  rb_define_singleton_method(cPyPtr, "new", pycall_pyptr_s_new, 1);
+  rb_define_alloc_func(cPyPtr, pycall_pyptr_allocate);
+  rb_define_method(cPyPtr, "initialize", pycall_pyptr_initialize, 1);
   rb_define_method(cPyPtr, "null?", pycall_pyptr_is_null, 0);
   rb_define_method(cPyPtr, "none?", pycall_pyptr_is_none, 0);
   rb_define_method(cPyPtr, "__address__", pycall_pyptr_get_ptr_address, 0);
@@ -344,4 +445,11 @@ Init_pyptr(void)
     VALUE pyptr_null = pycall_pyptr_new(NULL);
     rb_define_const(cPyPtr, "NULL", pyptr_null);
   }
+
+  cPyTypePtr = rb_define_class_under(mPyCall, "PyTypePtr", cPyPtr);
+  rb_define_alloc_func(cPyTypePtr, pycall_pytypeptr_allocate);
+  rb_define_method(cPyTypePtr, "__ob_size__", pycall_pytypeptr_get_ob_size, 0);
+  rb_define_method(cPyTypePtr, "__tp_name__", pycall_pytypeptr_get_tp_name, 0);
+  rb_define_method(cPyTypePtr, "__tp_basicsize__", pycall_pytypeptr_get_tp_basicsize, 0);
+  rb_define_method(cPyTypePtr, "__tp_flags__", pycall_pytypeptr_get_tp_flags, 0);
 }
