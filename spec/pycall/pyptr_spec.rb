@@ -46,7 +46,7 @@ module PyCall
 
     describe '#__ob_type__' do
       it 'returns a PyPtr for None' do
-        expect(PyPtr::None.__ob_type__).to be_a(PyPtr)
+        expect(PyPtr::None.__ob_type__).to be_a(PyTypePtr)
       end
     end
 

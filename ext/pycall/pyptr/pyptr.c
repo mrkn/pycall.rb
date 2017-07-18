@@ -284,7 +284,7 @@ pycall_pyptr_get_ob_type(VALUE obj)
 {
   PyObject* pyobj = get_pyobj_ptr(obj);
   if (pyobj) {
-    VALUE pytypeobj = pycall_pyptr_new((PyObject *)pyobj->ob_type);
+    VALUE pytypeobj = pycall_pytypeptr_new(pyobj->ob_type);
     return pytypeobj;
   }
   return Qnil;
@@ -379,6 +379,12 @@ static VALUE
 pycall_pytypeptr_allocate(VALUE klass)
 {
   return TypedData_Wrap_Struct(klass, &pycall_pytypeptr_data_type, NULL);
+}
+
+VALUE
+pycall_pytypeptr_new(PyTypeObject *pytypeobj)
+{
+  return pycall_pyptr_new_with_klass(cPyTypePtr, (PyObject *)pytypeobj);
 }
 
 static VALUE

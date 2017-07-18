@@ -299,6 +299,7 @@ PyObject* pycall_pyptr_get_pyobj_ptr(VALUE obj);
 VALUE pycall_pyptr_new(PyObject *pyobj);
 VALUE pycall_pyptr_incref(VALUE pyptr);
 VALUE pycall_pyptr_decref(VALUE pyptr);
+VALUE pycall_pytypeptr_new(PyTypeObject *pytypeobj);
 
 #if defined(__cplusplus)
 #if 0
