@@ -1,213 +1,140 @@
+require 'pycall/wrapper_object_cache'
+
 module PyCall
-  HASH_SALT = "PyCall::PyObject".hash
-
-  Py_LT = 0
-  Py_LE = 1
-  Py_EQ = 2
-  Py_NE = 3
-  Py_GT = 4
-  Py_GE = 5
-
-  RICH_COMPARISON_OPCODES = {
-    :<  => Py_LT,
-    :<= => Py_LE,
-    :== => Py_EQ,
-    :!= => Py_NE,
-    :>  => Py_GT,
-    :>= => Py_GE
-  }.freeze
-
   module PyObjectWrapper
-    module ClassMethods
-      private
+    attr_reader :__pyptr__
 
-      def wrap_class(pyclass)
-        pyclass__pyobj__ = pyclass.__pyobj__
-        define_singleton_method(:__pyobj__) { pyclass__pyobj__ }
-
-        PyCall.dir(__pyobj__).each do |name|
-          obj = PyCall.getattr(__pyobj__, name)
-          next unless obj.kind_of?(PyCall::PyObject) || obj.kind_of?(PyCall::PyObjectWrapper)
-          next unless PyCall.callable?(obj)
-
-          define_method(name) do |*args, **kwargs|
-            PyCall.getattr(__pyobj__, name).(*args, **kwargs)
-          end
-        end
-
-        class << self
-          def method_missing(name, *args, **kwargs)
-            return super unless PyCall.hasattr?(__pyobj__, name)
-            PyCall.getattr(__pyobj__, name)
-          end
-        end
-
-        PyCall::Conversions.python_type_mapping(__pyobj__, self)
+    def self.extend_object(obj)
+      pyptr = obj.instance_variable_get(:@__pyptr__)
+      unless pyptr.kind_of? PyPtr
+        raise TypeError, "@__pyptr__ should have PyCall::PyPtr object"
       end
+      super
     end
 
-    def self.included(mod)
-      mod.extend ClassMethods
+    OPERATOR_METHOD_NAMES = {
+      :+ => :__add__,
+      :- => :__sub__,
+      :* => :__mul__,
+      :/ => :__truediv__
+    }.freeze
+
+    def method_missing(name, *args)
+      name_str = name.to_s if name.kind_of?(Symbol)
+      name_str.chop! if name_str.end_with?('=')
+      case name
+      when :+, :-, :*, :/
+        op_name = OPERATOR_METHOD_NAMES[name]
+        if LibPython::Helpers.hasattr?(__pyptr__, op_name)
+          LibPython::Helpers.define_wrapper_method(self, op_name)
+          singleton_class.__send__(:alias_method, name, op_name)
+          return self.__send__(name, *args)
+        end
+      else
+        if LibPython::Helpers.hasattr?(__pyptr__, name_str)
+          LibPython::Helpers.define_wrapper_method(self, name)
+          return self.__send__(name, *args)
+        end
+      end
+      super
     end
 
-    def initialize(pyobj)
-      pyobj = LibPython::PyObjectStruct.new(pyobj) if pyobj.kind_of? FFI::Pointer
-      pyobj = pyobj.__pyobj__ unless pyobj.kind_of? LibPython::PyObjectStruct
-      @__pyobj__ = pyobj
+    def respond_to_missing?(name, include_private)
+      return true if LibPython::Helpers.hasattr?(__pyptr__, name)
+      super
     end
 
-    attr_reader :__pyobj__
-
-    def eql?(other)
-      rich_compare(other, :==)
-    end
-
-    def hash
-      hash_value = LibPython.PyObject_Hash(__pyobj__)
-      return super if hash_value == -1
-      hash_value
-    end
-
-    def type
-      LibPython.PyObject_Type(__pyobj__).to_ruby
-    end
-
-    def null?
-      __pyobj__.null?
-    end
-
-    def to_ptr
-      __pyobj__.to_ptr
-    end
-
-    def py_none?
-      to_ptr == PyCall.None.to_ptr
-    end
-
-    def kind_of?(klass)
-      case klass
+    def ==(other)
+      case other
       when PyObjectWrapper
-        __pyobj__.kind_of? klass.__pyobj__
-      when LibPython::PyObjectStruct
-        __pyobj__.kind_of? klass
+        LibPython::Helpers.compare(:==, __pyptr__, other.__pyptr__)
       else
         super
       end
     end
 
-    def rich_compare(other, op)
-      opcode = RICH_COMPARISON_OPCODES[op]
-      raise ArgumentError, "Unknown comparison op: #{op}" unless opcode
-
-      other = Conversions.from_ruby(other)
-      return other.null? if __pyobj__.null?
-      return false if other.null?
-
-      value = LibPython.PyObject_RichCompare(__pyobj__, other, opcode)
-      raise "Unable to compare: #{self} #{op} #{other}" if value.null?
-      value.to_ruby
-    end
-
-    RICH_COMPARISON_OPCODES.keys.each do |op|
-      define_method(op) {|other| rich_compare(other, op) }
-    end
-
-    def [](*indices)
-      if indices.length == 1
-        indices = indices[0]
+    def [](*key)
+      if key.length == 1
+        key = key[0]
       else
-        indices = PyCall.tuple(*indices)
+        keys = PyCall::Tuple.new(key)
       end
-      PyCall.getitem(self, indices)
+      LibPython::Helpers.getitem(__pyptr__, key)
     end
 
-    def []=(*indices_and_value)
-      value = indices_and_value.pop
-      indices = indices_and_value
-      if indices.length == 1
-        indices = indices[0]
+    def []=(*key, value)
+      if key.length == 1
+        key = key[0]
       else
-        indices = PyCall.tuple(*indices)
+        key = PyCall::Tuple.new(key)
       end
-      PyCall.setitem(self, indices, value)
+      LibPython::Helpers.setitem(__pyptr__, key, value)
     end
 
-    def +(other)
-      other = Conversions.from_ruby(other)
-      value = LibPython.PyNumber_Add(__pyobj__, other)
-      return value.to_ruby unless value.null?
-      raise PyError.fetch
+    def call(*args)
+      LibPython::Helpers.call_object(__pyptr__, *args)
     end
 
-    def -(other)
-      other = Conversions.from_ruby(other)
-      value = LibPython.PyNumber_Subtract(__pyobj__, other)
-      return value.to_ruby unless value.null?
-      raise PyError.fetch
-    end
-
-    def *(other)
-      other = Conversions.from_ruby(other)
-      value = LibPython.PyNumber_Multiply(__pyobj__, other)
-      return value.to_ruby unless value.null?
-      raise PyError.fetch
-    end
-
-    def /(other)
-      other = Conversions.from_ruby(other)
-      value = LibPython.PyNumber_TrueDivide(__pyobj__, other)
-      return value.to_ruby unless value.null?
-      raise PyError.fetch
-    end
-
-    def **(other)
-      other = Conversions.from_ruby(other)
-      value = LibPython.PyNumber_Power(__pyobj__, other, PyCall.None)
-      return value.to_ruby unless value.null?
-      raise PyError.fetch
-    end
-
-    def coerce(other)
-      [PyObject.new(Conversions.from_ruby(other)), self]
-    end
-
-    def call(*args, **kwargs)
-      args = PyCall::Tuple[*args]
-      kwargs = kwargs.empty? ? PyObject.null : PyCall::Dict.new(kwargs)
-      res = LibPython.PyObject_Call(__pyobj__, args.__pyobj__, kwargs.__pyobj__)
-      return res.to_ruby if LibPython.PyErr_Occurred().null?
-      raise PyError.fetch
-    end
-
-    def method_missing(name, *args, **kwargs)
-      name_s = name.to_s
-      if name_s.end_with? '='
-        name = name_s[0..-2]
-        if PyCall.hasattr?(__pyobj__, name.to_s)
-          PyCall.setattr(__pyobj__, name, args.first)
-        else
-          raise NameError, "object has no attribute `#{name}'"
-        end
-      elsif PyCall.hasattr?(__pyobj__, name.to_s)
-        PyCall.getattr(__pyobj__, name)
-      else
-        super
+    def dup
+      super.tap do |duped|
+        copied = PyCall.import_module('copy').copy(__pyptr__)
+        copied = copied.__pyptr__ if copied.kind_of? PyObjectWrapper
+        duped.instance_variable_set(:@__pyptr__, copied)
       end
     end
 
     def to_s
-      s = LibPython.PyObject_Repr(__pyobj__)
-      if s.null?
-        LibPython.PyErr_Clear()
-        s = LibPython.PyObject_Str(__pyobj__)
-        if s.null?
-          LibPython.PyErr_Clear()
-          return super
-        end
-      end
-      s.to_ruby
+      LibPython::Helpers.str(__pyptr__)
     end
 
-    alias inspect to_s
+    def to_i
+      LibPython::Helpers.call_object(PyCall::builtins.int.__pyptr__, __pyptr__)
+    end
+
+    def to_f
+      LibPython::Helpers.call_object(PyCall::builtins.float.__pyptr__, __pyptr__)
+    end
+  end
+
+  module_function
+
+  class WrapperModuleCache < WrapperObjectCache
+    def initialize
+      super(LibPython::API::PyModule_Type)
+    end
+
+    def check_wrapper_object(wrapper_object)
+      unless wrapper_object.kind_of?(Module) && wrapper_object.kind_of?(PyObjectWrapper)
+        raise TypeError, "unexpected type #{wrapper_object.class} (expected Module extended by PyObjectWrapper)"
+      end
+    end
+
+    def self.instance
+      @instance ||= self.new
+    end
+  end
+
+  private_constant :WrapperModuleCache
+
+  def wrap_module(pymodptr)
+    check_ismodule(pymodptr)
+    WrapperModuleCache.instance.lookup(pymodptr) do
+      Module.new do |mod|
+        mod.instance_variable_set(:@__pyptr__, pymodptr)
+        mod.extend PyObjectWrapper
+      end
+    end
+  end
+
+  def check_isclass(pyptr)
+    pyptr = pyptr.__pyptr__ if pyptr.kind_of? PyObjectWrapper
+    return if pyptr.kind_of? LibPython::API::PyType_Type
+    return defined?(LibPython::API::PyClass_Type) && pyptr.kind_of?(LibPython::API::PyClass_Type)
+    raise TypeError, "PyType object is required"
+  end
+
+  def check_ismodule(pyptr)
+    return if pyptr.kind_of? LibPython::API::PyModule_Type
+    raise TypeError, "PyModule object is required"
   end
 end

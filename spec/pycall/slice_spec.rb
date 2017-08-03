@@ -16,7 +16,7 @@ module PyCall
     context 'start, stop, and step are all nil' do
       subject { PyCall::Slice.new(nil, nil, nil) }
       specify do
-        expect(pylist[subject]).to eq([1, 2, 3, 4, 5])
+        expect(pylist[subject].to_a).to eq([1, 2, 3, 4, 5])
       end
     end
 
@@ -27,7 +27,7 @@ module PyCall
         expect(subject.stop).to eq(3)
         expect(subject.step).to eq(nil)
 
-        expect(pylist[subject]).to eq([1, 2, 3])
+        expect(pylist[subject].to_a).to eq([1, 2, 3])
       end
     end
 
@@ -38,7 +38,7 @@ module PyCall
         expect(subject.stop).to eq(3)
         expect(subject.step).to eq(nil)
 
-        expect(pylist[subject]).to eq([2, 3])
+        expect(pylist[subject].to_a).to eq([2, 3])
       end
     end
 
@@ -49,7 +49,7 @@ module PyCall
         expect(subject.stop).to eq(5)
         expect(subject.step).to eq(2)
 
-        expect(pylist[subject]).to eq([2, 4])
+        expect(pylist[subject].to_a).to eq([2, 4])
       end
     end
   end

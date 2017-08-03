@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module PyCall
   ::RSpec.describe Tuple do
-    subject { Tuple[1, 2, 3] }
+    subject { Tuple.new(1, 2, 3) }
 
     specify do
       expect(subject[0]).to eq(1)
@@ -14,6 +14,24 @@ module PyCall
       it 'returns its size' do
         expect(subject.length).to eq(3)
       end
+    end
+
+    describe '#to_a' do
+      it 'returns an array that contains all the items in the subject' do
+        expect(subject.to_a).to eq([1, 2, 3])
+      end
+    end
+
+    describe '#inspect' do
+      pending
+    end
+  end
+
+  ::RSpec.describe '.tuple' do
+    specify do
+      expect(PyCall.tuple()).to be_a(Tuple)
+      expect(PyCall.tuple(Tuple.new(1, 2, 3))).to eq(Tuple.new(1, 2, 3))
+      expect(PyCall.tuple([1, 2, 3])).to eq(Tuple.new(1, 2, 3))
     end
   end
 end

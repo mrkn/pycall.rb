@@ -1,0 +1,79 @@
+require 'spec_helper'
+
+module PyCall
+  ::RSpec.describe PyTypeObjectWrapper do
+    let(:simple_class) do
+      PyCall.import_module('pycall.simple_class').SimpleClass.__pyptr__
+    end
+
+    let(:simple_class_wrapper) do
+      PyCall.wrap_class(simple_class)
+    end
+
+    describe '.extend_object' do
+      context '@__pyptr__ of the extended object is a PyCall::PyTypePtr' do
+        it 'extends the given object' do
+          cls = Class.new
+          cls.instance_variable_set(:@__pyptr__, LibPython::API::PyType_Type)
+          expect { cls.extend PyTypeObjectWrapper }.not_to raise_error
+          expect(cls).to be_a(PyTypeObjectWrapper)
+        end
+      end
+
+      context '@__pyptr__ of the extended object is a PyCall::PyPtr' do
+        it 'raises TypeError' do
+          cls = Class.new
+          cls.instance_variable_set(:@__pyptr__, PyPtr::NULL)
+          expect { cls.extend PyTypeObjectWrapper }.to raise_error(TypeError, /@__pyptr__/)
+          expect(cls).not_to be_a(PyTypeObjectWrapper)
+        end
+      end
+
+      context '@__pyptr__ of the extended object is nil' do
+        it 'raises TypeError' do
+          cls = Class.new
+          expect { cls.extend PyTypeObjectWrapper }.to raise_error(TypeError, /@__pyptr__/)
+          expect(cls).not_to be_a(PyTypeObjectWrapper)
+        end
+      end
+
+      context '@__pyptr__ of the extended object is not a PyCall::PyPtr' do
+        it 'raises TypeError' do
+          cls = Class.new
+          cls.instance_variable_set(:@__pyptr__, 42)
+          expect { cls.extend PyTypeObjectWrapper }.to raise_error(TypeError, /@__pyptr__/)
+          expect(cls).not_to be_a(PyTypeObjectWrapper)
+        end
+      end
+    end
+
+    describe '.register_python_type_mapping' do
+      pending
+    end
+
+    describe '.new' do
+      let(:extended_class) { Class.new }
+
+      before do
+        extended_class.instance_variable_set(:@__pyptr__, simple_class)
+        extended_class.extend PyTypeObjectWrapper
+      end
+
+      it 'returns an instance of the extended class object' do
+        obj = extended_class.new
+        expect(obj).to be_a(extended_class)
+        expect(obj.x).to eq(0)
+      end
+
+      it 'calls the corresponding Python type object with the given arguments to instantiate its Python object' do
+        obj = extended_class.new(42)
+        expect(obj.x).to eq(42)
+      end
+
+      specify 'the returned object has a Python object pointer whose type is its __pyptr__' do
+        obj = extended_class.new
+        expect(obj.__pyptr__.__ob_type__).to eq(simple_class_wrapper)
+      end
+    end
+  end
+end

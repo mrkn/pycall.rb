@@ -1,34 +1,13 @@
 require 'spec_helper'
 
-RSpec.describe PyCall, '.with' do
-  before :all do
-    PyCall.eval(<<PYTHON, input_type: :file)
-class test_context(object):
-  def __init__(self, value):
-    self.enter_called = False
-    self.exit_called = False
-    self.exit_value = None
-    self.value = value
-    pass
-
-  def __enter__(self):
-    self.enter_called = True
-    return self.value
-
-  def __exit__(self, exc_type, exc_value, traceback):
-    self.exit_called = (exc_type, exc_value, traceback)
-    return self.exit_value
-
-  def error(self, message):
-    raise Exception(message)
-PYTHON
-end
-
-  after :all do
-    PyCall.eval('del test_context', input_type: :file)
+::RSpec.describe PyCall, '.with' do
+  let(:test_context_class) do
+    PyCall.import_module('pycall.with_test').test_context
   end
 
-  let(:test_context) { PyCall.eval('test_context(42)') }
+  let(:test_context) do
+    test_context_class.new(42)
+  end
 
   specify do
     expect {|b| PyCall.with(test_context, &b) }.to yield_with_args(42)
@@ -54,12 +33,12 @@ end
         expect {
           PyCall.with(test_context) do
             test_context.exit_value = true
-            test_context.error.('error in Python')
+            test_context.error('error in Python')
           end
         }.not_to raise_error
         expect(test_context.exit_called[0]).not_to be_nil
         expect(test_context.exit_called[1]).not_to be_nil
-        expect(PyCall.str(test_context.exit_called[1])).to eq('error in Python')
+        expect(test_context.exit_called[1].to_s).to eq('error in Python')
         expect(test_context.exit_called[2]).not_to be_nil
       end
     end
@@ -68,18 +47,18 @@ end
       specify do
         expect {
           PyCall.with(test_context) do
-            test_context.error.('error in Python')
+            test_context.error('error in Python')
           end
         }.to raise_error(PyCall::PyError, /error in Python/)
         expect(test_context.exit_called[0]).not_to be_nil
         expect(test_context.exit_called[1]).not_to be_nil
-        expect(PyCall.str(test_context.exit_called[1])).to eq('error in Python')
+        expect(test_context.exit_called[1].to_s).to eq('error in Python')
         expect(test_context.exit_called[2]).not_to be_nil
       end
     end
   end
 
-  xcontext 'in an exception occurred in Ruby' do
+  context 'in an exception occurred in Ruby' do
     context 'when __exit__ returns True' do
       specify do
         expect {
@@ -102,10 +81,11 @@ end
             raise "error in Ruby"
           end
         }.to raise_error(RuntimeError, /error in Ruby/)
-        expect(test_context.exit_called[0]).not_to be_nil
-        expect(test_context.exit_called[1]).not_to be_nil
+        expect(test_context.exit_called[0]).to eq(RuntimeError)
+        expect(test_context.exit_called[1]).to be_a(RuntimeError)
         expect(test_context.exit_called[1].message).to eq('error in Ruby')
-        expect(test_context.exit_called[2]).not_to be_nil
+        expect(test_context.exit_called[2]).to be_a(PyCall::List)
+        expect(test_context.exit_called[2]).to be_all {|x| x.is_a?(Thread::Backtrace::Location) }
       end
     end
   end

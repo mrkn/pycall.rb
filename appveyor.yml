@@ -152,5 +152,10 @@ before_test:
   - "python lib\\pycall\\python\\investigator.py"
 
 test_script:
-  - "SET DEBUG_FIND_LIBPYTHON=1"
+  - "SET PYCALL_DEBUG_FIND_LIBPYTHON=1"
   - rake
+
+matrix:
+  allow_failures:
+  - PYTHONDIR: "C:\\Python27"
+  - PYTHONDIR: "C:\\Python27-x64"

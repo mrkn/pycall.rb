@@ -1,7 +1,21 @@
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
+
+puts
+puts "Environment variables:"
+%w[LIBPYTHON PYTHON PYTHONPATH PYCALL_DEBUG_FIND_LIBPYTHON].each do |key|
+  puts "- #{key}=#{ENV[key]}"
+end
+
 require "pycall"
 
-PyCall.append_sys_path(File.expand_path('../python', __FILE__))
+puts
+puts "The following version of Python is used:"
+puts PyCall::PYTHON_DESCRIPTION
+
+require 'pycall/import'
+require "pycall/pretty_print"
+
+PyCall.sys.path.append(File.expand_path('../python', __FILE__))
 
 Dir.glob(File.expand_path('../support/**/*.rb', __FILE__)) do |file|
   require file
@@ -15,4 +29,11 @@ RSpec.configure do |config|
   config.order = :random
   config.seed = ENV['RSPEC_SEED'] if ENV['RSPEC_SEED']
   config.profile_examples = true if ENV['RSPEC_PROFILING']
+
+  config.after do
+    if PyCall::PyError.occurred?
+      pyerr = PyCall::PyError.fetch
+      raise "unhandled python exception: #{pyerr}" if pyerr
+    end
+  end
 end

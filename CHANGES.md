@@ -1,0 +1,32 @@
+# The change history of PyCall
+
+## master
+
+* Rewrite almost all fundamental parts of PyCall as C extension.
+
+* PyCall now calls `Py_DecRef` in the finalizer of `PyCall::PyPtr`.
+
+* Change the system of object mapping between Python and Ruby, drastically.
+  Now PyCall does not have `PyObject` class for wrapper objects.
+  Instead, PyCall generally makes `Object` instances and extends them by
+  `PyObjectWrapper` module.
+  But for Python module objects, PyCall makes anonymous `Module` instances 
+  that are extended by `PyObjectWrapper` module.
+  Moreover for Python type objects, PyCall makes `Class` instances and extends
+  them by `PyTypeObjectWrapper` module.
+
+* Change `PyCall.eval` to be a wrapper of `__builtins__.eval` in Python.
+  This means that `filename:` and `input_type:` parameters are dropped.
+  Instead, two new parameters `globals:` and `locals:` are introduced.
+  `globals:` is used for specifying a dictionary that is the global
+  namespace referred by the evaluated expression.
+  `locals:` is used for specifying a mapping object that is the local
+  namespace referred by the evaluated expression.
+
+* Add `PyCall.exec` for the replacement of the former `PyCall.eval`
+  with `input_type: :file`.
+  It has `globals:` and `locals:` parameters for the same meaning as
+  the new `PyCall.eval` described above.
+
+* Drop `PyCall.wrap_ruby_callable` and `PyCall.wrap_ruby_object` always
+  craetes a callable Python object taht has an ID of the given Ruby object.

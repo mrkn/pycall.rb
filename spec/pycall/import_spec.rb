@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'pycall/import'
 
 module PyCall
   ::RSpec.describe Import do
@@ -13,7 +12,7 @@ module PyCall
           it 'defines a method with the specified module name' do
             expect(mod).not_to be_respond_to(:time)
             mod.pyimport 'time'
-            expect(mod.time).to be_kind_of(PyObject)
+            expect(mod.time).to be_kind_of(PyObjectWrapper)
           end
         end
 
@@ -21,25 +20,26 @@ module PyCall
           it 'defines a method with the specified name by as: argument' do
             expect(mod).not_to be_respond_to(:tm)
             mod.pyimport 'time', as: 'tm'
-            expect(mod.tm).to be_kind_of(PyObject)
+            expect(mod.tm).to be_kind_of(PyObjectWrapper)
           end
         end
       end
 
       context 'the given module name includes "."' do
         context 'the as: argument is not given' do
+          # TODO: This example describes an undesired behavior that should be fixed.
           it 'raises ArgumentError' do
             expect {
-              mod.pyimport 'multiprocessing.pool'
-            }.to raise_error(ArgumentError, /multiprocessing\.pool is not a valid module variable name/)
+              mod.pyimport 'pycall.import_test'
+            }.to raise_error(ArgumentError, /pycall\.import_test is not a valid module variable name/)
           end
         end
 
         context 'the as: argument is given' do
           it 'defines a method with the specified name by as: argument' do
             expect(mod).not_to be_respond_to(:pool)
-            mod.pyimport 'multiprocessing.pool', as: 'pool'
-            expect(mod.pool).to be_kind_of(PyObject)
+            mod.pyimport 'pycall.import_test', as: 'import_test'
+            expect(mod.import_test).to be_kind_of(PyObjectWrapper)
           end
         end
       end
@@ -50,9 +50,9 @@ module PyCall
         it 'defines methods with the given names in the Hash values' do
           expect(mod).not_to be_respond_to(:foo)
           expect(mod).not_to be_respond_to(:bar)
-          mod.pyfrom 'multiprocessing', import: { Process: :foo, Queue: :bar }
-          expect(mod.foo).to be_kind_of(PyCall::TypeObject)
-          expect(mod.bar).to be_kind_of(PyObject)
+          mod.pyfrom 'pycall.import_test', import: { Foo: :foo, TestClass: :bar }
+          expect(mod.foo).to be_kind_of(PyTypeObjectWrapper)
+          expect(mod.bar).to be_kind_of(PyObjectWrapper)
         end
       end
 
@@ -60,17 +60,17 @@ module PyCall
         it 'defines methods with the given names in the Array' do
           expect(mod).not_to be_respond_to(:Process)
           expect(mod).not_to be_respond_to(:Queue)
-          mod.pyfrom 'multiprocessing', import: %i[Process Queue]
-          expect(mod::Process).to be_kind_of(PyCall::TypeObject)
-          expect(mod::Queue).to be_kind_of(PyObject)
+          mod.pyfrom 'pycall.import_test', import: %i[Foo TestClass]
+          expect(mod::Foo).to be_kind_of(PyTypeObjectWrapper)
+          expect(mod::TestClass).to be_kind_of(PyObjectWrapper)
         end
       end
 
       context 'the import: argument is a String' do
         it 'defines a methodswith the given name' do
           expect(mod).not_to be_respond_to(:Queue)
-          mod.pyfrom 'multiprocessing', import: 'Queue'
-          expect(mod::Queue).to be_kind_of(PyObject)
+          mod.pyfrom 'pycall.import_test', import: 'TestClass'
+          expect(mod::TestClass).to be_kind_of(PyObjectWrapper)
         end
       end
 
@@ -86,9 +86,10 @@ module PyCall
         context 'but there is a module with the same name and it has the attribute with the same name' do
           it 'imports the attribute' do
             expect(mod).not_to be_respond_to(:TestClass)
-            mod.pyfrom :pycall_test, import: :TestClass
+            mod.pyfrom 'pycall.import_test', import: :TestClass
             expect(mod).to be_const_defined(:TestClass)
-            expect(mod::TestClass.TestClass.(42).test.()).to eq('42')
+            expect(mod::TestClass.TestClass).to be_a(PyTypeObjectWrapper)
+            # XXX: expect(mod::TestClass.TestClass(42).test()).to eq('42')
           end
         end
       end

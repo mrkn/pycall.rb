@@ -1,115 +1,82 @@
 require 'spec_helper'
 
 RSpec.describe PyCall do
-  def py_eval(src, input_type: :eval)
-    PyCall.eval(src, input_type: input_type)
-  end
+  describe '.eval' do
+    context 'without globals' do
+      context 'without locals' do
+        it 'evaluates immediate values correctly' do
+          expect(PyCall.eval('None')).to eq(nil)
+          expect(PyCall.eval('True')).to eq(true)
+          expect(PyCall.eval('False')).to eq(false)
+          expect(PyCall.eval('1')).to eq(1)
+          expect(PyCall.eval('1.1')).to eq(1.1)
+          expect(PyCall.eval('"a"')).to eq("a")
+          expect(PyCall.eval('"あ"').force_encoding('UTF-8')).to eq("あ") # TODO: force_encoding
+          expect(PyCall.eval('1 + 2j')).to eq(1 + 2i)
+          expect(PyCall.eval('[1, 2, 3]')).to eq(PyCall::List.new([1, 2, 3])) # TODO: PyCall::List[1, 2, 3]
+          expect(PyCall.eval('(1, 2, 3)')).to eq(PyCall::Tuple.new(1, 2, 3))
+          expect(PyCall.eval('{"a": 1, "b": 2}')).to eq(PyCall::Dict.new(a: 1, b: 2))
+          expect(PyCall.eval('{1, 2, 3}')).to eq(PyCall.builtins.set.new([1, 2, 3]))
+        end
 
-  def self.describe_eval(src, input_type: :eval, &block)
-    describe ".eval(#{src.inspect}, input_type: #{input_type.inspect})" do
-      subject { py_eval(src, input_type: input_type) }
-      module_eval &block
-    end
-  end
-
-  describe 'Eval.main_dict' do
-    subject(:main_dict) { PyCall::Eval.send :main_dict }
-
-    specify 'ob_refcnt >= 2' do
-      expect(main_dict.__pyobj__[:ob_refcnt]).to be >= 2
-    end
-  end
-
-  describe '.import_module' do
-    context 'without block' do
-      it 'returns an imported module' do
-        begin
-          mod = PyCall.import_module('__main__')
-          expect(mod.type.inspect).to match(/module/)
-        ensure
-          PyCall.decref(mod.__pyobj__)
+        it 'raises an exception occurred in Python side' do
+          expect { PyCall.eval('raise Exception("abcdef")') }.to raise_error(PyCall::PyError, /abcdef/)
         end
       end
+
+      context 'with locals of a Hash' do
+        pending
+      end
+
+      xcontext 'with locals of a binding' do
+      end
     end
 
-    context 'with block' do
-      it 'ensures to release python module object' do
-        cnt = {}
-        PyCall.import_module('__main__') { |outer_m|
-          cnt[:before] = outer_m.__pyobj__[:ob_refcnt]
-          PyCall.import_module('__main__') { |inner_m|
-            cnt[:inner] = inner_m.__pyobj__[:ob_refcnt]
-          }
-          cnt[:after] = outer_m.__pyobj__[:ob_refcnt]
-        }
-        expect(cnt[:inner]).to eq(cnt[:before] + 1)
-        expect(cnt[:after]).to eq(cnt[:before])
+    xcontext 'with globals' do
+      context 'without locals' do
+      end
+
+      context 'with locals of a Hash' do
+      end
+
+      context 'with locals of a binding' do
       end
     end
   end
 
-  describe_eval('None') do
-    it { is_expected.to equal(nil) }
-  end
+  describe '.exec' do
+    context 'without globals' do
+      context 'without locals' do
+        specify do
+          expect(PyCall.exec(<<-PYTHON)).to eq(nil)
+class Hoge:
+  pass
+          PYTHON
+          expect(PyCall.import_module(:__main__).Hoge).to be_a(Class)
+        end
 
-  describe_eval('True') do
-    it { is_expected.to equal(true) }
-  end
+        it 'raises an exception occurred in Python side' do
+          expect { PyCall.exec('raise Exception("abcdef")') }.to raise_error(PyCall::PyError, /abcdef/)
+        end
+      end
 
-  describe_eval('False') do
-    it { is_expected.to equal(false) }
-  end
+      context 'with locals of a Hash' do
+        pending
+      end
 
-  describe_eval('1') do
-    it { is_expected.to be_kind_of(Integer) }
-    it { is_expected.to eq(1) }
-  end
-
-  describe_eval('1.0') do
-    it { is_expected.to be_kind_of(Float) }
-    it { is_expected.to eq(1.0) }
-  end
-
-  describe_eval('complex(1, 2)') do
-    it { is_expected.to eq(1 + 2i) }
-  end
-
-  describe_eval('"python"') do
-    it { is_expected.to eq("python") }
-  end
-
-  describe_eval('[1, 2, 3]') do
-    it { is_expected.to eq([1, 2, 3]) }
-  end
-
-  describe_eval('(1, 2, 3)') do
-    it { is_expected.to be_kind_of(PyCall::Tuple) }
-    it { is_expected.to eq(PyCall::Tuple[1, 2, 3]) }
-  end
-
-  describe_eval('{ "a": 1, "b": 2 }') do
-    it { is_expected.to be_kind_of(PyCall::Dict) }
-    specify do
-      expect(subject['a']).to eq(1)
-      expect(subject['b']).to eq(2)
-      expect(subject['c']).to be_nil
+      xcontext 'with locals of a binding' do
+      end
     end
-  end
 
-  describe_eval('{1, 2, 3}') do
-    it { is_expected.to be_kind_of(PyCall::Set) }
+    xcontext 'with globals' do
+      context 'without locals' do
+      end
 
-    specify { expect(subject.length).to eq(3) }
+      context 'with locals of a Hash' do
+      end
 
-    it { is_expected.to include(1, 2, 3) }
-    it { is_expected.not_to include(0, 4) }
-  end
-
-  describe_eval("raise Exception('abcdef')\n", input_type: :file) do
-    specify do
-      expect { subject }.not_to raise_error
-      pyerror = PyCall::PyError.fetch
-      expect(pyerror.message).to match(/abcdef/)
+      context 'with locals of a binding' do
+      end
     end
   end
 end
