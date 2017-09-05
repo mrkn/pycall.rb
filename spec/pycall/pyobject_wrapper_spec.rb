@@ -116,6 +116,14 @@ module PyCall
       end
     end
 
+    describe '#coerce' do
+      let(:np) { PyCall.import_module('numpy') }
+      specify do
+        x = np.random.randn(10)
+        expect(10 * x).to be_a(x.class)
+      end
+    end
+
     describe '#dup' do
       subject(:list) { PyCall::List.new([1, 2, 3]) }
 

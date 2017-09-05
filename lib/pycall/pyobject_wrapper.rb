@@ -75,6 +75,34 @@ module PyCall
       LibPython::Helpers.call_object(__pyptr__, *args)
     end
 
+    class SwappedOperationAdapter
+      def initialize(obj)
+        @obj = obj
+      end
+
+      attr_reader :obj
+
+      def +(other)
+        other.__radd__(self.obj)
+      end
+
+      def -(other)
+        other.__rsub__(self.obj)
+      end
+
+      def *(other)
+        other.__rmul__(self.obj)
+      end
+
+      def /(other)
+        other.__rtruediv__(self.obj)
+      end
+    end
+
+    def coerce(other)
+      [SwappedOperationAdapter.new(other), self]
+    end
+
     def dup
       super.tap do |duped|
         copied = PyCall.import_module('copy').copy(__pyptr__)
