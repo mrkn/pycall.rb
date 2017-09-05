@@ -38,13 +38,7 @@ module PyCall
     end
 
     def to_a
-      [].tap do |ary|
-        i, n = 0, length
-        while i < n
-          ary << self[i]
-          i += 1
-        end
-      end
+      Array.new(length) {|i| self[i] }
     end
 
     alias to_ary to_a
