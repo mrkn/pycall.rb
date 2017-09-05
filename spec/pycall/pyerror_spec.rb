@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 module PyCall
-  RSpec.describe PyError do
+  ::RSpec.describe PyError do
     subject(:pyerror) { PyError.new(type, value, traceback) }
 
-    let(:type) { (PyCall.eval('len()'); PyError.fetch).type }
-    let(:value) { (PyCall.eval('len()'); PyError.fetch).value }
-    let(:traceback) { (PyCall.eval('len()'); PyError.fetch).traceback }
+    let(:type) { (PyCall.builtins.len rescue $!).type }
+    let(:value) { (PyCall.builtins.len rescue $!).value }
+    let(:traceback) { (PyCall.builtins.len rescue $!).traceback }
 
     describe '#to_s' do
       shared_examples 'does not contain traceback' do
@@ -21,7 +21,7 @@ module PyCall
       end
 
       context 'when traceback is null' do
-        let(:traceback) { FFI::Pointer::NULL }
+        let(:traceback) { PyCall::PyPtr.new(0) }
         include_examples 'does not contain traceback'
       end
     end

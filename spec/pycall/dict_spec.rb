@@ -1,20 +1,14 @@
 require 'spec_helper'
-require 'pycall/import'
 
 module PyCall
   ::RSpec.describe Dict do
+    let(:time_module) { PyCall.import_module('time') }
     let(:key) { 'a' }
-    let(:mod) { Module.new }
 
     subject(:dict) { Dict.new(key => 1, 'b' => 2, 'c' => 3) }
 
-    before do
-      mod.extend PyCall::Import
-      mod.pyimport 'time'
-    end
-
     describe '.new' do
-      let(:key) { mod.time.localtime.() }
+      let(:key) { time_module.localtime() }
 
       it 'accepts python object as a key' do
         expect{ Dict.new(key => 1) }.not_to raise_error
@@ -30,13 +24,14 @@ module PyCall
       end
 
       it 'increments the returned python object' do
-        pyobj = PyCall.eval('object()')
+        pyobj = PyCall.builtins.object.()
         subject['o'] = pyobj
-        expect { subject['o'] }.to change { pyobj.__pyobj__[:ob_refcnt] }.from(2).to(3)
+        expect { subject['o'] }.to change { pyobj.__pyptr__.__ob_refcnt__ }.from(2).to(3)
+        expect(subject['o'].__pyptr__).to eq(pyobj.__pyptr__)
       end
 
       context 'when key is a python object' do
-        let(:key) { mod.time.localtime.() }
+        let(:key) { time_module.localtime() }
 
         it 'returns a value corresponding to a given key' do
           expect(subject[key]).to eq(1)
@@ -57,7 +52,7 @@ module PyCall
       end
 
       context 'when key is a python object' do
-        let(:key) { mod.time.localtime.() }
+        let(:key) { time_module.localtime() }
 
         it 'stores a given value for a given key' do
           subject[key] *= 10
@@ -75,7 +70,7 @@ module PyCall
       end
 
       context 'when key is a python object' do
-        let(:key) { mod.time.localtime.() }
+        let(:key) { time_module.localtime() }
 
         it 'deletes a value for a given key'do
           expect(subject.delete(key)).to eq(1)
@@ -95,11 +90,11 @@ module PyCall
       end
 
       context 'when key is a python object' do
-        let(:key) { mod.time.localtime.() }
+        let(:key) { time_module.localtime() }
 
         specify do
           expect(subject).to have_key(key)
-          non_key = mod.time.localtime.(mod.time.time.() + 1)
+          non_key = time_module.localtime(time_module.time() + 1)
           expect(subject).not_to have_key(non_key)
         end
       end

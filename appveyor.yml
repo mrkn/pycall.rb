@@ -7,10 +7,6 @@ environment:
     PYTHON: "C:\\Python27\\python.exe"
 
   - ruby_version: "21"
-    PYTHONDIR: "C:\\Python33"
-    PYTHON: "C:\\Python33\\python.exe"
-
-  - ruby_version: "21"
     PYTHONDIR: "C:\\Python34"
     PYTHON: "C:\\Python34\\python.exe"
 
@@ -26,10 +22,6 @@ environment:
   - ruby_version: "21-x64"
     PYTHONDIR: "C:\\Python27-x64"
     PYTHON: "C:\\Python27-x64\\python.exe"
-
-  - ruby_version: "21-x64"
-    PYTHONDIR: "C:\\Python33-x64"
-    PYTHON: "C:\\Python33-x64\\python.exe"
 
   - ruby_version: "21-x64"
     PYTHONDIR: "C:\\Python34-x64"
@@ -49,10 +41,6 @@ environment:
     PYTHON: "C:\\Python27\\python.exe"
 
   - ruby_version: "22"
-    PYTHONDIR: "C:\\Python33"
-    PYTHON: "C:\\Python33\\python.exe"
-
-  - ruby_version: "22"
     PYTHONDIR: "C:\\Python34"
     PYTHON: "C:\\Python34\\python.exe"
 
@@ -68,10 +56,6 @@ environment:
   - ruby_version: "22-x64"
     PYTHONDIR: "C:\\Python27-x64"
     PYTHON: "C:\\Python27-x64\\python.exe"
-
-  - ruby_version: "22-x64"
-    PYTHONDIR: "C:\\Python33-x64"
-    PYTHON: "C:\\Python33-x64\\python.exe"
 
   - ruby_version: "22-x64"
     PYTHONDIR: "C:\\Python34-x64"
@@ -91,10 +75,6 @@ environment:
     PYTHON: "C:\\Python27\\python.exe"
 
   - ruby_version: "23"
-    PYTHONDIR: "C:\\Python33"
-    PYTHON: "C:\\Python33\\python.exe"
-
-  - ruby_version: "23"
     PYTHONDIR: "C:\\Python34"
     PYTHON: "C:\\Python34\\python.exe"
 
@@ -110,10 +90,6 @@ environment:
   - ruby_version: "23-x64"
     PYTHONDIR: "C:\\Python27-x64"
     PYTHON: "C:\\Python27-x64\\python.exe"
-
-  - ruby_version: "23-x64"
-    PYTHONDIR: "C:\\Python33-x64"
-    PYTHON: "C:\\Python33-x64\\python.exe"
 
   - ruby_version: "23-x64"
     PYTHONDIR: "C:\\Python34-x64"
@@ -144,7 +120,8 @@ build: off
 install:
   - "SET PATH=%PYTHONDIR%;%PYTHONDIR%\\Scripts;%PATH%"
   - "SET PATH=C:\\Ruby%ruby_version%\\bin;%PATH%"
-  - bundle install
+  - "bundle install"
+  - "pip install numpy"
 
 before_test:
   - "bundle exec rake -rdevkit clobber compile"
@@ -152,5 +129,10 @@ before_test:
   - "python lib\\pycall\\python\\investigator.py"
 
 test_script:
-  - "SET DEBUG_FIND_LIBPYTHON=1"
+  - "SET PYCALL_DEBUG_FIND_LIBPYTHON=1"
   - rake
+
+matrix:
+  allow_failures:
+  - PYTHONDIR: "C:\\Python27"
+  - PYTHONDIR: "C:\\Python27-x64"

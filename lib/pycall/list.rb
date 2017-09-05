@@ -1,73 +1,43 @@
 module PyCall
+  List = builtins.list
   class List
-    include PyObjectWrapper
+    register_python_type_mapping
+
     include Enumerable
 
-    def self.new(init=nil)
-      case init
-      when LibPython::PyObjectStruct
-        super
-      when nil
-        new(0)
-      when Integer
-        new(LibPython.PyList_New(init))
-      when Array
-        new.tap do |list|
-          init.each do |item|
-            list << item
-          end
-        end
-      else
-        new(obj.to_ary)
-      end
+    def include?(item)
+      LibPython::Helpers.sequence_contains(__pyptr__, item)
     end
 
-    def <<(value)
-      value = Conversions.from_ruby(value)
-      LibPython.PyList_Append(__pyobj__, value)
-      self
-    end
-
-    def size
-      LibPython.PyList_Size(__pyobj__)
-    end
-
-    alias length size
-
-    def include?(value)
-      value = Conversions.from_ruby(value)
-      value = LibPython.PySequence_Contains(__pyobj__, value)
-      raise PyError.fetch if value == -1
-      1 == value
-    end
-
-    def ==(other)
-      case other
-      when Array
-        self.to_a == other
-      else
-        super
-      end
+    def length
+      PyCall.len(self)
     end
 
     def each
       return enum_for unless block_given?
-      i, n = 0, size
-      while i < n
-        yield self[i]
-        i += 1
-      end
+      LibPython::Helpers.sequence_each(__pyptr__, &proc)
+      self
+    end
+
+    def <<(item)
+      append(item)
+    end
+
+    def push(*items)
+      items.each {|i| append(i) }
+    end
+
+    def sort
+      dup.sort!
+    end
+
+    def sort!
+      LibPython::Helpers.getattr(__pyptr__, :sort).__call__
       self
     end
 
     def to_a
-      [].tap do |a|
-        i, n = 0, size
-        while i < n
-          a << self[i]
-          i += 1
-        end
-      end
+      Array.new(length) {|i| self[i] }
     end
 
     alias to_ary to_a

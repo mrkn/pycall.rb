@@ -1,63 +1,207 @@
 require 'spec_helper'
 
 module PyCall
-  module RSpec
-  end
-
   ::RSpec.describe PyObjectWrapper do
-    describe '.wrap_class' do
-      include_context 'Save and restore original python type map'
+    let(:simple_class_wrapper) do
+      PyCall.import_module('pycall.simple_class').SimpleClass
+    end
 
-      before do
-        class PyCall::RSpec::ClassForTest
-          include PyCall::PyObjectWrapper
+    describe '.extend_object' do
+      context '@__pyptr__ of the extended object is a PyCall::PyPtr' do
+        it 'extends the given object' do
+          obj = Object.new
+          obj.instance_variable_set(:@__pyptr__, PyPtr::NULL)
+          expect { obj.extend PyObjectWrapper }.not_to raise_error
+          expect(obj).to be_a(PyObjectWrapper)
         end
       end
 
-      after do
-        PyCall::RSpec.send :remove_const, :ClassForTest
+      context '@__pyptr__ of the extended object is nil' do
+        it 'raises TypeError' do
+          obj = Object.new
+          expect { obj.extend PyObjectWrapper }.to raise_error(TypeError, /@__pyptr__/)
+          expect(obj).not_to be_a(PyObjectWrapper)
+        end
       end
 
-      context 'called with fractions.Fraction class' do
-        it 'makes the class as a Fraction object wrapper' do
-          fraction_class = PyCall.import_module('fractions').Fraction
-
-          # before wrapping the class
-          expect(fraction_class.(1, 2)).to be_kind_of(PyObject)
-
-          expect {
-            PyCall::RSpec::ClassForTest.send :wrap_class, fraction_class
-          }.not_to raise_error
-
-          # after wrapping the class
-          expect(fraction_class.(1, 2)).to be_kind_of(PyCall::RSpec::ClassForTest)
+      context '@__pyptr__ of the extended object is not a PyCall::PyPtr' do
+        it 'raises TypeError' do
+          obj = Object.new
+          obj.instance_variable_set(:@__pyptr__, 42)
+          expect { obj.extend PyObjectWrapper }.to raise_error(TypeError, /@__pyptr__/)
+          expect(obj).not_to be_a(PyObjectWrapper)
         end
       end
     end
 
-    describe '#rich_compare' do
-      let(:fraction_class) { PyCall.import_module('fractions').Fraction }
-      subject { fraction_class.(1, 2) }
+    describe '#method_missing' do
+      context 'the Python object has the attribute of the given name' do
+        context 'the value of the attribute is not callable' do
+          it 'returns the Python object from the attribute' do
+            sys = PyCall.import_module('sys')
+            expect(sys.copyright).to eq(LibPython::Helpers.getattr(sys.__pyptr__, :copyright))
+          end
+        end
 
-      context 'when comparing with an Integer' do
-        specify do
-          expect { subject.rich_compare(42, :<) }.not_to raise_error
+        context 'the value of the attribute is callable' do
+          context 'the value of the attribute is a type object' do
+            it 'returns the Python object from the attribute' do
+              expect(simple_class_wrapper.NestedClass).to be_a(PyTypeObjectWrapper)
+            end
+          end
+
+          context 'the value of the attribute is not a type object' do
+            it 'returns the result of calling the Python object from the attribute' do
+              re = PyCall.import_module('re')
+              expect(re.escape('+')).to eq('\\+')
+            end
+
+            specify 'initialize attribute is mapped †o __initialize__ in Ruby side' do
+              obj = simple_class_wrapper.new(11)
+              expect(obj.x).to eq(11)
+              expect(obj.initialize(42)).to eq('initialized')
+              expect(obj.x).to eq(42)
+            end
+          end
         end
       end
 
-      context 'when comparing with an PyObject' do
-        specify do
-          expect { subject.rich_compare(fraction_class.(2, 3), :<) }.not_to raise_error
+      context 'the Python object does not have the attribute of the given name' do
+        it 'raises NameError' do
+          sys = PyCall.import_module('sys')
+          expect { sys.not_defined_name }.to raise_error(NameError)
         end
       end
+
+      context 'when the name is :+' do
+        it 'delegates to :__add__'
+      end
+
+      context 'when the name is :-' do
+        it 'delegates to :__sub__'
+      end
+
+      context 'when the name is :*' do
+        it 'delegates to :__mul__'
+      end
+
+      context 'when the name is :/' do
+        it 'delegates to :__truediv__'
+      end
+
+      context 'when the name is :%' do
+        it 'delegates to :__mod__'
+      end
+
+      context 'when the name is :**' do
+        it 'delegates to :__pow__'
+      end
+
+      context 'when the name is :<<' do
+        it 'delegates to :__lshift__'
+      end
+
+      context 'when the name is :>>' do
+        it 'delegates to :__rshift__'
+      end
+
+      context 'when the name is :&' do
+        it 'delegates to :__and__'
+      end
+
+      context 'when the name is :^' do
+        it 'delegates to :__xor__'
+      end
+
+      context 'when the name is :|' do
+        it 'delegates to :__or__'
+      end
+    end
+
+    describe '#==' do
+      pending
+    end
+
+    describe '#!=' do
+      pending
+    end
+
+    describe '#<' do
+      pending
+    end
+
+    describe '#<=' do
+      pending
+    end
+
+    describe '#>' do
+      pending
+    end
+
+    describe '#>=' do
+      pending
+    end
+
+    describe '#[]' do
+      pending
+    end
+
+    describe '#[]=' do
+      pending
     end
 
     describe '#call' do
-      context 'when less arguments' do
+      context 'when the receiver is callable' do
+        subject { PyCall.builtins.object }
+
         specify do
-          expect { PyCall.eval('len').() }.to raise_error(PyCall::PyError, /takes exactly one argument \(0 given\)/)
+          expect { subject.() }.not_to raise_error
         end
       end
+
+      context 'when the receiver is not callable' do
+        subject { PyCall.builtins.object.new }
+
+        specify do
+          expect { subject.() }.to raise_error(TypeError)
+        end
+      end
+    end
+
+    describe '#coerce' do
+      let(:np) { PyCall.import_module('numpy') }
+      specify do
+        x = np.random.randn(10)
+        expect(10 * x).to be_a(x.class)
+      end
+    end
+
+    describe '#dup' do
+      subject(:list) { PyCall::List.new([1, 2, 3]) }
+
+      it 'returns a duped instance with a copy of the Python object' do
+        duped = list.dup
+        expect(duped).not_to equal(list)
+        expect(duped.__pyptr__).not_to eq(list.__pyptr__)
+        expect(duped).to eq(list)
+      end
+    end
+
+    describe '#to_s' do
+      subject(:dict) { PyCall::Dict.new(a: 1, b: 2, c: 3) }
+
+      it 'returns a string generated by global function str' do
+        items = dict.map {|k, v| "'#{k}': #{v}" }
+        expect(dict.to_s).to eq("{#{items.join(', ')}}")
+      end
+    end
+
+    describe '#to_i' do
+      it 'delegates to builtins.int'
+    end
+
+    describe '#to_f' do
+      it 'delegates to builtins.float'
     end
   end
 end

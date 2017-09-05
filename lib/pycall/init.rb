@@ -1,31 +1,55 @@
 module PyCall
-  private_class_method def self.__initialize_pycall__
-    initialized = (0 != PyCall::LibPython.Py_IsInitialized())
-    return if initialized
+  def self.const_missing(name)
+    case name
+    when :PyPtr, :PyTypePtr, :PyObjectWrapper, :PYTHON_DESCRIPTION, :PYTHON_VERSION
+      PyCall.init
+      const_get(name)
+    else
+      super
+    end
+  end
 
-    PyCall::LibPython.Py_InitializeEx(0)
+  module LibPython
+    def self.const_missing(name)
+      case name
+      when :API, :Conversion, :Helpers, :PYTHON_DESCRIPTION, :PYTHON_VERSION
+        PyCall.init
+        const_get(name)
+      else
+        super
+      end
+    end
+  end
 
-    FFI::MemoryPointer.new(:pointer, 1) do |argv|
-      argv.write_pointer(FFI::MemoryPointer.from_string(""))
-      PyCall::LibPython.PySys_SetArgvEx(0, argv, 0)
+  def self.init(python = ENV['PYTHON'])
+    return false if LibPython.instance_variable_defined?(:@handle)
+    class << PyCall
+      remove_method :const_missing
+    end
+    class << PyCall::LibPython
+      remove_method :const_missing
     end
 
-    @builtin = LibPython.PyImport_ImportModule(PYTHON_VERSION < '3.0.0' ? '__builtin__' : 'builtins').to_ruby
+    ENV['PYTHONPATH'] = [ File.expand_path('../python', __FILE__), ENV['PYTHONPATH'] ].compact.join(File::PATH_SEPARATOR)
+
+    LibPython.instance_variable_set(:@handle, LibPython::Finder.find_libpython(python))
+    class << LibPython
+      undef_method :handle
+      attr_reader :handle
+    end
 
     begin
-      import_module('stackless')
-      @has_stackless_extension = true
-    rescue PyError
-      @has_stackless_extension = false
+      major, minor, _ = RUBY_VERSION.split('.')
+      require "#{major}.#{minor}/pycall.so"
+    rescue LoadError
+      require 'pycall.so'
     end
 
-    __initialize_ruby_wrapper__
+    require 'pycall/dict'
+    require 'pycall/list'
+    require 'pycall/slice'
+    const_set(:PYTHON_VERSION, LibPython::PYTHON_VERSION)
+    const_set(:PYTHON_DESCRIPTION, LibPython::PYTHON_DESCRIPTION)
+    true
   end
-
-  class << self
-    attr_reader :builtin
-    attr_reader :has_stackless_extension
-  end
-
-  __initialize_pycall__
 end
