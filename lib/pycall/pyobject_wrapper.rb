@@ -13,17 +13,24 @@ module PyCall
     end
 
     OPERATOR_METHOD_NAMES = {
-      :+ => :__add__,
-      :- => :__sub__,
-      :* => :__mul__,
-      :/ => :__truediv__
+      :+  => :__add__,
+      :-  => :__sub__,
+      :*  => :__mul__,
+      :/  => :__truediv__,
+      :%  => :__mod__,
+      :** => :__pow__,
+      :<< => :__lshift__,
+      :>> => :__rshift__,
+      :&  => :__and__,
+      :^  => :__xor__,
+      :|  => :__or__
     }.freeze
 
     def method_missing(name, *args)
       name_str = name.to_s if name.kind_of?(Symbol)
       name_str.chop! if name_str.end_with?('=')
       case name
-      when :+, :-, :*, :/
+      when *OPERATOR_METHOD_NAMES.keys
         op_name = OPERATOR_METHOD_NAMES[name]
         if LibPython::Helpers.hasattr?(__pyptr__, op_name)
           LibPython::Helpers.define_wrapper_method(self, op_name)
@@ -102,6 +109,34 @@ module PyCall
 
       def /(other)
         other.__rtruediv__(self.obj)
+      end
+
+      def %(other)
+        other.__rmod__(self.obj)
+      end
+
+      def **(other)
+        other.__rpow__(self.obj)
+      end
+
+      def <<(other)
+        other.__rlshift__(self.obj)
+      end
+
+      def >>(other)
+        other.__rrshift__(self.obj)
+      end
+
+      def &(other)
+        other.__rand__(self.obj)
+      end
+
+      def ^(other)
+        other.__rxor__(self.obj)
+      end
+
+      def |(other)
+        other.__ror__(self.obj)
       end
     end
 

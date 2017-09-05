@@ -88,6 +88,34 @@ module PyCall
       context 'when the name is :/' do
         it 'delegates to :__truediv__'
       end
+
+      context 'when the name is :%' do
+        it 'delegates to :__mod__'
+      end
+
+      context 'when the name is :**' do
+        it 'delegates to :__pow__'
+      end
+
+      context 'when the name is :<<' do
+        it 'delegates to :__lshift__'
+      end
+
+      context 'when the name is :>>' do
+        it 'delegates to :__rshift__'
+      end
+
+      context 'when the name is :&' do
+        it 'delegates to :__and__'
+      end
+
+      context 'when the name is :^' do
+        it 'delegates to :__xor__'
+      end
+
+      context 'when the name is :|' do
+        it 'delegates to :__or__'
+      end
     end
 
     describe '#==' do
