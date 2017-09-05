@@ -1251,7 +1251,7 @@ pycall_pyobject_to_ruby(PyObject *pyobj)
     return pycall_pystring_to_ruby(pyobj);
 
   Py_API(Py_IncRef)(pyobj);
-
+  Py_API(Py_IncRef)(pyobj->ob_type);
   cls = pycall_python_type_mapping_get_mapped_class(pycall_pytypeptr_new((PyObject *)pyobj->ob_type));
   if (NIL_P(cls)) {
     rb_warning("Currentry do not support to convert %s to Ruby object", Py_TYPE(pyobj)->tp_name);
