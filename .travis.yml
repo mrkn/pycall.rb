@@ -33,6 +33,8 @@ before_script:
   - echo === python investigator.py ===
   - python lib/pycall/python/investigator.py
   - python3 lib/pycall/python/investigator.py
+  - pip install numpy
+  - pip3 install numpy
 
 matrix:
   allow_failures:
