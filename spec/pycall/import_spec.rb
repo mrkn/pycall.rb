@@ -50,9 +50,10 @@ module PyCall
         it 'defines methods with the given names in the Hash values' do
           expect(mod).not_to be_respond_to(:foo)
           expect(mod).not_to be_respond_to(:bar)
-          mod.pyfrom 'pycall.import_test', import: { Foo: :foo, TestClass: :bar }
+          mod.pyfrom 'pycall.import_test', import: { Foo: :foo, TestClass: :bar, to_list: :to_list }
           expect(mod.foo).to be_kind_of(PyTypeObjectWrapper)
           expect(mod.bar).to be_kind_of(PyObjectWrapper)
+          expect(mod.to_list(42)).to eq(PyCall::List.new([42]))
         end
       end
 

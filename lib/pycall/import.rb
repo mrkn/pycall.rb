@@ -53,8 +53,8 @@ module PyCall
           name, asname = import_name, import_name
         end
 
-        if mod.respond_to? name
-          pyobj = mod.__send__ name
+        if PyCall::LibPython::Helpers.hasattr?(mod.__pyptr__, name)
+          pyobj = PyCall::LibPython::Helpers.getattr(mod.__pyptr__, name)
           define_name(asname, pyobj)
           next
         end
@@ -77,12 +77,18 @@ module PyCall
     private
 
     def define_name(name, pyobj)
-      if constant_name?(name)
-        context = self
-        context = (self == PyCall::Import.main_object) ? Object : self
-        context.module_eval { const_set(name, pyobj) }
+      if callable?(pyobj) && !type_object?(pyobj)
+        define_singleton_method(name) do |*args|
+          LibPython::Helpers.call_object(pyobj.__pyptr__, *args)
+        end
       else
-        define_singleton_method(name) { pyobj }
+        if constant_name?(name)
+          context = self
+          context = (self == PyCall::Import.main_object) ? Object : self
+          context.module_eval { const_set(name, pyobj) }
+        else
+          define_singleton_method(name) { pyobj }
+        end
       end
     end
 
@@ -101,6 +107,14 @@ module PyCall
       @assoc_array_matcher ||= ->(ary) do
         ary.is_a?(Array) && ary.length == 2
       end
+    end
+
+    def callable?(pyobj)
+      LibPython::Helpers.callable?(pyobj.__pyptr__)
+    end
+
+    def type_object?(pyobj)
+      pyobj.__pyptr__.kind_of? PyTypePtr
     end
   end
 end
