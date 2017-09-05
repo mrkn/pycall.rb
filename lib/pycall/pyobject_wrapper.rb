@@ -44,13 +44,19 @@ module PyCall
       super
     end
 
-    def ==(other)
-      case other
-      when PyObjectWrapper
-        LibPython::Helpers.compare(:==, __pyptr__, other.__pyptr__)
-      else
-        super
-      end
+    [:==, :!=, :<, :<=, :>, :>=].each do |op|
+      class_eval("#{<<-"begin;"}\n#{<<-"end;"}", __FILE__, __LINE__+1)
+      begin;
+        def #{op}(other)
+          case other
+          when PyObjectWrapper
+            LibPython::Helpers.compare(:#{op}, __pyptr__, other.__pyptr__)
+          else
+            other = Conversion.from_ruby(other)
+            LibPython::Helpers.compare(:#{op}, __pyptr__, other)
+          end
+        end
+      end;
     end
 
     def [](*key)

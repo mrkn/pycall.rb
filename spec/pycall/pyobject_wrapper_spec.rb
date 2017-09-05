@@ -90,6 +90,30 @@ module PyCall
       end
     end
 
+    describe '#==' do
+      pending
+    end
+
+    describe '#!=' do
+      pending
+    end
+
+    describe '#<' do
+      pending
+    end
+
+    describe '#<=' do
+      pending
+    end
+
+    describe '#>' do
+      pending
+    end
+
+    describe '#>=' do
+      pending
+    end
+
     describe '#[]' do
       pending
     end
