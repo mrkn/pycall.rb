@@ -620,6 +620,7 @@ typedef struct {
 pycall_libpython_api_table_t *pycall_libpython_api_table(void);
 #define Py_API(name) (pycall_libpython_api_table()->name)
 
+int pycall_python_major_version(void);
 Py_ssize_t pycall_python_hexversion(void);
 #define pycall_python_long_hash (pycall_python_hexversion() < 0x03020000)
 

@@ -30,11 +30,20 @@ static VALUE python_type_mapping;
 static VALUE python_type_mapping;
 static ID id_python_type_mapping;
 
+int
+pycall_python_major_version(void)
+{
+  return python_major_version;
+}
+
 Py_ssize_t
 pycall_python_hexversion(void)
 {
   return python_hexversion;
 }
+
+#undef pycall_python_major_version
+#define pycall_python_major_version() python_major_version
 
 #undef pycall_python_hexversion
 #define pycall_python_hexversion() python_hexversion
