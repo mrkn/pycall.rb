@@ -152,6 +152,10 @@ module PyCall
       end
     end
 
+    def inspect
+      PyCall.builtins.repr(__pyptr__)
+    end
+
     def to_s
       LibPython::Helpers.str(__pyptr__)
     end
