@@ -725,11 +725,38 @@ pycall_libpython_helpers_m_compare(VALUE mod, VALUE op, VALUE pyptr_a, VALUE pyp
   return pycall_pyobject_to_ruby(res);
 }
 
+static int is_pyobject_wrapper(VALUE obj);
+
+VALUE
+pycall_getattr_default(VALUE obj, char const *name, VALUE default_value)
+{
+  PyObject *pyobj, *res;
+
+  if (is_pyobject_wrapper(obj)) {
+    pyobj = pycall_pyobject_wrapper_get_pyobj_ptr(obj);
+  }
+  else {
+    pyobj = check_get_pyobj_ptr(obj, NULL);
+  }
+
+  res = Py_API(PyObject_GetAttrString)(pyobj, name);
+  if (!res && default_value == Qundef) {
+    pycall_pyerror_fetch_and_raise("PyObject_GetAttrString in pycall_libpython_helpers_m_getattr");
+  }
+  Py_API(PyErr_Clear)();
+  return res ? pycall_pyobject_to_ruby(res) : default_value;
+}
+
+VALUE
+pycall_getattr(VALUE pyptr, char const *name)
+{
+  return pycall_getattr_default(pyptr, name, Qundef);
+}
+
 static VALUE
 pycall_libpython_helpers_m_getattr(int argc, VALUE *argv, VALUE mod)
 {
   VALUE pyptr, name, default_value;
-  PyObject *pyobj, *res;
 
   if (rb_scan_args(argc, argv, "21", &pyptr, &name, &default_value) == 2) {
     default_value = Qundef;
@@ -739,18 +766,11 @@ pycall_libpython_helpers_m_getattr(int argc, VALUE *argv, VALUE mod)
     rb_raise(rb_eTypeError, "PyCall::PyPtr is required");
   }
 
-  pyobj = get_pyobj_ptr(pyptr);
-
   if (RB_TYPE_P(name, T_SYMBOL)) {
     name = rb_sym_to_s(name);
   }
 
-  res = Py_API(PyObject_GetAttrString)(pyobj, StringValueCStr(name));
-  if (!res && default_value == Qundef) {
-    pycall_pyerror_fetch_and_raise("PyObject_GetAttrString in pycall_libpython_helpers_m_getattr");
-  }
-  Py_API(PyErr_Clear)();
-  return res ? pycall_pyobject_to_ruby(res) : default_value;
+  return pycall_getattr_default(pyptr, StringValueCStr(name), default_value);
 }
 
 static VALUE
