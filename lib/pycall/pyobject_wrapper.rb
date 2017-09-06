@@ -51,6 +51,15 @@ module PyCall
       super
     end
 
+    def kind_of?(cls)
+      case cls
+      when PyTypeObjectWrapper
+        __pyptr__.kind_of?(cls.__pyptr__)
+      else
+        super
+      end
+    end
+
     [:==, :!=, :<, :<=, :>, :>=].each do |op|
       class_eval("#{<<-"begin;"}\n#{<<-"end;"}", __FILE__, __LINE__+1)
       begin;

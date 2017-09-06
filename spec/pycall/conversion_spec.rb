@@ -16,9 +16,9 @@ module PyCall
       end
 
       it 'returns true and registers a given type mapping' do
-        expect(LibPython::Helpers.call_object(python_class)).not_to be_a(wrapper_class)
+        expect(LibPython::Helpers.call_object(python_class).class).not_to eq(wrapper_class)
         expect(Conversion.register_python_type_mapping(python_class, wrapper_class)).to eq(true)
-        expect(LibPython::Helpers.call_object(python_class)).to be_a(wrapper_class)
+        expect(LibPython::Helpers.call_object(python_class).class).to eq(wrapper_class)
       end
 
       context 'when no type mapping for a given Python type is registered' do
@@ -70,7 +70,7 @@ module PyCall
       it 'returns true and unregisters the type mapping for a given Python type' do
         Conversion.register_python_type_mapping(python_class, wrapper_class)
         expect(Conversion.unregister_python_type_mapping(python_class)).to eq(true)
-        expect(LibPython::Helpers.call_object(python_class)).not_to be_a(wrapper_class)
+        expect(LibPython::Helpers.call_object(python_class).class).not_to eq(wrapper_class)
       end
 
       context 'when the type mapping for a given Python type is not registered' do
