@@ -1903,20 +1903,6 @@ pycall_tuple_to_a(VALUE obj)
 }
 
 static VALUE
-pycall_tuple_inspect(VALUE obj)
-{
-  PyObject *pyobj, *repr;
-
-  pyobj = pycall_pyobject_wrapper_check_get_pyobj_ptr(obj, Py_API(PyTuple_Type));
-  repr = Py_API(PyObject_Repr)(pyobj);
-  if (!repr) {
-    pycall_pyerror_fetch_and_raise("PyObject_Repr in pycall_tuple_inspect");
-  }
-
-  return pycall_pystring_to_ruby(pyobj);
-}
-
-static VALUE
 pycall_pyerror_s_occurred_p(VALUE klass)
 {
   return Py_API(PyErr_Occurred)() != NULL ? Qtrue : Qfalse;
@@ -1944,7 +1930,6 @@ init_tuple(void)
   rb_define_singleton_method(cTuple, "new", pycall_tuple_s_new, -1);
   rb_define_method(cTuple, "length", pycall_tuple_length, 0);
   rb_define_method(cTuple, "to_a", pycall_tuple_to_a, 0);
-  rb_define_method(cTuple, "inspect", pycall_tuple_inspect, 0);
 }
 
 void
