@@ -629,6 +629,9 @@ RUBY_EXTERN const rb_data_type_t pycall_pyptr_data_type;
 size_t pycall_pyptr_memsize(void const *);
 void pycall_pyptr_free(void *);
 
+VALUE pycall_import_module(char const *name);
+VALUE pycall_import_module_level(char const *name, VALUE globals, VALUE locals, VALUE fromlist, int level);
+
 VALUE pycall_pyobject_to_ruby(PyObject *);
 VALUE pycall_pytype_to_ruby(PyObject *);
 VALUE pycall_pymodule_to_ruby(PyObject *);

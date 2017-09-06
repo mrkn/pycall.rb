@@ -601,12 +601,48 @@ pycall_libpython_helpers_m_unicode_literals_p(VALUE mod)
   return python_is_unicode_literals ? Qtrue : Qfalse;
 }
 
+VALUE
+pycall_import_module(char const *name)
+{
+  PyObject *pymod = Py_API(PyImport_ImportModule)(name);
+  if (!pymod) {
+    pycall_pyerror_fetch_and_raise("PyImport_ImportModule in pycall_libpython_helpers_m_import_module");
+  }
+  return pycall_pyobject_to_ruby(pymod);
+}
+
+VALUE
+pycall_import_module_level(char const *name, VALUE globals, VALUE locals, VALUE fromlist, int level)
+{
+  PyObject *pyglobals = NULL, *pylocals = NULL, *pyfromlist = NULL, *pymod;
+
+  if (!NIL_P(globals)) {
+    pyglobals = check_get_pyobj_ptr(globals, Py_API(PyDict_Type));
+  }
+  if (!NIL_P(locals)) {
+    pylocals = check_get_pyobj_ptr(locals, Py_API(PyDict_Type));
+  }
+  if (!NIL_P(fromlist)) {
+    fromlist = rb_convert_type(fromlist, T_ARRAY, "Array", "to_ary");
+    pyfromlist = pycall_pyobject_from_ruby(fromlist);
+  }
+  else {
+    /* TODO: set the default fromlist to ['*'] */
+  }
+
+  pymod = Py_API(PyImport_ImportModuleLevel)(name, pyglobals, pylocals, pyfromlist, level);
+  if (!pymod) {
+    pycall_pyerror_fetch_and_raise("PyImport_ImportModuleLevel in pycall_libpython_helpers_m_import_module");
+  }
+
+  return pycall_pyobject_to_ruby(pymod);
+}
+
 static VALUE
 pycall_libpython_helpers_m_import_module(int argc, VALUE *argv, VALUE mod)
 {
-  VALUE name, globals, locals, fromlist, level, rbmod;
+  VALUE name, globals, locals, fromlist, level;
   char const *name_cstr;
-  PyObject *pymod;
 
   rb_scan_args(argc, argv, "14", &name, &globals, &locals, &fromlist, &level);
 
@@ -617,42 +653,17 @@ pycall_libpython_helpers_m_import_module(int argc, VALUE *argv, VALUE mod)
   name_cstr = StringValueCStr(name);
 
   if (argc == 1) {
-    pymod = Py_API(PyImport_ImportModule)(name_cstr);
-    if (!pymod) {
-      pycall_pyerror_fetch_and_raise("PyImport_ImportModule in pycall_libpython_helpers_m_import_module");
-    }
+    return pycall_import_module(name_cstr);
+  }
+
+  if (argc == 5) {
+    level = rb_check_to_integer(level, "to_int");
   }
   else {
-    PyObject *pyglobals = NULL, *pylocals = NULL, *pyfromlist = NULL;
-
-    if (argc >= 2 && !NIL_P(globals)) {
-      pyglobals = check_get_pyobj_ptr(globals, Py_API(PyDict_Type));
-    }
-    if (argc >= 3 && !NIL_P(locals)) {
-      pylocals = check_get_pyobj_ptr(locals, Py_API(PyDict_Type));
-    }
-    if (argc >= 4) {
-      fromlist = rb_convert_type(fromlist, T_ARRAY, "Array", "to_ary");
-      pyfromlist = pycall_pyobject_from_ruby(fromlist);
-    }
-    else {
-      /* TODO: set the default fromlist to ['*'] */
-    }
-    if (argc == 5) {
-      level = rb_check_to_integer(level, "to_int");
-    }
-    else {
-      /* TODO: set the default level to 0 */
-    }
-
-    pymod = Py_API(PyImport_ImportModuleLevel)(name_cstr, pyglobals, pylocals, pyfromlist, NUM2INT(level));
-    if (!pymod) {
-      pycall_pyerror_fetch_and_raise("PyImport_ImportModuleLevel in pycall_libpython_helpers_m_import_module");
-    }
+    /* TODO: set the default level to 0 */
   }
 
-  rbmod = pycall_pyobject_to_ruby(pymod);
-  return rbmod;
+  return pycall_import_module_level(name_cstr, globals, locals, fromlist, NUM2INT(level));
 }
 
 static int
