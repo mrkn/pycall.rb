@@ -726,6 +726,7 @@ pycall_libpython_helpers_m_compare(VALUE mod, VALUE op, VALUE pyptr_a, VALUE pyp
 }
 
 static int is_pyobject_wrapper(VALUE obj);
+static PyObject * pycall_pyobject_wrapper_get_pyobj_ptr(VALUE obj);
 
 VALUE
 pycall_getattr_default(VALUE obj, char const *name, VALUE default_value)
