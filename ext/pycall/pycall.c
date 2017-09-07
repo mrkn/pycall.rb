@@ -1778,7 +1778,16 @@ pycall_pyslice_from_ruby(VALUE obj)
   }
 
   if (!exclude_end) {
-    end = SSIZET2NUM(NUM2SSIZET(end) + 1); /* TODO: limit check */
+    ssize_t end_i = NUM2SSIZET(end);
+    switch (end_i) {
+      case -1:
+        end = Qnil;
+        break;
+
+      default:
+        end = SSIZET2NUM(end_i + 1); /* TODO: limit check */
+        break;
+    }
   }
 
   pystart = pycall_pyobject_from_ruby(begin);
