@@ -1,6 +1,9 @@
 # The change history of PyCall
 
-## master
+## 1.0.0
+
+* `#[]` and `#[]=` accept a `Range` and an `Enumerable`, which is genated by
+  `Range#step`, as a slice.
 
 * Rewrite almost all fundamental parts of PyCall as C extension.
 
