@@ -65,7 +65,7 @@ datasets = [
 
 fig = plt.figure(figsize: [27, 9])
 i = 1
-all = PyCall::Slice.all
+all = 0..-1
 datasets.each do |ds|
   x, y = *ds
   x = StandardScaler.new.fit_transform(x)
