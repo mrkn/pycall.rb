@@ -143,11 +143,46 @@ module PyCall
     end
 
     describe '#[]' do
-      pending
+      context 'when the given index is a Range' do
+        specify do
+          list = PyCall::List.new([*1..10])
+          expect(list[1..-2]).to eq(PyCall::List.new([*2..9]))
+          expect(list[1...-2]).to eq(PyCall::List.new([*2..8]))
+        end
+      end
+
+      context 'when the given index is an Enumerable that is created by Range#step' do
+        specify do
+          list = PyCall::List.new([*1..10])
+          expect(list[(1..-2).step(2)]).to eq(PyCall::List.new([2, 4, 6, 8]))
+        end
+      end
     end
 
     describe '#[]=' do
-      pending
+      context 'when the given index is a Range' do
+        specify do
+          list = PyCall::List.new([*1..10])
+          list[1..-2] = [100, 200, 300]
+          expect(list).to eq(PyCall::List.new([1, 100, 200, 300, 10]))
+
+          list = PyCall::List.new([*1..10])
+          list[1...-2] = [100, 200, 300]
+          expect(list).to eq(PyCall::List.new([1, 100, 200, 300, 9, 10]))
+        end
+      end
+
+      context 'when the given index is an Enumerable that is created by Range#step' do
+        specify do
+          list = PyCall::List.new([*1..10])
+          list[(1..-3).step(2)] = [100, 200, 300, 400]
+          expect(list).to eq(PyCall::List.new([1, 100, 3, 200, 5, 300, 7, 400, 9, 10]))
+
+          list = PyCall::List.new([*1..10])
+          list[(1...-3).step(2)] = [100, 200, 300]
+          expect(list).to eq(PyCall::List.new([1, 100, 3, 200, 5, 300, 7, 8, 9, 10]))
+        end
+      end
     end
 
     describe '#call' do

@@ -150,6 +150,8 @@ pycall_init_libpython_api_table(VALUE libpython_handle)
   INIT_API_TABLE_ENTRY(PyTuple_GetItem, required);
   INIT_API_TABLE_ENTRY(PyTuple_SetItem, required);
 
+  INIT_API_TABLE_ENTRY(PySlice_New, required);
+
   INIT_API_TABLE_ENTRY(PyIter_Next, required);
 
   INIT_API_TABLE_ENTRY(PyErr_Occurred, required);
