@@ -76,20 +76,10 @@ module PyCall
     end
 
     def [](*key)
-      if key.length == 1
-        key = key[0]
-      else
-        keys = PyCall::Tuple.new(key)
-      end
       LibPython::Helpers.getitem(__pyptr__, key)
     end
 
     def []=(*key, value)
-      if key.length == 1
-        key = key[0]
-      else
-        key = PyCall::Tuple.new(key)
-      end
       LibPython::Helpers.setitem(__pyptr__, key, value)
     end
 

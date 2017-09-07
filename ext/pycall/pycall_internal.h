@@ -577,6 +577,8 @@ typedef struct {
   PyObject * (* PyTuple_GetItem)(PyObject *, Py_ssize_t);
   int (* PyTuple_SetItem)(PyObject *, Py_ssize_t, PyObject *);
 
+  PyObject * (* PySlice_New)(PyObject *, PyObject *, PyObject *);
+
   PyObject * (* PyIter_Next)(PyObject *);
 
   PyObject * (* PyErr_Occurred)(void);
@@ -653,6 +655,7 @@ PyObject *pycall_pystring_from_ruby(VALUE);
 PyObject *pycall_pytuple_from_ruby(VALUE);
 PyObject *pycall_pylist_from_ruby(VALUE);
 PyObject *pycall_pydict_from_ruby(VALUE);
+PyObject *pycall_pyslice_from_ruby(VALUE);
 
 NORETURN(void pycall_pyerror_fetch_and_raise(char const *format, ...));
 
@@ -661,6 +664,9 @@ PyObject *pycall_pystring_from_format(char const *format, ...);
 PyObject *pycall_pystring_from_formatv(char const *format, va_list vargs);
 
 VALUE pycall_pyrubyptr_new(PyObject *pyrubyobj);
+
+int pycall_obj_is_step_range(VALUE obj);
+int pycall_extract_range(VALUE obj, VALUE *pbegin, VALUE *pend, int *pexclude_end, VALUE *pstep);
 
 void pycall_gcguard_register(PyObject *, VALUE);
 void pycall_gcguard_delete(PyObject *);
