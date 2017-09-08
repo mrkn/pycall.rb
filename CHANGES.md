@@ -1,5 +1,9 @@
 # The change history of PyCall
 
+## 1.0.1
+
+* Add PyTypeObject#===.
+
 ## 1.0.0
 
 * `#[]` and `#[]=` accept a `Range` and an `Enumerable`, which is genated by
