@@ -38,6 +38,17 @@ module PyCall
       end
     end
 
+    def ===(other)
+      case other
+      when PyObjectWrapper
+        __pyptr__ === other.__pyptr__
+      when PyPtr
+        __pyptr__ === other
+      else
+        super
+      end
+    end
+
     private
 
     def register_python_type_mapping
