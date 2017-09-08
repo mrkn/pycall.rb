@@ -10,6 +10,15 @@ module PyCall
       PyCall.wrap_class(simple_class)
     end
 
+    describe '#===' do
+      specify do
+        expect(PyCall.builtins.tuple === PyCall.tuple()).to eq(true)
+        np = PyCall.import_module('numpy')
+        expect(np.int64 === np.asarray([1])[0]).to eq(true)
+        expect(np.integer === np.asarray([1])[0]).to eq(true)
+      end
+    end
+
     describe '.extend_object' do
       context '@__pyptr__ of the extended object is a PyCall::PyTypePtr' do
         it 'extends the given object' do

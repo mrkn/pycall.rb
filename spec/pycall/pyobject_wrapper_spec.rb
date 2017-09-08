@@ -233,6 +233,12 @@ module PyCall
       end
     end
 
+    describe '#kind_of?' do
+      specify do
+        expect(PyCall.tuple()).to be_a(PyCall.builtins.tuple)
+      end
+    end
+
     describe '#to_s' do
       subject(:dict) { PyCall::Dict.new(a: 1, b: 2, c: 3) }
 
