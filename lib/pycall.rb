@@ -89,3 +89,5 @@ module PyCall
     end
   end
 end
+
+require 'pycall/iruby_helper' if defined? IRuby
