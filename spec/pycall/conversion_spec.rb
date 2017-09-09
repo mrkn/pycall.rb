@@ -102,6 +102,13 @@ module PyCall
         it { is_expected.to be_a(Module) }
         it { is_expected.to be_a(PyObjectWrapper) }
       end
+
+      context 'for a unicode string' do
+        let(:ruby_snowman) { "\u{2603}" }
+        let(:python_snowman) { p Conversion.from_ruby(ruby_snowman) }
+        subject { Conversion.to_ruby(python_snowman) }
+        it { is_expected.to eq(ruby_snowman) }
+      end
     end
 
     describe '.from_ruby' do

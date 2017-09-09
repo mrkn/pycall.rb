@@ -1,4 +1,5 @@
 #include "pycall_internal.h"
+#include <ruby/encoding.h>
 
 #include <stdarg.h>
 
@@ -1469,24 +1470,26 @@ pycall_pystring_to_ruby(PyObject *pyobj)
 {
   char *str = NULL;
   Py_ssize_t len = 0;
-  int res = -1;
+  int encindex, res = -1;
 
   /* TODO: PyUnicode_Check */
   if (pyobj->ob_type == Py_API(PyUnicode_Type)) {
     pyobj = Py_API(PyUnicode_AsUTF8String)(pyobj);
     res = Py_API(PyString_AsStringAndSize)(pyobj, &str, &len);
+    encindex = rb_utf8_encindex();
     pycall_Py_DecRef(pyobj);
   }
   /* TODO: PyString_Check */
   else if (pyobj->ob_type == Py_API(PyString_Type)) {
     res = Py_API(PyString_AsStringAndSize)(pyobj, &str, &len);
+    encindex = rb_ascii8bit_encindex();
   }
 
   if (res < 0) {
     return Qnil;
   }
 
-  return rb_str_new(str, len);
+  return rb_enc_str_new(str, len, rb_enc_from_index(encindex));
 }
 
 static VALUE
