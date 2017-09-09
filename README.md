@@ -1,7 +1,7 @@
 # PyCall: Calling Python functions from the Ruby language
 
-[![Build Status](https://travis-ci.org/mrkn/pycall.svg?branch=master)](https://travis-ci.org/mrkn/pycall)
-[![Build status](https://ci.appveyor.com/api/projects/status/071is0f4iu0vy8lp/branch/master?svg=true)](https://ci.appveyor.com/project/mrkn/pycall/branch/master)
+[![Build Status](https://travis-ci.org/mrkn/pycall.rb.svg?branch=1.0)](https://travis-ci.org/mrkn/pycall.rb)
+[![Build status](https://ci.appveyor.com/api/projects/status/071is0f4iu0vy8lp/branch/master?svg=true)](https://ci.appveyor.com/project/mrkn/pycall.rb/branch/master)
 
 This library provides the features to directly call and partially interoperate
 with Python from the Ruby language.  You can import arbitrary Python modules
@@ -77,7 +77,7 @@ version, push git commits and tags, and push the `.gem` file to
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at
-https://github.com/mrkn/pycall.
+https://github.com/mrkn/pycall.rb.
 
 
 ## Acknowledgement
