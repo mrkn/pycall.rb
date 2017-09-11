@@ -60,6 +60,24 @@ module PyCall
       end
     end
 
+    def <=>(other)
+      return 0  if equal?(other)
+      case other
+      when PyTypeObjectWrapper
+        return super if __pyptr__ == other.__pyptr__
+        other = other.__pyptr__
+      when Class, Module
+        return -1 if subclass?(other)
+        return 1  if other > self
+      end
+
+      return nil unless other.is_a?(PyTypePtr)
+      return 0  if __pyptr__ == other
+      return -1 if __pyptr__.subclass?(other)
+      return 1  if other.subclass?(__pyptr__)
+      nil
+    end
+
     private
 
     def register_python_type_mapping

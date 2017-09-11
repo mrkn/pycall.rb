@@ -41,6 +41,79 @@ module PyCall
       end
     end
 
+    describe '#<=>(other)' do
+      context 'when the value of other is a PyTypeObjectWrapper' do
+        context 'when the given class is a superclass in Python of the receiver' do
+          it 'returns -1' do
+            expect(PyCall.builtins.list <=> PyCall.builtins.object).to eq(-1)
+          end
+        end
+
+        context 'when the given class is a subclass in Python of the receiver' do
+          it 'returns 1' do
+            expect(PyCall.builtins.object <=> PyCall.builtins.list).to eq(1)
+          end
+        end
+
+        context 'when the given class is the receiver' do
+          it 'returns 0' do
+            expect(PyCall.builtins.list <=> PyCall.builtins.list).to eq(0)
+          end
+        end
+      end
+
+      context 'when the value of other is a PyTypePtr' do
+        context 'when the given class is a superclass in Python of the receiver' do
+          it 'returns -1' do
+            expect(PyCall.builtins.list <=> PyCall.builtins.object.__pyptr__).to eq(-1)
+          end
+        end
+
+        context 'when the given class is a subclass in Python of the receiver' do
+          it 'returns 1' do
+            expect(PyCall.builtins.object <=> PyCall.builtins.list.__pyptr__).to eq(1)
+          end
+        end
+
+        context 'when the given class is the receiver' do
+          it 'returns 0' do
+            expect(PyCall.builtins.list <=> PyCall.builtins.list.__pyptr__).to eq(0)
+          end
+        end
+      end
+
+      context 'when the value of other is a Class' do
+        context 'when the given class is a superclass of the receiver' do
+          it 'returns -1' do
+            expect(PyCall.builtins.list <=> Object).to eq(-1)
+            expect(PyCall.builtins.list <=> PyObjectWrapper).to eq(-1)
+          end
+        end
+
+        context 'when the given class is a subclass of the receiver' do
+          let(:subclass) { Class.new(PyCall.builtins.list) }
+
+          it 'returns 1' do
+            expect(PyCall.builtins.list <=> subclass).to eq(1)
+          end
+        end
+
+        context 'when the given class is neither a superclass or a subclass of the receiver' do
+          it 'returns nil' do
+            expect(PyCall.builtins.list <=> PyTypeObjectWrapper).to eq(nil)
+            expect(PyCall.builtins.list <=> Array).to eq(nil)
+          end
+        end
+      end
+
+      context 'when the other cases' do
+        it 'returns nil' do
+          expect(PyCall.builtins.list <=> Conversion.from_ruby(42)).to eq(nil)
+          expect(PyCall.builtins.list <=> 42).to eq(nil)
+        end
+      end
+    end
+
     describe '#===' do
       specify do
         expect(PyCall.builtins.tuple === PyCall.tuple()).to eq(true)
