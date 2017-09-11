@@ -7,7 +7,10 @@
 /pkg/
 /spec/reports/
 /tmp/
-__pycache__
+
+__pycache__/
+.ipynb_checkpoints/
 *.bundle
 *.so
 *.o
+*.pyc
