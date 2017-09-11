@@ -525,6 +525,7 @@ typedef struct {
   PyObject * (* _PyObject_New)(PyTypeObject *);
   int (* PyCallable_Check)(PyObject *);
   int (* PyObject_IsInstance)(PyObject *, PyObject *);
+  int (* PyObject_IsSubclass)(PyObject *, PyObject *);
   union {
     long      (* _long)(PyObject *);
     Py_hash_t (* _hash_t)(PyObject *);

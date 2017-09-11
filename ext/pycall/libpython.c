@@ -94,6 +94,7 @@ pycall_init_libpython_api_table(VALUE libpython_handle)
   INIT_API_TABLE_ENTRY(_PyObject_New, required);
   INIT_API_TABLE_ENTRY(PyCallable_Check, required);
   INIT_API_TABLE_ENTRY(PyObject_IsInstance, required);
+  INIT_API_TABLE_ENTRY(PyObject_IsSubclass, required);
   INIT_API_TABLE_ENTRY2(PyObject_Hash._hash_t, PyObject_Hash, required);
   INIT_API_TABLE_ENTRY(PyObject_RichCompare, required);
   INIT_API_TABLE_ENTRY(PyObject_Call, required);

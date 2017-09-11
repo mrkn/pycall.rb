@@ -527,6 +527,23 @@ pycall_pytypeptr_get_tp_flags(VALUE obj)
 }
 
 static VALUE
+pycall_pytypeptr_subclass_p(VALUE obj, VALUE other)
+{
+  PyObject *pyobj, *pyobj_other;
+  int res;
+
+  pyobj = get_pytypeobj_ptr(obj);
+  pyobj_other = check_get_pytypeobj_ptr(other);
+
+  res = Py_API(PyObject_IsSubclass)(pyobj, pyobj_other);
+  if (res < 0) {
+    pycall_pyerror_fetch_and_raise("PyObject_IsSubclass in pycall_pytypeptr_subclass_p");
+  }
+
+  return res ? Qtrue : Qfalse;
+}
+
+static VALUE
 pycall_pytypeptr_eqq(VALUE obj, VALUE other)
 {
   if (is_pycall_pyptr(other))
@@ -2108,6 +2125,7 @@ Init_pycall(void)
   rb_define_method(cPyTypePtr, "__tp_name__", pycall_pytypeptr_get_tp_name, 0);
   rb_define_method(cPyTypePtr, "__tp_basicsize__", pycall_pytypeptr_get_tp_basicsize, 0);
   rb_define_method(cPyTypePtr, "__tp_flags__", pycall_pytypeptr_get_tp_flags, 0);
+  rb_define_method(cPyTypePtr, "subclass?", pycall_pytypeptr_subclass_p, 1);
   rb_define_method(cPyTypePtr, "===", pycall_pytypeptr_eqq, 1);
 
   /* PyCall::LibPython::API */
