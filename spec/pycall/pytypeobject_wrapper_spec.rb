@@ -114,6 +114,58 @@ module PyCall
       end
     end
 
+    describe '#<' do
+      specify do
+        expect(PyCall.builtins.list < PyCall.builtins.list).to eq(false)
+        expect(PyCall.builtins.list < PyCall.builtins.object).to eq(true)
+        expect(PyCall.builtins.object < PyCall.builtins.list).to eq(false)
+        expect(PyCall.builtins.list < PyCall.builtins.dict).to eq(nil)
+        expect(PyCall.builtins.list < Object).to eq(true)
+        expect(PyCall.builtins.list < Array).to eq(nil)
+        expect(PyCall.builtins.list < Conversion.from_ruby(42)).to eq(nil)
+        expect(PyCall.builtins.list < 42).to eq(nil)
+      end
+    end
+
+    describe '#>' do
+      specify do
+        expect(PyCall.builtins.list > PyCall.builtins.list).to eq(false)
+        expect(PyCall.builtins.list > PyCall.builtins.object).to eq(false)
+        expect(PyCall.builtins.object > PyCall.builtins.list).to eq(true)
+        expect(PyCall.builtins.list > PyCall.builtins.dict).to eq(nil)
+        expect(PyCall.builtins.list > Object).to eq(false)
+        expect(PyCall.builtins.list > Array).to eq(nil)
+        expect(PyCall.builtins.list > Conversion.from_ruby(42)).to eq(nil)
+        expect(PyCall.builtins.list > 42).to eq(nil)
+      end
+    end
+
+    describe '#<=' do
+      specify do
+        expect(PyCall.builtins.list <= PyCall.builtins.list).to eq(true)
+        expect(PyCall.builtins.list <= PyCall.builtins.object).to eq(true)
+        expect(PyCall.builtins.object <= PyCall.builtins.list).to eq(false)
+        expect(PyCall.builtins.list <= PyCall.builtins.dict).to eq(nil)
+        expect(PyCall.builtins.list <= Object).to eq(true)
+        expect(PyCall.builtins.list <= Array).to eq(nil)
+        expect(PyCall.builtins.list <= Conversion.from_ruby(42)).to eq(nil)
+        expect(PyCall.builtins.list <= 42).to eq(nil)
+      end
+    end
+
+    describe '#>=' do
+      specify do
+        expect(PyCall.builtins.list >= PyCall.builtins.list).to eq(true)
+        expect(PyCall.builtins.list >= PyCall.builtins.object).to eq(false)
+        expect(PyCall.builtins.object >= PyCall.builtins.list).to eq(true)
+        expect(PyCall.builtins.list >= PyCall.builtins.dict).to eq(nil)
+        expect(PyCall.builtins.list >= Object).to eq(false)
+        expect(PyCall.builtins.list >= Array).to eq(nil)
+        expect(PyCall.builtins.list >= Conversion.from_ruby(42)).to eq(nil)
+        expect(PyCall.builtins.list >= 42).to eq(nil)
+      end
+    end
+
     describe '#===' do
       specify do
         expect(PyCall.builtins.tuple === PyCall.tuple()).to eq(true)

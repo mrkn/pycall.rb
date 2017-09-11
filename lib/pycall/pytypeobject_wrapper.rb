@@ -78,6 +78,26 @@ module PyCall
       nil
     end
 
+    def <(other)
+      cmp = self <=> other
+      cmp && cmp < 0
+    end
+
+    def >(other)
+      cmp = self <=> other
+      cmp && cmp > 0
+    end
+
+    def <=(other)
+      cmp = self <=> other
+      cmp && cmp <= 0
+    end
+
+    def >=(other)
+      cmp = self <=> other
+      cmp && cmp >= 0
+    end
+
     private
 
     def register_python_type_mapping
