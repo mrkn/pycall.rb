@@ -10,6 +10,37 @@ module PyCall
       PyCall.wrap_class(simple_class)
     end
 
+    describe '#subclass?(other)' do
+      subject { PyCall.builtins.list }
+
+      context 'when the value of other is a PyTypeObjectWrapper' do
+        specify do
+          expect(subject.subclass?(PyCall.builtins.object)).to eq(true)
+          expect(subject.subclass?(PyCall.builtins.list)).to eq(true)
+          expect(subject.subclass?(PyCall.builtins.dict)).to eq(false)
+        end
+      end
+
+      context 'when the value of other is a Class' do
+        specify do
+          expect(subject.subclass?(Object)).to eq(true)
+          expect(subject.subclass?(PyObjectWrapper)).to eq(true)
+          expect(subject.subclass?(PyTypeObjectWrapper)).to eq(false)
+          expect(subject.subclass?(Array)).to eq(false)
+        end
+      end
+
+      context 'when the other cases' do
+        it 'behaves as well as PyTypePtr#subclass?' do
+          expect(subject.subclass?(PyCall.builtins.object.__pyptr__)).to eq(true)
+          expect(subject.subclass?(PyCall.builtins.list.__pyptr__)).to eq(true)
+          expect(subject.subclass?(PyCall.builtins.dict.__pyptr__)).to eq(false)
+          expect { subject.subclass?(Conversion.from_ruby(12)) }.to raise_error(TypeError)
+          expect { subject.subclass?(12) }.to raise_error(TypeError)
+        end
+      end
+    end
+
     describe '#===' do
       specify do
         expect(PyCall.builtins.tuple === PyCall.tuple()).to eq(true)

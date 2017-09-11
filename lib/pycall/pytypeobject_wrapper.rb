@@ -49,6 +49,17 @@ module PyCall
       end
     end
 
+    def subclass?(other)
+      case other
+      when PyTypeObjectWrapper
+        __pyptr__.subclass?(other.__pyptr__)
+      when Class, Module
+        other >= self || false
+      else
+        __pyptr__.subclass?(other)
+      end
+    end
+
     private
 
     def register_python_type_mapping
