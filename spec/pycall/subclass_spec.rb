@@ -13,6 +13,10 @@ require 'spec_helper'
     Class.new(superclass_wrapper)
   end
 
+  it 'is an instance of subclass' do
+    expect(subclass.new.class).to eq(subclass)
+  end
+
   it 'calls __init__ of superclass' do
     a = subclass.new(1, 2, 3)
     expect(a.init_args.to_a).to eq([1, 2, 3])

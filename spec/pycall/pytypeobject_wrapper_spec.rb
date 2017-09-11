@@ -239,6 +239,20 @@ module PyCall
         obj = extended_class.new
         expect(obj.__pyptr__.__ob_type__).to eq(simple_class_wrapper)
       end
+
+      it 'calls __init__ only once' do
+        test_class = PyCall.import_module('pycall.initialize_test').InitializeTest
+        obj = test_class.new(42)
+        expect(obj.values.to_a).to eq([42])
+      end
+
+      context 'when __new__ is redefined' do
+        it 'calls __init__ only once' do
+          test_class = PyCall.import_module('pycall.initialize_test').NewOverrideTest
+          obj = test_class.new(42)
+          expect(obj.values.to_a).to eq([42, 42])
+        end
+      end
     end
   end
 end

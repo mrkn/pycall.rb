@@ -20,12 +20,14 @@ module PyCall
       subclass.instance_variable_set(:@__pyptr__, __pyptr__)
     end
 
-    def new(*args)
-      wrap_pyptr(LibPython::Helpers.call_object(__pyptr__, *args))
+    def new(*args, &b)
+      wrap_pyptr(__new__(__pyptr__, *args)).tap do |obj|
+        obj.instance_eval { initialize(*args, &b) }
+      end
     end
 
     def wrap_pyptr(pyptr)
-      return pyptr if pyptr.kind_of? self
+      return pyptr if pyptr.class <= self
       pyptr = pyptr.__pyptr__ if pyptr.kind_of? PyObjectWrapper
       unless pyptr.kind_of? PyPtr
         raise TypeError, "unexpected argument type #{pyptr.class} (expected PyCall::PyPtr)"
