@@ -1318,7 +1318,10 @@ pycall_pyobject_to_ruby(PyObject *pyobj)
   if (pyobj->ob_type == Py_API(PyLong_Type))
     return pycall_pylong_to_ruby(pyobj);
 
-  if (pyobj->ob_type == Py_API(PyUnicode_Type) || pyobj->ob_type == Py_API(PyString_Type))
+  if (pyobj->ob_type == Py_API(PyUnicode_Type))
+    return pycall_pyunicode_to_ruby(pyobj);
+
+  if (pyobj->ob_type == Py_API(PyString_Type))
     return pycall_pystring_to_ruby(pyobj);
 
   Py_API(Py_IncRef)(pyobj);
@@ -1470,26 +1473,46 @@ pycall_pystring_to_ruby(PyObject *pyobj)
 {
   char *str = NULL;
   Py_ssize_t len = 0;
-  int encindex, res = -1;
+  int res;
 
-  /* TODO: PyUnicode_Check */
-  if (pyobj->ob_type == Py_API(PyUnicode_Type)) {
-    pyobj = Py_API(PyUnicode_AsUTF8String)(pyobj);
-    res = Py_API(PyString_AsStringAndSize)(pyobj, &str, &len);
-    encindex = rb_utf8_encindex();
-    pycall_Py_DecRef(pyobj);
-  }
   /* TODO: PyString_Check */
-  else if (pyobj->ob_type == Py_API(PyString_Type)) {
-    res = Py_API(PyString_AsStringAndSize)(pyobj, &str, &len);
-    encindex = rb_ascii8bit_encindex();
+  if (pyobj->ob_type != Py_API(PyString_Type)) {
+    return Qnil;
   }
 
+  res = Py_API(PyString_AsStringAndSize)(pyobj, &str, &len);
   if (res < 0) {
     return Qnil;
   }
 
-  return rb_enc_str_new(str, len, rb_enc_from_index(encindex));
+  return rb_enc_str_new(str, len, rb_enc_from_index(rb_ascii8bit_encindex()));
+}
+
+VALUE
+pycall_pyunicode_to_ruby(PyObject *pyobj)
+{
+  char *str = NULL;
+  Py_ssize_t len = 0;
+  int res;
+
+  /* TODO: PyUnicode_Check */
+  if (pyobj->ob_type != Py_API(PyUnicode_Type)) {
+    return Qnil;
+  }
+
+  pyobj = Py_API(PyUnicode_AsUTF8String)(pyobj);
+  if (!pyobj) {
+    Py_API(PyErr_Clear)();
+    return Qnil;
+  }
+
+  res = Py_API(PyString_AsStringAndSize)(pyobj, &str, &len);
+  if (res < 0) {
+    pycall_Py_DecRef(pyobj);
+    return Qnil;
+  }
+
+  return rb_enc_str_new(str, len, rb_enc_from_index(rb_utf8_encindex()));
 }
 
 static VALUE
