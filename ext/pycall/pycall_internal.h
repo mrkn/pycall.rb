@@ -646,6 +646,7 @@ VALUE pycall_pyfloat_to_ruby(PyObject *);
 VALUE pycall_pyint_to_ruby(PyObject *);
 VALUE pycall_pylong_to_ruby(PyObject *);
 VALUE pycall_pystring_to_ruby(PyObject *);
+VALUE pycall_pyunicode_to_ruby(PyObject *);
 VALUE pycall_pyobject_to_a(PyObject *);
 
 VALUE pycall_conv_to_str(VALUE);
