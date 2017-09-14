@@ -105,9 +105,15 @@ module PyCall
 
       context 'for a unicode string' do
         let(:ruby_snowman) { "\u{2603}" }
-        let(:python_snowman) { p Conversion.from_ruby(ruby_snowman) }
+        let(:python_snowman) { Conversion.from_ruby(ruby_snowman) }
         subject { Conversion.to_ruby(python_snowman) }
         it { is_expected.to eq(ruby_snowman) }
+      end
+
+      context 'for a large size string' do
+        let(:large_string) { 'x' * 10000 }
+        subject { Conversion.to_ruby(Conversion.from_ruby(large_string)) }
+        it { is_expected.to eq(large_string) }
       end
     end
 
