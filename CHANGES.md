@@ -1,5 +1,10 @@
 # The change history of PyCall
 
+## 1.0.2
+
+* Fix the bug that a large Python string is broken when it converted to Ruby string
+  https://github.com/mrkn/pycall.rb/issues/32
+
 ## 1.0.1
 
 * Add PyTypeObject#===.
