@@ -11,7 +11,7 @@ if test -z "$PYENV_VERSION"; then
 fi
 
 if test -n "$LIBPYTHON"; then
-  LIBPYTHON=$(pyenv root)/$LIBPYTHON
+  export LIBPYTHON=$(pyenv root)/$LIBPYTHON
 fi
 
 if test "$PYENV_VERSION" = "system"; then

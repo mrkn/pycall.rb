@@ -49,5 +49,6 @@ install:
 - ci/travis_install.sh
 
 before_script:
+- . ci/travis_before_script.sh
 - bundle exec rake clobber compile
 - python lib/pycall/python/investigator.py
