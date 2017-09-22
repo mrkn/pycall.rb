@@ -19,11 +19,10 @@ if test "$PYENV_VERSION" = "system"; then
     echo "ERROR: LIBPYTHON is not provided for PYENV_VERSION=system" >2
     exit 1
   fi
-  PYENV_INSTALL_VERSION=$(basename $(dirname $(dirname $LIBPYTHON)))
-else
-  PYENV_INSTALL_VERSION=$PYENV_VERSION
+  # NOTE: PYENV_VERSION should be the version of LIBPYTHON during install script
+  PYENV_VERSION=$(basename $(dirname $(dirname $LIBPYTHON)))
 fi
-PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install -f $PYENV_INSTALL_VERSION
+PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install -f $PYENV_VERSION
 
 case "$PYENV_VERSION" in
 *conda*)
