@@ -25,16 +25,19 @@ env:
 matrix:
   include:
   - os: osx
+    osx_image: xcode9
     compiler: clang
-    rvm: 2.4.2
+    rvm: 2.4.1
     env: PYENV_VERSION=3.6.2
   - os: osx
+    osx_image: xcode9
     compiler: clang
-    rvm: 2.4.2
+    rvm: 2.4.1
     env: PYENV_VERSION=system LIBPYTHON=versions/3.6.2/lib/libpython3.6m.so
   - os: osx
+    osx_image: xcode9
     compiler: clang
-    rvm: 2.4.2
+    rvm: 2.4.1
     env: PYENV_VERSION=miniconda3-4.3.11
   allow_failure:
   - os: osx
