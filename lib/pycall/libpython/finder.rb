@@ -39,6 +39,7 @@ module PyCall
 	    end
 	  end
 
+          set_PYTHONHOME(python_config)
           libs = make_libs(python_config)
           libpaths = make_libpaths(python_config)
 
@@ -101,6 +102,10 @@ module PyCall
             {}.tap do |config|
               io.each_line do |line|
                 key, value = line.chomp.split(': ', 2)
+                case value
+                when 'True', 'true', 'False', 'false'
+                  value = (value == 'True' || value == 'true')
+                end
                 config[key.to_sym] = value if value != 'None'
               end
             end
@@ -111,6 +116,17 @@ module PyCall
 
         def python_investigator_py
           File.expand_path('../../python/investigator.py', __FILE__)
+        end
+
+        def set_PYTHONHOME(python_config)
+          if !ENV.has_key?('PYTHONHOME') && python_config[:conda]
+            case RUBY_PLATFORM
+            when /mingw32/, /cygwin/, /mswin/
+              ENV['PYTHONHOME'] = python_config[:exec_prefix]
+            else
+              ENV['PYTHONHOME'] = python_config.values_at(:prefix, :exec_prefix).join(':')
+            end
+          end
         end
 
         def make_libs(python_config)

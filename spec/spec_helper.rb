@@ -2,7 +2,15 @@ $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
 
 puts
 puts "Environment variables:"
-%w[LIBPYTHON PYTHON PYTHONPATH PYCALL_DEBUG_FIND_LIBPYTHON].each do |key|
+%w[
+  ANACONDA
+  LIBPYTHON
+  PYENV_VERSION
+  PYTHON
+  PYTHON_VERSION
+  PYTHONPATH
+  PYCALL_DEBUG_FIND_LIBPYTHON
+].each do |key|
   puts "- #{key}=#{ENV[key]}"
 end
 
