@@ -6,6 +6,20 @@
 
   *Naoto Takai*
 
+## 1.0.3
+
+* Fix anaconda support to define the environment variable `PYTHONHOME`.
+  https://github.com/mrkn/pycall.rb/issues/37
+
+## 1.0.2
+
+* Fix the bug that a large Python string is broken when it converted to Ruby string
+  https://github.com/mrkn/pycall.rb/issues/32
+
+## 1.0.1
+
+* Add PyTypeObject#===.
+
 ## 1.0.0
 
 * `#[]` and `#[]=` accept a `Range` and an `Enumerable`, which is genated by
