@@ -1,5 +1,11 @@
 # The change history of PyCall
 
+## master
+
+* Add `PyCall::Tuple#to_ary`
+
+  *Naoto Takai*
+
 ## 1.0.0
 
 * `#[]` and `#[]=` accept a `Range` and an `Enumerable`, which is genated by
