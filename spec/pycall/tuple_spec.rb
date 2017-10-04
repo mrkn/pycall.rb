@@ -22,6 +22,14 @@ module PyCall
       end
     end
 
+    describe '#to_ary' do
+      it 'is used for multiple assignment' do
+        (a1, a2, a3), (b1, b2, b3) = Tuple.new(subject, subject)
+        expect([a1, a2, a3]).to eq([1, 2, 3])
+        expect([b1, b2, b3]).to eq([1, 2, 3])
+      end
+    end
+
     describe '#inspect' do
       pending
     end

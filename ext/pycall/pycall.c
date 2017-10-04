@@ -2078,6 +2078,7 @@ init_tuple(void)
   rb_define_singleton_method(cTuple, "new", pycall_tuple_s_new, -1);
   rb_define_method(cTuple, "length", pycall_tuple_length, 0);
   rb_define_method(cTuple, "to_a", pycall_tuple_to_a, 0);
+  rb_define_alias(cTuple, "to_ary", "to_a");
 }
 
 void
