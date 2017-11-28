@@ -154,12 +154,16 @@ pycall_init_libpython_api_table(VALUE libpython_handle)
 
   INIT_API_TABLE_ENTRY(PyIter_Next, required);
 
+  INIT_API_TABLE_ENTRY(PyEval_ThreadsInitialized, required);
+  INIT_API_TABLE_ENTRY(PyEval_InitThreads, required);
+
   INIT_API_TABLE_ENTRY(PyErr_Occurred, required);
   INIT_API_TABLE_ENTRY(PyErr_Fetch, required);
   INIT_API_TABLE_ENTRY(PyErr_Restore, required);
   INIT_API_TABLE_ENTRY(PyErr_Clear, required);
   INIT_API_TABLE_ENTRY(PyErr_SetString, required);
   INIT_API_TABLE_ENTRY(PyErr_Format, required);
+  INIT_API_TABLE_ENTRY(PyErr_SetInterrupt, required);
 
   INIT_API_TABLE_ENTRY(PyImport_ImportModule, required);
   INIT_API_TABLE_ENTRY(PyImport_ImportModuleLevel, required);

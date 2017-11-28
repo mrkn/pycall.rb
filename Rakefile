@@ -17,6 +17,8 @@ Rake::ExtensionTask.new('pycall', gem_spec) do |ext|
   end
 end
 
+Rake::ExtensionTask.new('pycall/spec_helper')
+
 desc "Compile binaries for mingw platform using rake-compiler-dock"
 task 'build:mingw' do
   require 'rake_compiler_dock'

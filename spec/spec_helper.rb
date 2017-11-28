@@ -22,6 +22,7 @@ puts PyCall::PYTHON_DESCRIPTION
 
 require 'pycall/import'
 require "pycall/pretty_print"
+require 'pycall/spec_helper.so'
 
 PyCall.sys.path.append(File.expand_path('../python', __FILE__))
 

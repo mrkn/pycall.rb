@@ -1,4 +1,6 @@
-def call_callable(f, x):
+def call_callable(f, x=None):
+    if x is None:
+        return f()
     return f(str(x))
 
 def test_ruby_object_attr(ro):
