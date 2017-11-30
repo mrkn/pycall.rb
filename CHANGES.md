@@ -6,6 +6,10 @@
 
   *Naoto Takai*
 
+* Release GVL while the Python interpreter is running
+
+* Drop support Ruby 2.2.x and 2.1.x
+
 ## 1.0.3
 
 * Fix anaconda support to define the environment variable `PYTHONHOME`.
