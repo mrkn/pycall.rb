@@ -1,71 +1,37 @@
 ---
 environment:
   matrix:
-  # Ruby 2.1 (32bit)
-  - ruby_version: "21"
+  # Ruby 2.4 (32bit)
+  - ruby_version: "24"
     PYTHONDIR: "C:\\Python27"
     PYTHON: "C:\\Python27\\python.exe"
 
-  - ruby_version: "21"
+  - ruby_version: "24"
     PYTHONDIR: "C:\\Python34"
     PYTHON: "C:\\Python34\\python.exe"
 
-  - ruby_version: "21"
+  - ruby_version: "24"
     PYTHONDIR: "C:\\Python35"
     PYTHON: "C:\\Python35\\python.exe"
 
-  - ruby_version: "21"
+  - ruby_version: "24"
     PYTHONDIR: "C:\\Python36"
     PYTHON: "C:\\Python36\\python.exe"
 
-  # Ruby 2.1 (64bit)
-  - ruby_version: "21-x64"
+  # Ruby 2.4 (64bit)
+  - ruby_version: "24-x64"
     PYTHONDIR: "C:\\Python27-x64"
     PYTHON: "C:\\Python27-x64\\python.exe"
 
-  - ruby_version: "21-x64"
+  - ruby_version: "24-x64"
     PYTHONDIR: "C:\\Python34-x64"
     PYTHON: "C:\\Python34-x64\\python.exe"
 
-  - ruby_version: "21-x64"
+  - ruby_version: "24-x64"
     PYTHONDIR: "C:\\Python35-x64"
     PYTHON: "C:\\Python35-x64\\python.exe"
 
-  - ruby_version: "21-x64"
-    PYTHONDIR: "C:\\Python36-x64"
-    PYTHON: "C:\\Python36-x64\\python.exe"
-
-  # Ruby 2.2 (32bit)
-  - ruby_version: "22"
-    PYTHONDIR: "C:\\Python27"
-    PYTHON: "C:\\Python27\\python.exe"
-
-  - ruby_version: "22"
-    PYTHONDIR: "C:\\Python34"
-    PYTHON: "C:\\Python34\\python.exe"
-
-  - ruby_version: "22"
-    PYTHONDIR: "C:\\Python35"
-    PYTHON: "C:\\Python35\\python.exe"
-
-  - ruby_version: "22"
-    PYTHONDIR: "C:\\Python36"
-    PYTHON: "C:\\Python36\\python.exe"
-
-  # Ruby 2.2 (64bit)
-  - ruby_version: "22-x64"
-    PYTHONDIR: "C:\\Python27-x64"
-    PYTHON: "C:\\Python27-x64\\python.exe"
-
-  - ruby_version: "22-x64"
-    PYTHONDIR: "C:\\Python34-x64"
-    PYTHON: "C:\\Python34-x64\\python.exe"
-
-  - ruby_version: "22-x64"
-    PYTHONDIR: "C:\\Python35-x64"
-    PYTHON: "C:\\Python35-x64\\python.exe"
-
-  - ruby_version: "22-x64"
+  - ruby_version: "24-x64"
     PYTHONDIR: "C:\\Python36-x64"
     PYTHON: "C:\\Python36-x64\\python.exe"
 
