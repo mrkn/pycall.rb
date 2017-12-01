@@ -10,6 +10,7 @@ extern "C" {
 
 #include <ruby.h>
 #include <ruby/encoding.h>
+#include <ruby/thread.h>
 #include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
@@ -34,6 +35,9 @@ pycall_integer_type_p(VALUE obj)
 #endif
 
 void ruby_debug_breakpoint();
+int ruby_thread_has_gvl_p(void);
+
+#define CALL_WITH_GVL(func, data) rb_thread_call_with_gvl((void * (*)(void *))(func), (void *)(data))
 
 /* ==== python ==== */
 
@@ -581,12 +585,16 @@ typedef struct {
 
   PyObject * (* PyIter_Next)(PyObject *);
 
+  int (* PyEval_ThreadsInitialized)(void);
+  void (* PyEval_InitThreads)(void);
+
   PyObject * (* PyErr_Occurred)(void);
   void (* PyErr_Fetch)(PyObject **, PyObject **, PyObject **);
   void (* PyErr_Restore)(PyObject *, PyObject *, PyObject *);
   void (* PyErr_Clear)(void);
   void (* PyErr_SetString)(PyObject *, const char *);   /* decoded from utf-8 */
   void (* PyErr_Format)(PyObject *, const char *, ...); /* ASCII-encoded string  */
+  void (* PyErr_SetInterrupt)(void);
 
   PyObject * (* PyImport_ImportModule)(char const*);
   PyObject * (* PyImport_ImportModuleLevel)(char const*, PyObject *, PyObject *, PyObject *, int);

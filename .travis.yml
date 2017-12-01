@@ -39,8 +39,10 @@ matrix:
     compiler: clang
     rvm: 2.4.1
     env: PYENV_VERSION=miniconda3-4.3.11
-  allow_failure:
+  allow_failures:
   - os: osx
+  - rvm: 2.2.8
+  - rvm: 2.1.10
 
 before_install:
 - gem update --system

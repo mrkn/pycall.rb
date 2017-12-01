@@ -858,6 +858,42 @@ pycall_extract_kwargs_from_ruby_hash(VALUE key, VALUE value, VALUE arg)
   return ST_CONTINUE;
 }
 
+static void
+pycall_interrupt_python_thread(void *ptr)
+{
+  Py_API(PyErr_SetInterrupt)();
+}
+
+struct call_pyobject_call_params {
+  PyObject *pycallable;
+  PyObject *args;
+  PyObject *kwargs;
+};
+
+PyObject *
+call_pyobject_call(struct call_pyobject_call_params *params)
+{
+  PyObject *res;
+  res = Py_API(PyObject_Call)(params->pycallable, params->args, params->kwargs); /* New reference */
+  return res;
+}
+
+PyObject *
+pyobject_call_without_gvl(PyObject *pycallable, PyObject *args, PyObject *kwargs)
+{
+  PyObject *res;
+  struct call_pyobject_call_params params;
+  params.pycallable = pycallable;
+  params.args = args;
+  params.kwargs = kwargs;
+
+  res = (PyObject *)rb_thread_call_without_gvl(
+      (void * (*)(void *))call_pyobject_call, (void *)&params,
+      (rb_unblock_function_t *)pycall_interrupt_python_thread, NULL);
+
+  return res;
+}
+
 static VALUE
 pycall_call_python_callable(PyObject *pycallable, int argc, VALUE *argv)
 {
@@ -905,7 +941,7 @@ pycall_call_python_callable(PyObject *pycallable, int argc, VALUE *argv)
     }
   }
 
-  res = Py_API(PyObject_Call)(pycallable, args, kwargs); /* New reference */
+  res = pyobject_call_without_gvl(pycallable, args, kwargs); /* New reference */
   if (!res) {
     pycall_pyerror_fetch_and_raise("PyObject_Call in pycall_call_python_callable");
   }
@@ -1946,6 +1982,10 @@ init_python(void)
 
   Py_API(Py_InitializeEx)(0);
   Py_API(PySys_SetArgvEx)(0, (char **)argv, 0);
+
+  if (!Py_API(PyEval_ThreadsInitialized)()) {
+    Py_API(PyEval_InitThreads)();
+  }
 
   /* check the availability of stackless extension */
   python_has_stackless_extension = (Py_API(PyImport_ImportModule)("stackless") != NULL);

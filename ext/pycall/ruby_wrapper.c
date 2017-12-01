@@ -5,29 +5,30 @@ static PyMemberDef PyRuby_members[] = {
   {NULL} /* sentinel */
 };
 
-static void PyRuby_dealloc(PyRubyObject *);
-static PyObject * PyRuby_repr(PyRubyObject *);
-static PyObject * PyRuby_call(PyRubyObject *, PyObject *, PyObject *);
-static PyObject * PyRuby_getattro(PyRubyObject *, PyObject *);
+static VALUE PyRuby_get_ruby_object_and_set_pyerr(PyObject *pyobj);
+static void PyRuby_dealloc_with_gvl(PyRubyObject *);
+static PyObject * PyRuby_repr_with_gvl(PyRubyObject *);
+static PyObject * PyRuby_call_with_gvl(PyRubyObject *, PyObject *, PyObject *);
+static PyObject * PyRuby_getattro_with_gvl(PyRubyObject *, PyObject *);
 
 PyTypeObject PyRuby_Type = {
   PyVarObject_HEAD_INIT(NULL, 0)
   "PyCall.ruby_object", /* tp_name */
   sizeof(PyRubyObject), /* tp_basicsize */
   0, /* tp_itemsize */
-  (destructor)PyRuby_dealloc,    /* tp_dealloc */
+  (destructor)PyRuby_dealloc_with_gvl, /* tp_dealloc */
   0,                             /* tp_print */
   0,                             /* tp_getattr */
   0,                             /* tp_setattr */
   0,                             /* tp_reserved */
-  (reprfunc)PyRuby_repr,         /* tp_repr */
+  (reprfunc)PyRuby_repr_with_gvl, /* tp_repr */
   0,                             /* tp_as_number */
   0,                             /* tp_as_sequence */
   0,                             /* tp_as_mapping */
   {0},                           /* tp_hash  */
-  (ternaryfunc)PyRuby_call,      /* tp_call */
+  (ternaryfunc)PyRuby_call_with_gvl, /* tp_call */
   0,                             /* tp_str */
-  (getattrofunc)PyRuby_getattro, /* tp_getattro */
+  (getattrofunc)PyRuby_getattro_with_gvl, /* tp_getattro */
   0,                             /* tp_setattro */
   0,                             /* tp_as_buffer */
   Py_TPFLAGS_BASETYPE,           /* tp_flags */
@@ -42,8 +43,8 @@ PyTypeObject PyRuby_Type = {
   PyRuby_members,                /*tp_members*/
 };
 
-PyObject *
-PyRuby_New(VALUE ruby_object)
+static PyObject *
+PyRuby_New_impl(VALUE ruby_object)
 {
   PyRubyObject *op;
 
@@ -53,59 +54,17 @@ PyRuby_New(VALUE ruby_object)
   return (PyObject *)op;
 }
 
-static VALUE
-funcall_id2ref(VALUE object_id)
+PyObject *
+PyRuby_New(VALUE ruby_object)
 {
-  VALUE rb_mObjSpace;
-  object_id = rb_check_to_integer(object_id, "to_int");
-  rb_mObjSpace = rb_const_get(rb_cObject, rb_intern("ObjectSpace"));
-  return rb_funcall(rb_mObjSpace, rb_intern("_id2ref"), 1, object_id);
-}
-
-static VALUE
-protect_id2ref(VALUE object_id)
-{
-  VALUE obj;
-  int state;
-
-  obj = rb_protect((VALUE (*)(VALUE))funcall_id2ref, object_id, &state);
-  if (state)
-    return Qundef;
-
-  return obj;
-}
-
-static VALUE
-protect_id2ref_and_set_pyerr(VALUE object_id)
-{
-  VALUE obj = protect_id2ref(object_id);
-  if (obj != Qundef)
-    return obj;
-
-  obj = rb_errinfo();
-  if (RTEST(rb_obj_is_kind_of(obj, rb_eRangeError))) {
-    Py_API(PyErr_SetString)(Py_API(PyExc_RuntimeError), "[BUG] referenced object was garbage-collected");
+  if (!ruby_thread_has_gvl_p()) {
+    CALL_WITH_GVL(PyRuby_New_impl, ruby_object);
   }
-  else {
-    VALUE emesg = rb_check_funcall(obj, rb_intern("message"), 0, 0);
-    Py_API(PyErr_Format)(Py_API(PyExc_RuntimeError),
-        "[BUG] Unable to obtain ruby object from ID: %s (%s)",
-        StringValueCStr(emesg), rb_class2name(CLASS_OF(obj)));
-  }
-  return Qundef;
+
+  return PyRuby_New_impl(ruby_object);
 }
 
-static VALUE
-PyRuby_get_ruby_object_and_set_pyerr(PyObject *pyobj)
-{
-  VALUE obj_id;
-  if (!PyRuby_Check(pyobj))
-    return Qundef;
-  obj_id = rb_obj_id(PyRuby_get_ruby_object(pyobj));
-  return protect_id2ref_and_set_pyerr(obj_id);
-}
-
-static void
+static void *
 PyRuby_dealloc(PyRubyObject *pyro)
 {
   VALUE obj;
@@ -117,9 +76,20 @@ PyRuby_dealloc(PyRubyObject *pyro)
 #endif /* PYCALL_DEBUG_DUMP_REFCNT */
 
   if (obj == Qundef)
-    return;
+    return NULL;
 
   pycall_gcguard_unregister_pyrubyobj((PyObject *)pyro);
+
+  return NULL;
+}
+
+static void
+PyRuby_dealloc_with_gvl(PyRubyObject *pyro)
+{
+  if (!ruby_thread_has_gvl_p()) {
+    CALL_WITH_GVL(PyRuby_dealloc, pyro);
+  }
+  PyRuby_dealloc(pyro);
 }
 
 static PyObject *
@@ -137,6 +107,15 @@ PyRuby_repr(PyRubyObject *pyro)
   return res;
 }
 
+static PyObject *
+PyRuby_repr_with_gvl(PyRubyObject *pyro)
+{
+  if (!ruby_thread_has_gvl_p()) {
+    return CALL_WITH_GVL(PyRuby_repr, pyro);
+  }
+  return PyRuby_repr(pyro);
+}
+
 #if SIZEOF_SSIZE_T < 8
 /* int64to32hash from src/support/hashing.c in Julia */
 static inline uint32_t
@@ -152,7 +131,7 @@ int64to32hash(uint64_t key)
 }
 #endif
 
-static long
+static void *
 PyRuby_hash_long(PyRubyObject *pyro)
 {
   VALUE obj, rbhash;
@@ -160,15 +139,24 @@ PyRuby_hash_long(PyRubyObject *pyro)
 
   obj = PyRuby_get_ruby_object_and_set_pyerr((PyObject *)pyro);
   if (obj == Qundef)
-    return -1;
+    return (void *)-1;
 
   rbhash = rb_hash(obj);
   h = FIX2LONG(rbhash); /* Ruby's hash value is a Fixnum */
 
-  return h == -1 ? pycall_hash_salt : h;
+  return (void *)(h == -1 ? pycall_hash_salt : h);
 }
 
-static Py_hash_t
+static long
+PyRuby_hash_long_with_gvl(PyRubyObject *pyro)
+{
+  if (!ruby_thread_has_gvl_p()) {
+    return (long)CALL_WITH_GVL(PyRuby_hash_long, pyro);
+  }
+  return (long)PyRuby_hash_long(pyro);
+}
+
+static void *
 PyRuby_hash_hash_t(PyRubyObject *pyro)
 {
   VALUE obj, rbhash;
@@ -176,18 +164,27 @@ PyRuby_hash_hash_t(PyRubyObject *pyro)
 
   obj = PyRuby_get_ruby_object_and_set_pyerr((PyObject *)pyro);
   if (obj == Qundef)
-    return -1;
+    return (void *)-1;
 
   rbhash = rb_hash(obj);
 #if SIZEOF_PY_HASH_T == SIZEOF_LONG
   /* In this case, we can assume sizeof(Py_hash_t) == sizeof(long) */
   h = NUM2SSIZET(rbhash);
-  return h == -1 ? (Py_hash_t)pycall_hash_salt : h;
+  return (void *)(h == -1 ? (Py_hash_t)pycall_hash_salt : h);
 #else
   /* In this case, we can assume sizeof(long) == 4 and sizeof(Py_hash_t) == 8 */
   h = (pycall_hash_salt_32 << 32) | FIX2LONG(rbhash);
-  return h == -1 ? ((pycall_hash_salt << 32) | pycall_hash_salt) : h;
+  return (void *)(h == -1 ? ((pycall_hash_salt << 32) | pycall_hash_salt) : h);
 #endif
+}
+
+static Py_hash_t
+PyRuby_hash_hash_t_with_gvl(PyRubyObject *pyro)
+{
+  if (!ruby_thread_has_gvl_p()) {
+    return (Py_hash_t)CALL_WITH_GVL(PyRuby_hash_hash_t, pyro);
+  }
+  return (Py_hash_t)PyRuby_hash_hash_t(pyro);
 }
 
 struct call_rb_funcallv_params {
@@ -221,15 +218,21 @@ rb_protect_funcallv(VALUE recv, ID meth, int argc, VALUE *argv, int *pstate)
   return res;
 }
 
+struct PyRuby_call_params {
+  PyRubyObject *pyro;
+  PyObject *pyobj_args;
+  PyObject *pyobj_kwargs;
+};
+
 static PyObject *
-PyRuby_call(PyRubyObject *pyro, PyObject *pyobj_args, PyObject *pyobj_kwargs)
+PyRuby_call(struct PyRuby_call_params *params)
 {
   ID id_call;
   VALUE obj, args, kwargs, res;
   PyObject *pyobj_res;
   int state;
 
-  obj = PyRuby_get_ruby_object_and_set_pyerr((PyObject *)pyro);
+  obj = PyRuby_get_ruby_object_and_set_pyerr((PyObject *)params->pyro);
   if (obj == Qundef)
     return NULL;
 
@@ -239,9 +242,9 @@ PyRuby_call(PyRubyObject *pyro, PyObject *pyobj_args, PyObject *pyobj_kwargs)
     return NULL;
   }
 
-  args = pycall_pyobject_to_a(pyobj_args);
-  if (pyobj_kwargs) {
-    kwargs = pycall_pyobject_to_ruby(pyobj_kwargs);
+  args = pycall_pyobject_to_a(params->pyobj_args);
+  if (params->pyobj_kwargs) {
+    kwargs = pycall_pyobject_to_ruby(params->pyobj_kwargs);
     rb_ary_push(args, kwargs);
   }
 
@@ -255,18 +258,38 @@ PyRuby_call(PyRubyObject *pyro, PyObject *pyobj_args, PyObject *pyobj_kwargs)
 }
 
 static PyObject *
-PyRuby_getattro(PyRubyObject *pyro, PyObject *pyobj_name)
+PyRuby_call_with_gvl(PyRubyObject *pyro, PyObject *pyobj_args, PyObject *pyobj_kwargs)
+{
+  struct PyRuby_call_params params;
+  params.pyro = pyro;
+  params.pyobj_args = pyobj_args;
+  params.pyobj_kwargs = pyobj_kwargs;
+
+  if (!ruby_thread_has_gvl_p()) {
+    return CALL_WITH_GVL(PyRuby_call, &params);
+  }
+
+  return PyRuby_call(&params);
+}
+
+struct PyRuby_getattro_params {
+  PyRubyObject *pyro;
+  PyObject *pyobj_name;
+};
+
+static PyObject *
+PyRuby_getattro(struct PyRuby_getattro_params *params)
 {
   VALUE obj, name, res;
   char const *name_cstr;
   ID name_id;
   PyObject *pyobj_res;
 
-  obj = PyRuby_get_ruby_object_and_set_pyerr((PyObject *)pyro);
+  obj = PyRuby_get_ruby_object_and_set_pyerr((PyObject *)params->pyro);
   if (obj == Qundef)
     return NULL;
 
-  name = pycall_pyobject_to_ruby(pyobj_name);
+  name = pycall_pyobject_to_ruby(params->pyobj_name);
   name_cstr = StringValueCStr(name);
   name_id = rb_intern(name_cstr);
 
@@ -299,19 +322,33 @@ PyRuby_getattro(PyRubyObject *pyro, PyObject *pyobj_name)
   else if (name_cstr[0] == '_' && name_cstr[1] == '_') {
     /* name.start_with? "__" */
     /* TODO: handle `__code__` and `func_code` */
-    return Py_API(PyObject_GenericGetAttr)((PyObject *)pyro, pyobj_name);
+    return Py_API(PyObject_GenericGetAttr)((PyObject *)params->pyro, params->pyobj_name);
   }
   else {
     /* TODO: handle `__code__` and `func_code` */
     if (rb_respond_to(obj, name_id)) {
       VALUE method = rb_obj_method(obj, name);
-      return PyRuby_New(method);
+      return PyRuby_New_impl(method);
     }
-    return Py_API(PyObject_GenericGetAttr)((PyObject *)pyro, pyobj_name);
+    return Py_API(PyObject_GenericGetAttr)((PyObject *)params->pyro, params->pyobj_name);
   }
 
   pyobj_res = pycall_pyobject_from_ruby(res);
   return pyobj_res;
+}
+
+static PyObject *
+PyRuby_getattro_with_gvl(PyRubyObject *pyro, PyObject *pyobj_name)
+{
+  struct PyRuby_getattro_params params;
+  params.pyro = pyro;
+  params.pyobj_name = pyobj_name;
+
+  if (!ruby_thread_has_gvl_p()) {
+    return CALL_WITH_GVL(PyRuby_getattro, &params);
+  }
+
+  return PyRuby_getattro(&params);
 }
 
 /* ==== PyCall::PyRubyPtr ==== */
@@ -411,9 +448,9 @@ pycall_init_ruby_wrapper(void)
   PyRuby_Type.tp_flags |= pycall_default_tp_flags();
   PyRuby_Type.tp_new = Py_API(PyType_GenericNew);
   if (pycall_python_long_hash)
-    PyRuby_Type.tp_hash._long = (hashfunc_long)PyRuby_hash_long;
+    PyRuby_Type.tp_hash._long = (hashfunc_long)PyRuby_hash_long_with_gvl;
   else
-    PyRuby_Type.tp_hash._hash_t = (hashfunc_hash_t)PyRuby_hash_hash_t;
+    PyRuby_Type.tp_hash._hash_t = (hashfunc_hash_t)PyRuby_hash_hash_t_with_gvl;
 
   if (Py_API(PyType_Ready)(&PyRuby_Type) < 0) {
     pycall_pyerror_fetch_and_raise("PyType_Ready in pycall_init_ruby_wrapper");
@@ -429,4 +466,58 @@ pycall_init_ruby_wrapper(void)
   rb_define_method(cPyRubyPtr, "__ruby_object_id__", pycall_pyruby_get_ruby_object_id, 0);
 
   rb_define_module_function(mPyCall, "wrap_ruby_object", pycall_m_wrap_ruby_object, 1);
+}
+
+/* --- File internal utilities --- */
+
+static VALUE
+funcall_id2ref(VALUE object_id)
+{
+  VALUE rb_mObjSpace;
+  object_id = rb_check_to_integer(object_id, "to_int");
+  rb_mObjSpace = rb_const_get(rb_cObject, rb_intern("ObjectSpace"));
+  return rb_funcall(rb_mObjSpace, rb_intern("_id2ref"), 1, object_id);
+}
+
+static VALUE
+protect_id2ref(VALUE object_id)
+{
+  VALUE obj;
+  int state;
+
+  obj = rb_protect((VALUE (*)(VALUE))funcall_id2ref, object_id, &state);
+  if (state)
+    return Qundef;
+
+  return obj;
+}
+
+static VALUE
+protect_id2ref_and_set_pyerr(VALUE object_id)
+{
+  VALUE obj = protect_id2ref(object_id);
+  if (obj != Qundef)
+    return obj;
+
+  obj = rb_errinfo();
+  if (RTEST(rb_obj_is_kind_of(obj, rb_eRangeError))) {
+    Py_API(PyErr_SetString)(Py_API(PyExc_RuntimeError), "[BUG] referenced object was garbage-collected");
+  }
+  else {
+    VALUE emesg = rb_check_funcall(obj, rb_intern("message"), 0, 0);
+    Py_API(PyErr_Format)(Py_API(PyExc_RuntimeError),
+        "[BUG] Unable to obtain ruby object from ID: %s (%s)",
+        StringValueCStr(emesg), rb_class2name(CLASS_OF(obj)));
+  }
+  return Qundef;
+}
+
+static VALUE
+PyRuby_get_ruby_object_and_set_pyerr(PyObject *pyobj)
+{
+  VALUE obj_id;
+  if (!PyRuby_Check(pyobj))
+    return Qundef;
+  obj_id = rb_obj_id(PyRuby_get_ruby_object(pyobj));
+  return protect_id2ref_and_set_pyerr(obj_id);
 }
