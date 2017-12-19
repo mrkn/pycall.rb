@@ -1,4 +1,5 @@
 #include "pycall_internal.h"
+#include "pycall.h"
 #include <ruby/encoding.h>
 
 #include <stdarg.h>
