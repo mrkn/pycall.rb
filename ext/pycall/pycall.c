@@ -143,6 +143,12 @@ get_pyobj_ptr(VALUE obj)
   return pyobj;
 }
 
+PyObject *
+pycall_pyptr_get_pyobj_ptr(VALUE pyptr)
+{
+  return get_pyobj_ptr(pyptr);
+}
+
 static inline PyObject*
 try_get_pyobj_ptr(VALUE obj)
 {
