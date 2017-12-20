@@ -1,4 +1,5 @@
 #include "pycall_internal.h"
+#include "pycall.h"
 #include <ruby/encoding.h>
 
 #include <stdarg.h>
@@ -141,6 +142,12 @@ get_pyobj_ptr(VALUE obj)
   PyObject *pyobj;
   TypedData_Get_Struct(obj, PyObject, &pycall_pyptr_data_type, pyobj);
   return pyobj;
+}
+
+PyObject *
+pycall_pyptr_get_pyobj_ptr(VALUE pyptr)
+{
+  return get_pyobj_ptr(pyptr);
 }
 
 static inline PyObject*
