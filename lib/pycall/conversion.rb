@@ -32,7 +32,7 @@ module PyCall
     #
     # @return a Ruby object converted from `pyptr`.
     def self.to_ruby(pyptr)
-      return nil if pyptr.null? || PyCall.none?(pyptr)
+      return nil if pyptr.null? || pyptr.none?
 
       case
       when PyCall::Types.pyisinstance(pyptr, LibPython.PyType_Type)
