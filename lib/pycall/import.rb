@@ -86,10 +86,25 @@ module PyCall
           context = self
           context = (self == PyCall::Import.main_object) ? Object : self
           context.module_eval { const_set(name, pyobj) }
+          class_new_sugar(name, context)
         else
           define_singleton_method(name) { pyobj }
         end
       end
+    end
+
+    # define `SomeClassName(*args)` (singleton method; NO dot(.) between class name
+    # and open-parenthesis) in the specified context.
+    # this is a syntax sugar for `SomeClassName.(*args)`.
+    #
+    # ==== Args
+    # clsnm :: name of a class in the context.
+    # ctx :: context.
+    def class_new_sugar( clsnm, ctx )
+      clsobj = ctx.module_eval(clsnm.to_s)
+      define_singleton_method(clsnm) {|*args|
+             clsobj.(*args)
+      } if clsobj.class == Class
     end
 
     def constant_name?(name)

@@ -73,6 +73,13 @@ module PyCall
           mod.pyfrom 'pycall.import_test', import: 'TestClass'
           expect(mod::TestClass).to be_kind_of(PyObjectWrapper)
         end
+        it 'defines a class and its initializer (singleton method) with the given name via hiearachical signature of modules' do
+          expect(mod).not_to be_respond_to(:TestClass)
+          mod.pyfrom 'pycall.import_test.TestClass', import: 'TestClass'
+          expect(mod::TestClass.class).to eq(Class)
+          expect(mod.TestClass(42).class).to eq(Object)
+          expect(mod.TestClass(42).test()).to eq('42')
+        end
       end
 
       context 'there is not the module with the given name' do
