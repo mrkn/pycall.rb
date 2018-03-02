@@ -645,7 +645,6 @@ VALUE pycall_import_module_level(char const *name, VALUE globals, VALUE locals, 
 VALUE pycall_getattr_default(VALUE pyobj, char const *name, VALUE default_value);
 VALUE pycall_getattr(VALUE pyobj, char const *name);
 
-VALUE pycall_pyobject_to_ruby(PyObject *);
 VALUE pycall_pytype_to_ruby(PyObject *);
 VALUE pycall_pymodule_to_ruby(PyObject *);
 VALUE pycall_pybool_to_ruby(PyObject *);
