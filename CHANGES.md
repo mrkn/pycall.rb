@@ -10,6 +10,18 @@
 
 * Drop support Ruby 2.2.x and 2.1.x
 
+* Release GVL while the Python interpreter is running [Fix #45]
+
+* Add public header file
+
+* Use PyPtr.none? instead of removed PyCall.none?
+
+  *Kouhei Sutou*
+
+* Export PyObject convert functions
+
+  *Kouhei Sutou*
+
 ## 1.0.3
 
 * Fix anaconda support to define the environment variable `PYTHONHOME`.
