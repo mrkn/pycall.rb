@@ -21,23 +21,23 @@ module PyCall
       class << self
         def find_libpython(python = nil)
           debug_report("find_libpython(#{python.inspect})")
-	  if python
-	    begin
-	      python_config = investigate_python_config(python)
-	    rescue
+          if python
+            begin
+              python_config = investigate_python_config(python)
+            rescue
               raise ::PyCall::PythonNotFound
-	    end
+            end
           else
             %w[python python3].each do |python_cmd|
-	      begin
-		python_config = investigate_python_config(python_cmd)
-		python = python_cmd
+              begin
+                python_config = investigate_python_config(python_cmd)
+                python = python_cmd
                 break
-	      rescue
-		raise ::PyCall::PythonNotFound
-	      end
-	    end
-	  end
+              rescue
+                raise ::PyCall::PythonNotFound
+              end
+            end
+          end
 
           set_PYTHONHOME(python_config)
           libs = make_libs(python_config)
