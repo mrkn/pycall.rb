@@ -1,4 +1,5 @@
 #include "pycall_internal.h"
+#include "pycall.h"
 
 static PyMemberDef PyRuby_members[] = {
   {"ruby_object_ptr", Py_T_PYSSIZET, offsetof(PyRubyObject, ruby_object), Py_READONLY},
