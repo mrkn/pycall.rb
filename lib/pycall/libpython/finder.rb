@@ -19,25 +19,24 @@ module PyCall
       LIBSUFFIX = libsuffix || 'so'
 
       class << self
+        DEFAULT_PYTHON = [
+          -'python3',
+          -'python',
+        ].freeze
+
+        def find_python_config(python = nil)
+          python ||= DEFAULT_PYTHON
+          Array(python).each do |python_cmd|
+            python_config = investigate_python_config(python_cmd)
+            return [python_cmd, python_config]
+          end
+        rescue
+          raise ::PyCall::PythonNotFound
+        end
+
         def find_libpython(python = nil)
           debug_report("find_libpython(#{python.inspect})")
-          if python
-            begin
-              python_config = investigate_python_config(python)
-            rescue
-              raise ::PyCall::PythonNotFound
-            end
-          else
-            %w[python python3].each do |python_cmd|
-              begin
-                python_config = investigate_python_config(python_cmd)
-                python = python_cmd
-                break
-              rescue
-                raise ::PyCall::PythonNotFound
-              end
-            end
-          end
+          python, python_config = find_python_config(python)
 
           set_PYTHONHOME(python_config)
           libs = make_libs(python_config)
