@@ -452,7 +452,7 @@ get_pytypeobj_ptr(VALUE obj)
 static inline PyTypeObject*
 try_get_pytypeobj_ptr(VALUE obj)
 {
-  if (is_pycall_pytypeptr(obj)) return NULL;
+  if (!is_pycall_pytypeptr(obj)) return NULL;
   return (PyTypeObject*)DATA_PTR(obj);
 }
 
@@ -538,6 +538,20 @@ pycall_pytypeptr_eqq(VALUE obj, VALUE other)
 {
   if (is_pycall_pyptr(other))
     return pycall_pyptr_is_kind_of(other, obj);
+  return Qfalse;
+}
+
+static VALUE
+pycall_pytypeptr_subclass_p(VALUE obj, VALUE other)
+{
+  PyTypeObject* pytype = get_pytypeobj_ptr(obj);
+  if (is_pycall_pyptr(other)) {
+    PyTypeObject* pytype_other = try_get_pytypeobj_ptr(other);
+    if (pytype_other) {
+      int res =  Py_API(PyObject_IsSubclass)((PyObject *)pytype, (PyObject *)pytype_other);
+      return res ? Qtrue : Qfalse;
+    }
+  }
   return Qfalse;
 }
 
@@ -2179,6 +2193,7 @@ Init_pycall(void)
   rb_define_method(cPyTypePtr, "__tp_basicsize__", pycall_pytypeptr_get_tp_basicsize, 0);
   rb_define_method(cPyTypePtr, "__tp_flags__", pycall_pytypeptr_get_tp_flags, 0);
   rb_define_method(cPyTypePtr, "===", pycall_pytypeptr_eqq, 1);
+  rb_define_method(cPyTypePtr, "<", pycall_pytypeptr_subclass_p, 1);
 
   /* PyCall::LibPython::API */
 

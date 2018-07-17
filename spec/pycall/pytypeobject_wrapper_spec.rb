@@ -24,6 +24,30 @@ module PyCall
       end
     end
 
+    describe '#<' do
+      let(:simple_subclass) do
+        PyCall.import_module('pycall.simple_class').SimpleSubClass.__pyptr__
+      end
+
+      let(:simple_subclass_wrapper) do
+        PyCall.wrap_class(simple_subclass)
+      end
+
+      specify do
+        expect(simple_subclass_wrapper < simple_class_wrapper).to eq(true)
+      end
+
+      specify do
+        expect(PyCall.builtins.tuple < simple_class_wrapper).to eq(false)
+      end
+
+      specify do
+        expect {
+          PyCall.builtins.tuple < 0
+        }.to raise_error(TypeError, "compared with non class/module")
+      end
+    end
+
     describe '.extend_object' do
       context '@__pyptr__ of the extended object is a PyCall::PyTypePtr' do
         it 'extends the given object' do
