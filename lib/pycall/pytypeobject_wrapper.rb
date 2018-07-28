@@ -20,12 +20,14 @@ module PyCall
       subclass.instance_variable_set(:@__pyptr__, __pyptr__)
     end
 
-    def new(*args)
-      wrap_pyptr(LibPython::Helpers.call_object(__pyptr__, *args))
+    def new(*args, &b)
+      wrap_pyptr(__new__(__pyptr__, *args)).tap do |obj|
+        obj.instance_eval { initialize(*args, &b) }
+      end
     end
 
     def wrap_pyptr(pyptr)
-      return pyptr if pyptr.kind_of? self
+      return pyptr if pyptr.class <= self
       pyptr = pyptr.__pyptr__ if pyptr.kind_of? PyObjectWrapper
       unless pyptr.kind_of? PyPtr
         raise TypeError, "unexpected argument type #{pyptr.class} (expected PyCall::PyPtr)"
@@ -47,6 +49,55 @@ module PyCall
       else
         super
       end
+    end
+
+    def subclass?(other)
+      case other
+      when PyTypeObjectWrapper
+        __pyptr__.subclass?(other.__pyptr__)
+      when Class, Module
+        other >= self || false
+      else
+        __pyptr__.subclass?(other)
+      end
+    end
+
+    def <=>(other)
+      return 0  if equal?(other)
+      case other
+      when PyTypeObjectWrapper
+        return super if __pyptr__ == other.__pyptr__
+        other = other.__pyptr__
+      when Class, Module
+        return -1 if subclass?(other)
+        return 1  if other > self
+      end
+
+      return nil unless other.is_a?(PyTypePtr)
+      return 0  if __pyptr__ == other
+      return -1 if __pyptr__.subclass?(other)
+      return 1  if other.subclass?(__pyptr__)
+      nil
+    end
+
+    def <(other)
+      cmp = self <=> other
+      cmp && cmp < 0
+    end
+
+    def >(other)
+      cmp = self <=> other
+      cmp && cmp > 0
+    end
+
+    def <=(other)
+      cmp = self <=> other
+      cmp && cmp <= 0
+    end
+
+    def >=(other)
+      cmp = self <=> other
+      cmp && cmp >= 0
     end
 
     private

@@ -26,6 +26,10 @@ module PyCall
       :|  => :__or__
     }.freeze
 
+    def initialize(*args)
+      __init__(*args)
+    end
+
     def method_missing(name, *args)
       name_str = name.to_s if name.kind_of?(Symbol)
       name_str.chop! if name_str.end_with?('=')
