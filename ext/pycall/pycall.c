@@ -1291,11 +1291,39 @@ pycall_pyobject_wrapper_check_get_pyobj_ptr(VALUE obj, PyTypeObject *pytypeobj)
 
 /* ==== PyCall::Conversion ==== */
 
+static int
+get_mapped_ancestor_class_iter(VALUE key, VALUE value, VALUE arg)
+{
+  VALUE *args = (VALUE *)arg;
+  if (RTEST(pycall_pytypeptr_subclass_p(args[0], key))) {
+    args[1] = value;
+    return ST_STOP;
+  }
+  return ST_CONTINUE;
+}
+
+static VALUE
+pycall_python_type_mapping_get_mapped_ancestor_class(VALUE pytypeptr)
+{
+  VALUE args[2];
+  args[0] = pytypeptr;
+  args[1] = Qnil;
+
+  rb_hash_foreach(python_type_mapping, get_mapped_ancestor_class_iter, (VALUE)args);
+
+  return args[1];
+}
+
 static VALUE
 pycall_python_type_mapping_get_mapped_class(VALUE pytypeptr)
 {
+  VALUE mapped;
   (void)check_get_pytypeobj_ptr(pytypeptr);
-  return rb_hash_lookup(python_type_mapping, pytypeptr);
+  mapped = rb_hash_lookup(python_type_mapping, pytypeptr);
+  if (NIL_P(mapped)) {
+    mapped = pycall_python_type_mapping_get_mapped_ancestor_class(pytypeptr);
+  }
+  return mapped;
 }
 
 static int
