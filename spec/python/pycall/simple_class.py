@@ -1,4 +1,4 @@
-class SimpleClass:
+class SimpleClass(object):
     class NestedClass:
         pass
 
