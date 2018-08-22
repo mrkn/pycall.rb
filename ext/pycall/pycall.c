@@ -452,7 +452,7 @@ get_pytypeobj_ptr(VALUE obj)
 static inline PyTypeObject*
 try_get_pytypeobj_ptr(VALUE obj)
 {
-  if (is_pycall_pytypeptr(obj)) return NULL;
+  if (!is_pycall_pytypeptr(obj)) return NULL;
   return (PyTypeObject*)DATA_PTR(obj);
 }
 
@@ -538,6 +538,20 @@ pycall_pytypeptr_eqq(VALUE obj, VALUE other)
 {
   if (is_pycall_pyptr(other))
     return pycall_pyptr_is_kind_of(other, obj);
+  return Qfalse;
+}
+
+static VALUE
+pycall_pytypeptr_subclass_p(VALUE obj, VALUE other)
+{
+  PyTypeObject* pytype = get_pytypeobj_ptr(obj);
+  if (is_pycall_pyptr(other)) {
+    PyTypeObject* pytype_other = try_get_pytypeobj_ptr(other);
+    if (pytype_other) {
+      int res =  Py_API(PyObject_IsSubclass)((PyObject *)pytype, (PyObject *)pytype_other);
+      return res ? Qtrue : Qfalse;
+    }
+  }
   return Qfalse;
 }
 
@@ -1277,11 +1291,39 @@ pycall_pyobject_wrapper_check_get_pyobj_ptr(VALUE obj, PyTypeObject *pytypeobj)
 
 /* ==== PyCall::Conversion ==== */
 
+static int
+get_mapped_ancestor_class_iter(VALUE key, VALUE value, VALUE arg)
+{
+  VALUE *args = (VALUE *)arg;
+  if (RTEST(pycall_pytypeptr_subclass_p(args[0], key))) {
+    args[1] = value;
+    return ST_STOP;
+  }
+  return ST_CONTINUE;
+}
+
+static VALUE
+pycall_python_type_mapping_get_mapped_ancestor_class(VALUE pytypeptr)
+{
+  VALUE args[2];
+  args[0] = pytypeptr;
+  args[1] = Qnil;
+
+  rb_hash_foreach(python_type_mapping, get_mapped_ancestor_class_iter, (VALUE)args);
+
+  return args[1];
+}
+
 static VALUE
 pycall_python_type_mapping_get_mapped_class(VALUE pytypeptr)
 {
+  VALUE mapped;
   (void)check_get_pytypeobj_ptr(pytypeptr);
-  return rb_hash_lookup(python_type_mapping, pytypeptr);
+  mapped = rb_hash_lookup(python_type_mapping, pytypeptr);
+  if (NIL_P(mapped)) {
+    mapped = pycall_python_type_mapping_get_mapped_ancestor_class(pytypeptr);
+  }
+  return mapped;
 }
 
 static int
@@ -2179,6 +2221,7 @@ Init_pycall(void)
   rb_define_method(cPyTypePtr, "__tp_basicsize__", pycall_pytypeptr_get_tp_basicsize, 0);
   rb_define_method(cPyTypePtr, "__tp_flags__", pycall_pytypeptr_get_tp_flags, 0);
   rb_define_method(cPyTypePtr, "===", pycall_pytypeptr_eqq, 1);
+  rb_define_method(cPyTypePtr, "<", pycall_pytypeptr_subclass_p, 1);
 
   /* PyCall::LibPython::API */
 

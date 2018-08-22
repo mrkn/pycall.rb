@@ -1,4 +1,4 @@
-class SimpleClass:
+class SimpleClass(object):
     class NestedClass:
         pass
 
@@ -8,3 +8,6 @@ class SimpleClass:
     def initialize(self, x):
         self.x = x
         return 'initialized'
+
+class SimpleSubClass(SimpleClass):
+    pass

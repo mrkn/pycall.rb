@@ -49,6 +49,15 @@ module PyCall
       end
     end
 
+    def <(other)
+      case other
+      when PyTypeObjectWrapper
+        __pyptr__ < other.__pyptr__
+      else
+        raise TypeError, "compared with non class/module"
+      end
+    end
+
     private
 
     def register_python_type_mapping

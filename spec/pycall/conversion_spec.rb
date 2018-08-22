@@ -115,6 +115,42 @@ module PyCall
         subject { Conversion.to_ruby(Conversion.from_ruby(large_string)) }
         it { is_expected.to eq(large_string) }
       end
+
+      describe 'inheritance support' do
+        let(:pymod) { PyCall.import_module('pycall.simple_class') }
+        let(:simple_class) { pymod.SimpleClass }
+        let(:simple_sub_class) { pymod.SimpleSubClass }
+
+        context 'when the super class was registered to python type mapping' do
+          before do
+            Conversion.register_python_type_mapping(simple_class.__pyptr__, simple_class)
+          end
+
+          after do
+            Conversion.unregister_python_type_mapping(simple_class.__pyptr__)
+          end
+
+          specify do
+            expect(simple_class.new).to be_instance_of(simple_class)
+            expect(simple_sub_class.new).to be_instance_of(simple_class)
+          end
+
+          context 'when the subclass was also registered to python type mapping' do
+            before do
+              Conversion.register_python_type_mapping(simple_sub_class.__pyptr__, simple_sub_class)
+            end
+
+            after do
+              Conversion.unregister_python_type_mapping(simple_sub_class.__pyptr__)
+            end
+
+            specify do
+              expect(simple_class.new).to be_instance_of(simple_class)
+              expect(simple_sub_class.new).to be_instance_of(simple_sub_class)
+            end
+          end
+        end
+      end
     end
 
     describe '.from_ruby' do

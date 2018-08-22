@@ -17,6 +17,12 @@ Ruby to Python.
 
 pycall.rb supports Ruby version 2.3 or higher.
 
+## Supported Python versions
+
+pycall.rb supports Python version 2.7 or higher.
+
+Note that in Python 2.7 old-style class, that is defined without a super class, is not fully supported in pycall.rb.
+
 ## Installation
 
 Add this line to your application's Gemfile:
