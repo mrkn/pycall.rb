@@ -28,9 +28,11 @@ module PyCall
           python ||= DEFAULT_PYTHON
           Array(python).each do |python_cmd|
             python_config = investigate_python_config(python_cmd)
-            return [python_cmd, python_config]
+            return [python_cmd, python_config] unless python_config.empty?
           end
         rescue
+          raise ::PyCall::PythonNotFound
+        else
           raise ::PyCall::PythonNotFound
         end
 
@@ -100,6 +102,7 @@ module PyCall
           IO.popen(python_env, [python, python_investigator_py], 'r') do |io|
             {}.tap do |config|
               io.each_line do |line|
+                next unless line =~ /: /
                 key, value = line.chomp.split(': ', 2)
                 case value
                 when 'True', 'true', 'False', 'false'
