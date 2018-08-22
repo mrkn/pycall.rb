@@ -13,6 +13,10 @@ with Python from the Ruby language.  You can import arbitrary Python modules
 into Ruby modules, call Python functions with automatic type conversion from
 Ruby to Python.
 
+## Supported Ruby versions
+
+pycall.rb supports Ruby version 2.3 or higher.
+
 ## Installation
 
 Add this line to your application's Gemfile:
