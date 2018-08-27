@@ -22,6 +22,16 @@
 
   *Kouhei Sutou*
 
+* Support multiple candidates of Python command in `PyCall.init`
+
+* Now, `PyCall.init` tries `python3` command before `python` in default
+
+* Drop Ruby 2.2 and 2.1 supports
+
+* Add `PyCall::PyTypeObjectWrapper#<` as `Class#<`
+
+* Support class inheritance in python type mapping
+
 ## 1.0.3
 
 * Fix anaconda support to define the environment variable `PYTHONHOME`.
