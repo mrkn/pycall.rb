@@ -48,6 +48,15 @@ module PyCall
     end
   end
 
+  def getattr(*args)
+    obj, *rest = args
+    LibPython::Helpers.getattr(obj.__pyptr__, *rest)
+  end
+
+  def hasattr?(obj, name)
+    LibPython::Helpers.hasattr?(obj.__pyptr__, name)
+  end
+
   def import_module(name)
     LibPython::Helpers.import_module(name)
   end
