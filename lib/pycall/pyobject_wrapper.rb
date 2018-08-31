@@ -170,32 +170,9 @@ module PyCall
 
   module_function
 
-  class WrapperModuleCache < WrapperObjectCache
-    def initialize
-      super(LibPython::API::PyModule_Type)
-    end
-
-    def check_wrapper_object(wrapper_object)
-      unless wrapper_object.kind_of?(Module) && wrapper_object.kind_of?(PyObjectWrapper)
-        raise TypeError, "unexpected type #{wrapper_object.class} (expected Module extended by PyObjectWrapper)"
-      end
-    end
-
-    def self.instance
-      @instance ||= self.new
-    end
-  end
-
-  private_constant :WrapperModuleCache
-
-  def wrap_module(pymodptr)
-    check_ismodule(pymodptr)
-    WrapperModuleCache.instance.lookup(pymodptr) do
-      Module.new do |mod|
-        mod.instance_variable_set(:@__pyptr__, pymodptr)
-        mod.extend PyObjectWrapper
-      end
-    end
+  def check_ismodule(pyptr)
+    return if pyptr.kind_of? LibPython::API::PyModule_Type
+    raise TypeError, "PyModule object is required"
   end
 
   def check_isclass(pyptr)
@@ -203,10 +180,5 @@ module PyCall
     return if pyptr.kind_of? LibPython::API::PyType_Type
     return defined?(LibPython::API::PyClass_Type) && pyptr.kind_of?(LibPython::API::PyClass_Type)
     raise TypeError, "PyType object is required"
-  end
-
-  def check_ismodule(pyptr)
-    return if pyptr.kind_of? LibPython::API::PyModule_Type
-    raise TypeError, "PyModule object is required"
   end
 end

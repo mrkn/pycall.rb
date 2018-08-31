@@ -4,6 +4,7 @@ module PyCall
   require 'pycall/pyerror'
   require 'pycall/pyobject_wrapper'
   require 'pycall/pytypeobject_wrapper'
+  require 'pycall/pymodule_wrapper'
   require 'pycall/init'
 
   module_function
