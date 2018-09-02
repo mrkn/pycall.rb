@@ -48,6 +48,28 @@ RSpec.describe PyCall do
     end
   end
 
+  describe '.getattr' do
+    let(:pyobj) { PyCall.import_module('pycall.simple_module') }
+
+    specify do
+      expect(PyCall.getattr(pyobj, :answer)).to eq(42)
+      expect {
+        PyCall.getattr(pyobj, :absent_name)
+      }.to raise_error(PyCall::PyError, /AttributeError/)
+      o = Object.new
+      expect(PyCall.getattr(pyobj, :absent_name, o)).to equal(o)
+    end
+  end
+
+  describe '.hasattr?' do
+    let(:pyobj) { PyCall.import_module('pycall.simple_module') }
+
+    specify do
+      expect(PyCall.hasattr?(pyobj, :answer)).to eq(true)
+      expect(PyCall.hasattr?(pyobj, :absent_name)).to eq(false)
+    end
+  end
+
   describe '.import_module' do
     subject { PyCall.import_module('sys') }
 

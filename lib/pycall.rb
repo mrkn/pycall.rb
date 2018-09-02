@@ -4,6 +4,7 @@ module PyCall
   require 'pycall/pyerror'
   require 'pycall/pyobject_wrapper'
   require 'pycall/pytypeobject_wrapper'
+  require 'pycall/pymodule_wrapper'
   require 'pycall/init'
 
   module_function
@@ -46,6 +47,15 @@ module PyCall
     else
       import_module('PyCall.six').exec_(code, globals, locals)
     end
+  end
+
+  def getattr(*args)
+    obj, *rest = args
+    LibPython::Helpers.getattr(obj.__pyptr__, *rest)
+  end
+
+  def hasattr?(obj, name)
+    LibPython::Helpers.hasattr?(obj.__pyptr__, name)
   end
 
   def import_module(name)
