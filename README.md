@@ -23,6 +23,15 @@ pycall.rb supports Python version 2.7 or higher.
 
 Note that in Python 2.7 old-style class, that is defined without a super class, is not fully supported in pycall.rb.
 
+## Note for pyenv users
+
+pycall.rb requires Python's shared library (e.g. `libpython3.7m.so`).
+pyenv does not build the shared library in default, so you need to specify `--enable-shared` option at the installation like below:
+
+```
+$ env PYTHON_CONFIGURE_OPTS='--enable-shared' pyenv install 3.7.2
+```
+
 ## Installation
 
 Add this line to your application's Gemfile:
