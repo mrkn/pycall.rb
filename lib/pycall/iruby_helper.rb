@@ -1,4 +1,4 @@
-require 'pycall'
+require 'pycall' unless defined?(::PyCall)
 require 'iruby'
 
 module PyCall
