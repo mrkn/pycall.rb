@@ -1,6 +1,10 @@
 # The change history of PyCall
 
-## master
+## 1.2.1
+
+* Prevent circular require in pycall/iruby.rb
+
+## 1.2.0
 
 * Add `PyCall::Tuple#to_ary`
 
