@@ -27,12 +27,12 @@ module PyCall
         def find_python_config(python = nil)
           python ||= DEFAULT_PYTHON
           Array(python).each do |python_cmd|
-            python_config = investigate_python_config(python_cmd)
-            return [python_cmd, python_config] unless python_config.empty?
+            begin
+              python_config = investigate_python_config(python_cmd)
+              return [python_cmd, python_config] unless python_config.empty?
+            rescue
+            end
           end
-        rescue
-          raise ::PyCall::PythonNotFound
-        else
           raise ::PyCall::PythonNotFound
         end
 
