@@ -61,6 +61,27 @@ the `Math.sin` in Ruby:
 Type conversions from Ruby to Python are automatically performed for numeric,
 boolean, string, arrays, and hashes.
 
+### Debugging python finder
+
+When you encounter `PyCall::PythonNotFound` error, you can investigate PyCall's python finder by setting `PYCALL_DEBUG_FIND_LIBPYTHON` environment variable to `1`.  You can see the log like below:
+
+```
+$ PYCALL_DEBUG_FIND_LIBPYTHON=1 ruby -rpycall -ePyCall.builtins
+DEBUG(find_libpython) find_libpython(nil)
+DEBUG(find_libpython) investigate_python_config("python3")
+DEBUG(find_libpython) libs: ["Python.framework/Versions/3.7/Python", "Python", "libpython3.7m", "libpython3.7", "libpython"]
+DEBUG(find_libpython) libpaths: ["/opt/brew/opt/python/Frameworks/Python.framework/Versions/3.7/lib", "/opt/brew/opt/python/lib", "/opt/brew/opt/python/Frameworks", "/opt/brew/Cellar/python/3.7.2_1/Frameworks/Python.framework/Versions/3.7", "/opt/brew/Cellar/python/3.7.2_1/Frameworks/Python.framework/Versions/3.7/lib"]
+DEBUG(find_libpython) Unable to find /opt/brew/opt/python/Frameworks/Python.framework/Versions/3.7/lib/Python.framework/Versions/3.7/Python
+DEBUG(find_libpython) Unable to find /opt/brew/opt/python/Frameworks/Python.framework/Versions/3.7/lib/Python.framework/Versions/3.7/Python.dylib
+DEBUG(find_libpython) Unable to find /opt/brew/opt/python/Frameworks/Python.framework/Versions/3.7/lib/darwin/Python.framework/Versions/3.7/Python
+DEBUG(find_libpython) Unable to find /opt/brew/opt/python/Frameworks/Python.framework/Versions/3.7/lib/darwin/Python.framework/Versions/3.7/Python.dylib
+DEBUG(find_libpython) Unable to find /opt/brew/opt/python/lib/Python.framework/Versions/3.7/Python
+DEBUG(find_libpython) Unable to find /opt/brew/opt/python/lib/Python.framework/Versions/3.7/Python.dylib
+DEBUG(find_libpython) Unable to find /opt/brew/opt/python/lib/darwin/Python.framework/Versions/3.7/Python
+DEBUG(find_libpython) Unable to find /opt/brew/opt/python/lib/darwin/Python.framework/Versions/3.7/Python.dylib
+DEBUG(find_libpython) dlopen("/opt/brew/opt/python/Frameworks/Python.framework/Versions/3.7/Python") = #<Fiddle::Handle:0x00007fc012048650>
+```
+
 ## PyCall object system
 
 PyCall wraps pointers of Python objects in `PyCall::PyPtr` objects.
