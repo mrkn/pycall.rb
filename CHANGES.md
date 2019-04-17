@@ -1,5 +1,9 @@
 # The change history of PyCall
 
+## master
+
+* Add `PyCall.without_gvl` for explicitly releasing the RubyVM GVL
+
 ## 1.2.1
 
 * Prevent circular require in pycall/iruby.rb
