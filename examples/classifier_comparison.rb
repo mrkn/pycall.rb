@@ -2,7 +2,7 @@ require 'pycall/import'
 include PyCall::Import
 
 pyimport 'numpy', as: :np
-pyfrom 'sklearn.cross_validation', import: :train_test_split
+pyfrom 'sklearn.model_selection', import: :train_test_split
 pyfrom 'sklearn.preprocessing', import: :StandardScaler
 pyfrom 'sklearn.datasets', import: %i(make_moons make_circles make_classification)
 pyfrom 'sklearn.neighbors', import: :KNeighborsClassifier
