@@ -20,7 +20,7 @@ num_bins = 50
 
 fig, ax = *plt.subplots
 
-n, bins, patches = *ax.hist(x, num_bins, normed: 1)
+n, bins, patches = *ax.hist(x, num_bins, density: 1)
 
 y = mlab.normpdf(bins, mu, sigma)
 ax.plot(bins, y, '--')
