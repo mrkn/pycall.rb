@@ -5,7 +5,13 @@ require 'pycall/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "pycall"
-  spec.version       = PyCall::VERSION
+  version_components = [
+    PyCall::Version::MAJOR.to_s,
+    PyCall::Version::MINOR.to_s,
+    PyCall::Version::MICRO.to_s,
+    PyCall::Version::TAG,
+  ]
+  spec.version       = version_components.compact.join(".")
   spec.authors       = ["Kenta Murata"]
   spec.email         = ["mrkn@mrkn.jp"]
 

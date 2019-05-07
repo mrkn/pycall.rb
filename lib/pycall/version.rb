@@ -1,3 +1,9 @@
 module PyCall
-  VERSION = "1.2.1"
+  VERSION = "1.3.0-dev"
+
+  module Version
+    numbers, TAG = VERSION.split("-")
+    MAJOR, MINOR, MICRO = numbers.split(".").map(&:to_i)
+    STRING = VERSION
+  end
 end
