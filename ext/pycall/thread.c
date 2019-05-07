@@ -14,7 +14,7 @@ void *pycall_tls_get(pycall_tls_key tls_key)
 
 int pycall_tls_set(pycall_tls_key tls_key, void *ptr)
 {
-  return TlsSetValue(tls_key, th) == 0;
+  return 0 == TlsSetValue(tls_key, ptr);
 }
 #endif
 
