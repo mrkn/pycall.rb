@@ -70,6 +70,52 @@ pycall_after_fork(VALUE mod)
   return Qnil;
 }
 
+static volatile pycall_tls_key without_gvl_key;
+
+int
+pycall_without_gvl_p(void)
+{
+  /*
+   * In pthread, the default value is NULL (== 0).
+   *
+   * In Win32 thread, the default value is 0 (initialized by TlsAlloc).
+   */
+  return (int)pycall_tls_get(without_gvl_key);
+}
+
+static inline int
+pycall_set_without_gvl(void)
+{
+  return pycall_tls_set(without_gvl_key, (void *)1);
+}
+
+static inline int
+pycall_set_with_gvl(void)
+{
+  return pycall_tls_set(without_gvl_key, (void *)0);
+}
+
+VALUE
+pycall_without_gvl(VALUE (* func)(VALUE), VALUE arg)
+{
+  int state;
+  VALUE result;
+
+  pycall_set_without_gvl();
+
+  result = rb_protect(func, arg, &state);
+
+  pycall_set_with_gvl();
+
+  return result;
+}
+
+static VALUE
+pycall_m_without_gvl(VALUE mod)
+{
+  return pycall_without_gvl(rb_yield, Qnil);
+}
+
 /* ==== PyCall::PyPtr ==== */
 
 const rb_data_type_t pycall_pyptr_data_type = {
@@ -890,7 +936,7 @@ struct call_pyobject_call_params {
   PyObject *kwargs;
 };
 
-PyObject *
+static inline PyObject *
 call_pyobject_call(struct call_pyobject_call_params *params)
 {
   PyObject *res;
@@ -899,7 +945,7 @@ call_pyobject_call(struct call_pyobject_call_params *params)
 }
 
 PyObject *
-pyobject_call_without_gvl(PyObject *pycallable, PyObject *args, PyObject *kwargs)
+pyobject_call(PyObject *pycallable, PyObject *args, PyObject *kwargs)
 {
   PyObject *res;
   struct call_pyobject_call_params params;
@@ -907,9 +953,14 @@ pyobject_call_without_gvl(PyObject *pycallable, PyObject *args, PyObject *kwargs
   params.args = args;
   params.kwargs = kwargs;
 
-  res = (PyObject *)rb_thread_call_without_gvl(
-      (void * (*)(void *))call_pyobject_call, (void *)&params,
-      (rb_unblock_function_t *)pycall_interrupt_python_thread, NULL);
+  if (pycall_without_gvl_p()) {
+    res = (PyObject *)rb_thread_call_without_gvl(
+        (void * (*)(void *))call_pyobject_call, (void *)&params,
+        (rb_unblock_function_t *)pycall_interrupt_python_thread, NULL);
+  }
+  else {
+    res = call_pyobject_call(&params);
+  }
 
   return res;
 }
@@ -961,7 +1012,7 @@ pycall_call_python_callable(PyObject *pycallable, int argc, VALUE *argv)
     }
   }
 
-  res = pyobject_call_without_gvl(pycallable, args, kwargs); /* New reference */
+  res = pyobject_call(pycallable, args, kwargs); /* New reference */
   if (!res) {
     pycall_pyerror_fetch_and_raise("PyObject_Call in pycall_call_python_callable");
   }
@@ -2184,6 +2235,9 @@ Init_pycall(void)
   /* PyCall */
 
   rb_define_module_function(mPyCall, "after_fork", pycall_after_fork, 0);
+
+  pycall_tls_create(&without_gvl_key);
+  rb_define_module_function(mPyCall, "without_gvl", pycall_m_without_gvl, 0);
 
   /* PyCall::PyPtr */
 

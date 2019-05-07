@@ -11,9 +11,18 @@ extern "C" {
 #include <ruby.h>
 #include <ruby/encoding.h>
 #include <ruby/thread.h>
+
 #include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
+
+#if defined(_WIN32)
+# define PYCALL_THREAD_WIN32
+# include <ruby/win32.h>
+#elif defined(HAVE_PTHREAD_H)
+# define PYCALL_THREAD_PTHREAD
+# include <pthread.h>
+#endif
 
 #if SIZEOF_LONG == SIZEOF_VOIDP
 # define PTR2NUM(x)   (LONG2NUM((long)(x)))
@@ -491,6 +500,23 @@ extern PyTypeObject PyRuby_Type;
 #define PyRuby_get_ruby_object(pyobj) (((PyRubyObject *)(pyobj))->ruby_object)
 
 PyObject * PyRuby_New(VALUE ruby_object);
+
+/* ==== thread support ==== */
+
+#if   defined(PYCALL_THREAD_WIN32)
+typedef DWORD pycall_tls_key;
+#elif defined(PYCALL_THREAD_PTHREAD)
+typedef pthread_key_t pycall_tls_key;
+#else
+# error "unsupported thread type"
+#endif
+
+int pycall_tls_create(pycall_tls_key* tls_key);
+void *pycall_tls_get(pycall_tls_key tls_key);
+int pycall_tls_set(pycall_tls_key tls_key, void *ptr);
+
+int pycall_without_gvl_p(void);
+VALUE pycall_without_gvl(VALUE (* func)(VALUE), VALUE arg);
 
 /* ==== pycall ==== */
 

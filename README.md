@@ -61,6 +61,24 @@ the `Math.sin` in Ruby:
 Type conversions from Ruby to Python are automatically performed for numeric,
 boolean, string, arrays, and hashes.
 
+### Releasing the RubyVM GVL during Python function calls
+
+You may want to release the RubyVM GVL when you call a Python function that takes very long runtime.
+PyCall provides `PyCall.without_gvl` method for such purpose.  When PyCall performs python function call,
+PyCall checks the current context, and then it releases the RubyVM GVL when the current context is in a `PyCall.without_gvl`'s block.
+
+```ruby
+PyCall.without_gvl do
+  # In this block, all Python function calls are performed without
+  # the GVL acquisition.
+  pyobj.long_running_function()
+end
+
+# Outside of PyCall.without_gvl block,
+# all Python function calls are performed with the GVL acquisition.
+pyobj.long_running_function()
+```
+
 ### Debugging python finder
 
 When you encounter `PyCall::PythonNotFound` error, you can investigate PyCall's python finder by setting `PYCALL_DEBUG_FIND_LIBPYTHON` environment variable to `1`.  You can see the log like below:
