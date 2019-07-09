@@ -201,7 +201,7 @@ module PyCall
   def check_isclass(pyptr)
     pyptr = pyptr.__pyptr__ if pyptr.kind_of? PyObjectWrapper
     return if pyptr.kind_of? LibPython::API::PyType_Type
-    return defined?(LibPython::API::PyClass_Type) && pyptr.kind_of?(LibPython::API::PyClass_Type)
+    return if defined?(LibPython::API::PyClass_Type) && pyptr.kind_of?(LibPython::API::PyClass_Type)
     raise TypeError, "PyType object is required"
   end
 
