@@ -121,7 +121,7 @@ module PyCall
         end
 
         def set_PYTHONHOME(python_config)
-          if !ENV.has_key?('PYTHONHOME') && python_config[:conda]
+          if !ENV.has_key?('PYTHONHOME')
             case RUBY_PLATFORM
             when /mingw32/, /cygwin/, /mswin/
               ENV['PYTHONHOME'] = python_config[:exec_prefix]
