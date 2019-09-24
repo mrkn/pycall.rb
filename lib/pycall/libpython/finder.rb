@@ -40,10 +40,6 @@ module PyCall
           debug_report("find_libpython(#{python.inspect})")
           python, python_config = find_python_config(python)
 
-          set_PYTHONHOME(python_config)
-          libs = make_libs(python_config)
-          libpaths = make_libpaths(python_config)
-
           # Try LIBPYTHON environment variable first.
           if (libpython = ENV['LIBPYTHON'])
             if File.file?(libpython)
@@ -59,6 +55,9 @@ module PyCall
           end
 
           # Find libpython (we hope):
+          set_PYTHONHOME(python_config)
+          libs = make_libs(python_config)
+          libpaths = make_libpaths(python_config)
           multiarch = python_config[:MULTIARCH] || python_config[:multiarch]
           libs.each do |lib|
             libpaths.each do |libpath|
@@ -121,7 +120,7 @@ module PyCall
         end
 
         def set_PYTHONHOME(python_config)
-          if !ENV.has_key?('PYTHONHOME') && python_config[:conda]
+          if !ENV.has_key?('PYTHONHOME')
             case RUBY_PLATFORM
             when /mingw32/, /cygwin/, /mswin/
               ENV['PYTHONHOME'] = python_config[:exec_prefix]
