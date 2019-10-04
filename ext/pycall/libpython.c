@@ -30,7 +30,13 @@ lookup_libpython_api(VALUE libpython_handle, char const *name)
   arg.libpython_handle = libpython_handle;
   arg.name = name;
   addr = rb_protect((VALUE (*)(VALUE))lookup_libpython_api_0, (VALUE)&arg, &state);
-  return (state || NIL_P(addr)) ? NULL : NUM2PTR(addr);
+  if (state) {
+    rb_set_errinfo(Qnil);
+    return NULL;
+  }
+  else {
+    return NIL_P(addr) ? NULL : NUM2PTR(addr);
+  }
 }
 
 #define LOOKUP_API_ENTRY(api_name) lookup_libpython_api(libpython_handle, #api_name)
