@@ -1,0 +1,66 @@
+name: CI
+
+on:
+- push
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - ubuntu-18.04
+        - macos-latest
+        ruby_version:
+        - 2.6.x
+        - 2.5.x
+        - 2.4.x
+        python_version:
+        - 3.8.x
+        - 3.7.x
+        - 3.6.x
+        - 2.7.x
+        python_architecture:
+        - x64
+
+    steps:
+      - name: Setup Ruby
+        if: matrix.ruby_version != 'master-nightly'
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby_version }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python_version }}
+          architecture: ${{ matrix.python_architecture }}
+
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Prepare environment
+        run: |
+          gem install bundler
+
+      - name: Install requirements
+        run: |
+          pip install --user numpy
+          bundle install
+
+      - name: Compile pycall.so
+        run: |
+          bundle exec rake compile
+
+      - name: Python investigator
+        run: |
+          python lib/pycall/python/investigator.py
+
+      - name: Test
+        run: |
+          PYTHON=python bundle exec rake
