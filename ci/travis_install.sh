@@ -17,11 +17,21 @@ fi
 if test "$PYENV_VERSION" = "system"; then
   if test -z "$LIBPYTHON"; then
     echo "ERROR: LIBPYTHON is not provided for PYENV_VERSION=system" >2
+    python3 lib/pycall/python/investigator.py
+    python lib/pycall/python/investigator.py
     exit 1
   fi
   # NOTE: PYENV_VERSION should be the version of LIBPYTHON during install script
   PYENV_VERSION=$(basename $(dirname $(dirname $LIBPYTHON)))
 fi
+
+(
+  cd $(pyenv root)
+  git fetch origin
+  git checkout master
+  git reset --hard origin/master
+)
+
 PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install -f $PYENV_VERSION
 
 case "$PYENV_VERSION" in
