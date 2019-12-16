@@ -10,29 +10,35 @@ if test -z "$PYENV_VERSION"; then
   exit 1
 fi
 
-if test -n "$LIBPYTHON"; then
-  export LIBPYTHON=$(pyenv root)/$LIBPYTHON
-fi
+pyenv_root=$(pyenv root)
 
-if test "$PYENV_VERSION" = "system"; then
-  if test -z "$LIBPYTHON"; then
-    echo "ERROR: LIBPYTHON is not provided for PYENV_VERSION=system" >2
-    python3 lib/pycall/python/investigator.py
-    python lib/pycall/python/investigator.py
-    exit 1
+if test -n "$LIBPYTHON"; then
+  if test ! -f $LIBPYTHON; then
+    if test -f ${pyenv_root}/$LIBPYTHON; then
+      export LIBPYTHON=${pyenv_root}/$LIBPYTHON
+    else
+      echo "Invalid value in LIBPYTHON: ${LIBPYTHON}" >&2
+      exit 1
+    fi
   fi
-  # NOTE: PYENV_VERSION should be the version of LIBPYTHON during install script
-  PYENV_VERSION=$(basename $(dirname $(dirname $LIBPYTHON)))
 fi
 
 (
   cd $(pyenv root)
-  git fetch origin
-  git checkout master
-  git reset --hard origin/master
+  if [ -d .git ]; then
+    git fetch origin
+    git checkout master
+    git reset --hard origin/master
+  fi
 )
 
-PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install -f $PYENV_VERSION
+case $PYENV_VERSION in
+system)
+  ;;
+*)
+  PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install -f $PYENV_VERSION
+  ;;
+esac
 
 case "$PYENV_VERSION" in
 *conda*)
@@ -49,6 +55,11 @@ case "$PYENV_VERSION" in
   conda info -a
   travis_retry conda create -q -n test-environment python=$python_version numpy
   source $(pyenv prefix)/bin/activate test-environment
+  ;;
+system)
+  travis_retry pip install --user numpy
+  sudo sh -c "apt-get update && apt-get install --no-install-recommends -y python3-pip"
+  travis_retry python3.6 -m pip install --user numpy
   ;;
 *)
   travis_retry pip install --user numpy

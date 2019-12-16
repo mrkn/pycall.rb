@@ -18,8 +18,8 @@ env:
   - PYENV_VERSION=3.8.0
   - PYENV_VERSION=3.7.5
   - PYENV_VERSION=2.7.17
-  - PYENV_VERSION=system LIBPYTHON=/usr/lib/libpython3.6m.so
-  - PYENV_VERSION=system LIBPYTHON=/usr/lib/libpython2.7.so
+  - PYENV_VERSION=system LIBPYTHON=/usr/lib/x86_64-linux-gnu/libpython3.6m.so
+  - PYENV_VERSION=system LIBPYTHON=/usr/lib/x86_64-linux-gnu/libpython2.7.so
   - PYENV_VERSION=miniconda2-4.3.30
   - PYENV_VERSION=miniconda3-4.3.30
 
@@ -40,21 +40,6 @@ matrix:
     compiler: clang
     rvm: 2.4
     env: PYENV_VERSION=3.8.0
-  - os: osx
-    osx_image: xcode11.2
-    compiler: clang
-    rvm: 2.6
-    env: PYENV_VERSION=system LIBPYTHON=versions/3.6.2/lib/libpython3.6m.so
-  - os: osx
-    osx_image: xcode11.2
-    compiler: clang
-    rvm: 2.5
-    env: PYENV_VERSION=system LIBPYTHON=versions/3.6.2/lib/libpython3.6m.so
-  - os: osx
-    osx_image: xcode11.2
-    compiler: clang
-    rvm: 2.4
-    env: PYENV_VERSION=system LIBPYTHON=versions/3.6.2/lib/libpython3.6m.so
   - os: osx
     osx_image: xcode11.2
     compiler: clang
