@@ -51,8 +51,18 @@ module PyCall
 
     def <(other)
       case other
+      when self
+        false
       when PyTypeObjectWrapper
         __pyptr__ < other.__pyptr__
+      when Class
+        false if other.ancestors.include?(self)
+      when Module
+        if ancestors.include?(other)
+          true
+        elsif other.ancestors.include?(self)
+          false
+        end
       else
         raise TypeError, "compared with non class/module"
       end
