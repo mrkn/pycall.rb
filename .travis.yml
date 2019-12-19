@@ -2,48 +2,63 @@ language: ruby
 
 os: linux
 
-dist: trusty
+dist: bionic
 sudo: required
 
 rvm:
 - ruby-head
-- 2.5.0
-- 2.4.3
-- 2.3.5
+- 2.6
+- 2.5
+- 2.4
 
 env:
   global:
   - PYCALL_DEBUG_FIND_LIBPYTHON=1
   matrix:
-  - PYENV_VERSION=2.7.13
-  - PYENV_VERSION=3.6.2
-  - PYENV_VERSION=system LIBPYTHON=versions/3.6.2/lib/libpython3.6m.so
-  - PYENV_VERSION=miniconda2-4.1.11
-  - PYENV_VERSION=miniconda3-4.3.11
+  - PYENV_VERSION=3.8.0
+  - PYENV_VERSION=3.7.5
+  - PYENV_VERSION=2.7.17
+  - PYENV_VERSION=system LIBPYTHON=/usr/lib/x86_64-linux-gnu/libpython3.6m.so
+  - PYENV_VERSION=system LIBPYTHON=/usr/lib/x86_64-linux-gnu/libpython2.7.so
+  - PYENV_VERSION=miniconda2-4.3.30
+  - PYENV_VERSION=miniconda3-4.3.30
 
 matrix:
   include:
   - os: osx
-    osx_image: xcode9
+    osx_image: xcode11.2
     compiler: clang
-    rvm: 2.4.1
-    env: PYENV_VERSION=3.6.2
+    rvm: 2.6
+    env: PYENV_VERSION=3.8.0
   - os: osx
-    osx_image: xcode9
+    osx_image: xcode11.2
     compiler: clang
-    rvm: 2.4.1
-    env: PYENV_VERSION=system LIBPYTHON=versions/3.6.2/lib/libpython3.6m.so
+    rvm: 2.5
+    env: PYENV_VERSION=3.8.0
   - os: osx
-    osx_image: xcode9
+    osx_image: xcode11.2
     compiler: clang
-    rvm: 2.4.1
+    rvm: 2.4
+    env: PYENV_VERSION=3.8.0
+  - os: osx
+    osx_image: xcode11.2
+    compiler: clang
+    rvm: 2.6
+    env: PYENV_VERSION=miniconda3-4.3.11
+  - os: osx
+    osx_image: xcode11.2
+    compiler: clang
+    rvm: 2.5
+    env: PYENV_VERSION=miniconda3-4.3.11
+  - os: osx
+    osx_image: xcode11.2
+    compiler: clang
+    rvm: 2.4
     env: PYENV_VERSION=miniconda3-4.3.11
   allow_failures:
   - os: osx
 
 before_install:
-- gem update --system
-- gem update bundler
 - export PATH="$(pyenv root)/bin:$PATH"
 - eval "$(pyenv init -)"
 
