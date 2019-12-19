@@ -67,8 +67,10 @@ pycall_gcguard_register(PyObject *pyobj, VALUE obj)
 void
 pycall_init_gcguard(void)
 {
+  VALUE table = rb_hash_new();
   id_gcguard_table = rb_intern("gcguard_table");
-  rb_ivar_set(mPyCall, id_gcguard_table, rb_hash_new());
+  rb_ivar_set(mPyCall, id_gcguard_table, table);
+  rb_gc_register_mark_object(table);
 
   weakref_callback_pyobj = Py_API(PyCFunction_NewEx)(&gcguard_weakref_callback_def, NULL, NULL);
 }

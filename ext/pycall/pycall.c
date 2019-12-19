@@ -2324,6 +2324,7 @@ Init_pycall(void)
   python_type_mapping = rb_hash_new();
   id_python_type_mapping = rb_intern("__python_type_mapping__");
   rb_ivar_set(mConversion, id_python_type_mapping, python_type_mapping);
+  rb_gc_register_mark_object(python_type_mapping);
 
   /* initialize the constat PYTHON_VERSION */
 
