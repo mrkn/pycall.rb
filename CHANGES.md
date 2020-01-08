@@ -1,8 +1,24 @@
 # The change history of PyCall
 
-## master
+## 1.3.0
 
 * Add `PyCall.without_gvl` for explicitly releasing the RubyVM GVL
+
+* Fix for missing if in PyObjectWrapper
+
+  *Kouhei Sutou*
+
+* Fix for Anaconda environment
+
+  *Ryo MATSUMIYA*
+
+* Fix against `unknown symbol "PyInt_AsSsize_t"` (Fiddle::DLError)
+
+  *Kouhei Sutou*
+
+* Fix for `TypeError: Compared with non class/module`
+
+  *Archonic*
 
 ## 1.2.1
 
