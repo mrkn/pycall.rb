@@ -7,6 +7,7 @@ sudo: required
 
 rvm:
 - ruby-head
+- 2.7
 - 2.6
 - 2.5
 - 2.4
@@ -28,6 +29,11 @@ matrix:
   - os: osx
     osx_image: xcode11.2
     compiler: clang
+    rvm: 2.7
+    env: PYENV_VERSION=3.8.0
+  - os: osx
+    osx_image: xcode11.2
+    compiler: clang
     rvm: 2.6
     env: PYENV_VERSION=3.8.0
   - os: osx
@@ -40,6 +46,11 @@ matrix:
     compiler: clang
     rvm: 2.4
     env: PYENV_VERSION=3.8.0
+  - os: osx
+    osx_image: xcode11.2
+    compiler: clang
+    rvm: 2.7
+    env: PYENV_VERSION=miniconda3-4.3.11
   - os: osx
     osx_image: xcode11.2
     compiler: clang
