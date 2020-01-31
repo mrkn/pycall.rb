@@ -13,9 +13,9 @@ module PyCall
       PyCall.len(self)
     end
 
-    def each
+    def each(&block)
       return enum_for unless block_given?
-      LibPython::Helpers.sequence_each(__pyptr__, &proc)
+      LibPython::Helpers.sequence_each(__pyptr__, &block)
       self
     end
 
