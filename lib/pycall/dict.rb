@@ -33,9 +33,9 @@ module PyCall
       v
     end
 
-    def each
+    def each(&block)
       return enum_for unless block_given?
-      LibPython::Helpers.dict_each(__pyptr__, &proc)
+      LibPython::Helpers.dict_each(__pyptr__, &block)
       self
     end
 
