@@ -1,5 +1,11 @@
 # The change history of PyCall
 
+## 1.3.1
+
+* Stop using `&proc` idiom to prevent warnings
+
+  *Kenta Murata*
+
 ## 1.3.0
 
 * Add `PyCall.without_gvl` for explicitly releasing the RubyVM GVL
