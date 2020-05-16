@@ -356,12 +356,9 @@ PyRuby_getattro_with_gvl(PyRubyObject *pyro, PyObject *pyobj_name)
 
 VALUE cPyRubyPtr;
 
-const rb_data_type_t pycall_pyrubyptr_data_type = {
+rb_data_type_t pycall_pyrubyptr_data_type = {
   "PyCall::PyRubyPtr",
-  { 0, pycall_pyptr_free, pycall_pyptr_memsize, },
-#ifdef RUBY_TYPED_FREE_IMMEDIATELY
-  &pycall_pyptr_data_type, 0, RUBY_TYPED_FREE_IMMEDIATELY
-#endif
+  { 0, pycall_pyptr_free, pycall_pyptr_memsize, }
 };
 
 static inline int
@@ -462,11 +459,19 @@ pycall_init_ruby_wrapper(void)
 
   /* PyCall::PyRubyPtr */
 
+// This cannot be defined above because MSVC 2019 results in error C2099: initializer is not a constant
+#ifdef RUBY_TYPED_FREE_IMMEDIATELY
+  pycall_pyrubyptr_data_type.parent = &pycall_pyptr_data_type;
+  pycall_pyrubyptr_data_type.data = 0;
+  pycall_pyrubyptr_data_type.flags = RUBY_TYPED_FREE_IMMEDIATELY;
+#endif
+
   cPyRubyPtr = rb_define_class_under(mPyCall, "PyRubyPtr", cPyPtr);
   rb_define_alloc_func(cPyRubyPtr, pycall_pyruby_allocate);
   rb_define_method(cPyRubyPtr, "__ruby_object_id__", pycall_pyruby_get_ruby_object_id, 0);
 
   rb_define_module_function(mPyCall, "wrap_ruby_object", pycall_m_wrap_ruby_object, 1);
+   
 }
 
 /* --- File internal utilities --- */
