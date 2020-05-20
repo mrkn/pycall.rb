@@ -8,6 +8,8 @@ require "rspec/core/rake_task"
 Dir[File.expand_path('../tasks/**/*.rake', __FILE__)].each {|f| load f }
 
 gem_spec = eval(File.read('pycall.gemspec'))
+=begin
+#TODO: make this conditional for ruby/truffleruby env
 Rake::ExtensionTask.new('pycall', gem_spec) do |ext|
   ext.lib_dir = File.join(*['lib', ENV['FAT_DIR']].compact)
   ext.cross_compile = true
@@ -16,6 +18,7 @@ Rake::ExtensionTask.new('pycall', gem_spec) do |ext|
     s.files.concat %w[lib/2.2/pycall.so lib/2.3/pycall.so lib/2.4/pycall.so]
   end
 end
+=end
 
 Rake::ExtensionTask.new('pycall/spec_helper')
 
