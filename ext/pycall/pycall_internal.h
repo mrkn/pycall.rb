@@ -663,6 +663,19 @@ Py_ssize_t pycall_python_hexversion(void);
 
 void pycall_Py_DecRef(PyObject *);
 
+#if defined(_MSC_VER) && defined(RUBY_TYPED_FREE_IMMEDIATELY)
+# define PYCALL_PYPTR_PARENT 0
+# define PYCALL_PYPTR_DATA_INIT_PARENT(pyptr_data) ((pyptr_data).parent = &pycall_pyptr_data_type)
+#endif
+
+#ifndef PYCALL_PYPTR_PARENT
+# define PYCALL_PYPTR_PARENT &pycall_pyptr_data_type
+#endif
+
+#ifndef PYCALL_PYPTR_DATA_INIT_PARENT
+# define PYCALL_PYPTR_DATA_INIT_PARENT(pyptr_data) ((void)0)
+#endif
+
 RUBY_EXTERN const rb_data_type_t pycall_pyptr_data_type;
 size_t pycall_pyptr_memsize(void const *);
 void pycall_pyptr_free(void *);
