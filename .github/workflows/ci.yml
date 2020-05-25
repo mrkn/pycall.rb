@@ -1,11 +1,22 @@
 name: CI
 
 on:
-- push
+  push:
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'ext/**'
+      - 'lib/**'
+      - 'spec/**'
+  pull_request:
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'ext/**'
+      - 'lib/**'
+      - 'spec/**'
 
 jobs:
-  test:
-    name: Test
+  unix-like:
+    name: "${{ matrix.os }}: Ruby ${{ matrix.ruby_version }} & Python ${{ matrix.python_version }}-${{ matrix.python_architecture }}"
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -35,13 +46,13 @@ jobs:
           ruby-version: ${{ matrix.ruby_version }}
 
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python_version }}
           architecture: ${{ matrix.python_architecture }}
 
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
         with:
           fetch-depth: 1
 
@@ -65,3 +76,83 @@ jobs:
       - name: Test
         run: |
           PYTHON=python bundle exec rake
+
+  windows:
+    name: "${{ matrix.os }}: Ruby ${{ matrix.ruby_version }} & Python ${{ matrix.python_version }}-${{ matrix.python_architecture }}"
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - windows-latest
+        vs_version:
+        - 2019
+        ruby_version:
+        - 2.7.x
+        - 2.6.x
+        - 2.5.x
+        - 2.4.x
+        python_version:
+        - 3.8.x
+        - 3.7.x
+        - 3.6.x
+        - 2.7.x
+        python_architecture:
+        - x64
+
+    steps:
+      - name: Setup Ruby
+        if: matrix.ruby_version != 'master-nightly'
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby_version }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python_version }}
+          architecture: ${{ matrix.python_architecture }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Prepare environment
+        run: |
+          gem install bundler
+
+      - name: Install requirements
+        run: |
+          pip install --user numpy
+          bundle install
+
+      - name: Configure pycall.so
+        shell: cmd
+        working-directory: ext/pycall
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\${{ matrix.vs_version }}\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          echo on
+          set MAKE=nmake.exe
+          bundle exec ruby -v extconf.rb
+
+      - name: Compile pycall.so
+        shell: cmd
+        working-directory: ext/pycall
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\${{ matrix.vs_version }}\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          echo on
+          type Makefile
+          nmake
+
+      - name: Python investigator
+        run: |
+          python lib/pycall/python/investigator.py
+
+      - name: Test
+        shell: cmd
+        run: |
+          echo on
+          set PYTHON=python.exe
+          bundle exec rspec spec
