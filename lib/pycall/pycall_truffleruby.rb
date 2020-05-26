@@ -37,7 +37,7 @@ module PyCall
 
     ENV['PYTHONPATH'] = [ File.expand_path('../python', __FILE__), ENV['PYTHONPATH'] ].compact.join(File::PATH_SEPARATOR)
     const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
-    const_set(:PYTHON_DESCRIPTION, LPolyglot.eval('python', 'import sys;sys.version'))
+    const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
     true
   end
 
@@ -52,8 +52,8 @@ module PyCall
   end
 
   def callable?(obj)
-    #@@callable ||= Polyglot.eval('python', 'callable')
-    #@@callable(obj)
+    @@callable ||= Polyglot.eval('python', 'callable')
+    @@callable.call(obj)
   end
 
   def dir(obj)
@@ -69,12 +69,13 @@ module PyCall
   end
 
   def getattr(*args)
-    obj, *rest = args
-    obj.__getattr__(rest)
+    @@getattr_py ||= Polyglot.eval('python', 'getattr')
+    @@getattr_py.call(*args)
   end
 
   def hasattr?(obj, name)
-    obj.__hasattr__(name)
+    @@hasattr_py ||= Polyglot.eval('python', 'hasattr')
+    @@hasattr_py.call(obj, name)
   end
 
   def len(obj)
@@ -86,8 +87,8 @@ module PyCall
   end
 
   def tuple(iterable=nil)
-    #@@tuple_py ||= Polyglot.eval('python', 'tuple')
-    #@@tuple_py(*iterable)
+    @@tuple_py ||= Polyglot.eval('python', 'tuple')
+    @@tuple_py.call(iterable)
   end
 
   def with(ctx)
