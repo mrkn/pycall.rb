@@ -70,6 +70,20 @@ RSpec.describe PyCall do
     end
   end
 
+  describe '.same?' do
+    let(:simple_module) { PyCall.import_module('pycall.simple_module') }
+    let(:simple_class) { PyCall.import_module('pycall.simple_class').SimpleClass }
+
+    specify do
+      pyobj_1 = simple_class.new
+      expect(PyCall.same?(pyobj_1, pyobj_1)).to eq(true)
+      pyobj_2 = simple_module.identity(pyobj_1)
+      expect(pyobj_2).not_to be_equal(pyobj_1)
+      expect(PyCall.same?(pyobj_1, pyobj_2)).to eq(true)
+      expect(PyCall.same?(pyobj_1, simple_class.new)).to eq(false)
+    end
+  end
+
   describe '.import_module' do
     subject { PyCall.import_module('sys') }
 

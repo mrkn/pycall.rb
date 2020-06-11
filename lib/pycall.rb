@@ -58,6 +58,17 @@ module PyCall
     LibPython::Helpers.hasattr?(obj.__pyptr__, name)
   end
 
+  def same?(left, right)
+    case left
+    when PyObjectWrapper
+      case right
+      when PyObjectWrapper
+        return left.__pyptr__ == right.__pyptr__
+      end
+    end
+    false
+  end
+
   def import_module(name)
     LibPython::Helpers.import_module(name)
   end
