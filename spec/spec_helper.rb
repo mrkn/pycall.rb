@@ -22,7 +22,9 @@ puts PyCall::PYTHON_DESCRIPTION
 
 require 'pycall/import'
 require "pycall/pretty_print"
-require 'pycall/spec_helper.so'
+if RUBY_ENGINE != "truffleruby"
+  require 'pycall/spec_helper.so'
+end
 
 PyCall.sys.path.append(File.expand_path('../python', __FILE__))
 
