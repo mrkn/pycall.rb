@@ -33,7 +33,7 @@ module PyCall
     true
   end
 
-  require 'pycall/trufflruby/pyobject_wrapper'
+  require 'pycall/truffleruby/pyobject_wrapper'
 
   module_function
 

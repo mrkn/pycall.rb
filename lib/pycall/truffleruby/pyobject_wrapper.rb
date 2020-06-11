@@ -27,32 +27,27 @@ module PyCall
     def method_missing(name, *args)
       name_str = name.to_s if name.kind_of?(Symbol)
       name_str.chop! if name_str.end_with?('=')
-      case name
-      when *OPERATOR_METHOD_NAMES.keys
-        op_name = OPERATOR_METHOD_NAMES[name]
-        if LibPython::Helpers.hasattr?(__foreignobj__, op_name)
-          LibPython::Helpers.define_wrapper_method(self, op_name)
-          singleton_class.__send__(:alias_method, name, op_name)
-          return self.__send__(name, *args)
-        end
+      @@python_isfunction ||= Polyglot.eval('python', 'import inspect;inspect.isfunction')
+      obj_attr = __foreignobj__[name]
+      if python_isfunction.call(obj_attr) 
+        return obj_attr.call(args)#TODO: wrap those return values
       else
-        if LibPython::Helpers.hasattr?(__foreignobj__, name_str)
-          LibPython::Helpers.define_wrapper_method(self, name)
-          return self.__send__(name, *args)
-        end
+        return obj_attr
       end
+
       super
     end
 
     def respond_to_missing?(name, include_private)
-      return true if LibPython::Helpers.hasattr?(__foreignobj__, name)
+      return true if PyCall.hasattr?(__foreignobj__, name)
       super
     end
 
     def kind_of?(cls)
       case cls
       when PyTypeObjectWrapper
-        __foreignobj__.kind_of?(cls.__foreignobj__)
+        @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
+        @@python_isinstance.call(__foreignobj__, cls.__foreignobj__)
       else
         super
       end
@@ -79,15 +74,15 @@ module PyCall
     end
 
     def [](*key)
-      LibPython::Helpers.getitem(__foreignobj__, key)
+      __foreignobj__.__getitem__(key)
     end
 
     def []=(*key, value)
-      LibPython::Helpers.setitem(__foreignobj__, key, value)
+      __foreignobj__.__setitem__(key, value)
     end
 
     def call(*args)
-      LibPython::Helpers.call_object(__foreignobj__, *args)
+      __foreignobj__.call(*args)
     end
 
     class SwappedOperationAdapter
@@ -159,15 +154,18 @@ module PyCall
     end
 
     def to_s
-      LibPython::Helpers.str(__foreignobj__)
+      @@python_str ||= Polyglot.eval('python', 'str')
+      @@python_str.call(__foreignobj__)
     end
 
     def to_i
-      LibPython::Helpers.call_object(PyCall::builtins.int.__foreignobj__, __foreignobj__)
+      @@python_int ||= Polyglot.eval('python', 'int')
+      @@python_int.call(__foreignobj__)
     end
 
     def to_f
-      LibPython::Helpers.call_object(PyCall::builtins.float.__foreignobj__, __foreignobj__)
+      @@python_float ||= Polyglot.eval('python', 'float')
+      @@python_float.call(__foreignobj__)
     end
   end
 
