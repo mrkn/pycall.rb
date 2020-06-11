@@ -4,7 +4,6 @@ PyCall bildet alle Python-built-in Methoden als Instanz- und Klassenmethoden ab
 
 =end
 module PyCall
-
   def self.const_missing(name)
     case name
     when :PyPtr, :PyTypePtr, :PyObjectWrapper, :PYTHON_DESCRIPTION, :PYTHON_VERSION
@@ -28,18 +27,14 @@ module PyCall
   end
 
   def self.init(python = ENV['PYTHON'])
-    class << PyCall
-      remove_method :const_missing
-    end
-    class << PyCall::LibPython
-      remove_method :const_missing
-    end
 
     ENV['PYTHONPATH'] = [ File.expand_path('../python', __FILE__), ENV['PYTHONPATH'] ].compact.join(File::PATH_SEPARATOR)
     const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
     const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
     true
   end
+
+  require 'pycall/trufflruby/pyobject_wrapper'
 
   module_function
 
