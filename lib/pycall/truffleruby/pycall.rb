@@ -27,7 +27,6 @@ module PyCall
   end
 
   def self.init(python = ENV['PYTHON'])
-
     ENV['PYTHONPATH'] = [ File.expand_path('../python', __FILE__), ENV['PYTHONPATH'] ].compact.join(File::PATH_SEPARATOR)
     const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
     const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
