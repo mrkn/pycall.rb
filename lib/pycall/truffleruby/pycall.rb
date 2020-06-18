@@ -38,11 +38,11 @@ module PyCall
   module_function
 
   def import_module(name)
-     Polyglot.eval('python', "import #{name}\n#{name}")
+    PyObjectWrapper.wrap(Polyglot.eval('python', "import #{name}\n#{name}"))
   end
 
   def builtins
-    @@builtins ||= import_module('builtins')
+    @@builtins ||= PyObjectWrapper.wrap(import_module('builtins'))
   end
 
   def callable?(obj)
@@ -55,16 +55,16 @@ module PyCall
   end
 
   def eval(expr, globals: nil, locals: nil)
-    Polyglot.eval('python', expr)
+    PyObjectWrapper.wrap(Polyglot.eval('python', expr))
   end
 
   def exec(code, globals: nil, locals: nil)
-    Polyglot.eval('python', expr)
+    PyObjectWrapper.wrap(Polyglot.eval('python', expr))
   end
 
   def getattr(*args)
     @@getattr_py ||= Polyglot.eval('python', 'getattr')
-    @@getattr_py.call(*args)
+    PyObjectWrapper.wrap(@@getattr_py.call(*args))
   end
 
   def hasattr?(obj, name)
@@ -77,12 +77,12 @@ module PyCall
   end
 
   def sys
-    @@sys ||= import_module('sys')
+    @@sys ||= PyObjectWrapper.wrap(import_module('sys'))
   end
 
   def tuple(iterable=nil)
     @@tuple_py ||= Polyglot.eval('python', 'tuple')
-    @@tuple_py.call(iterable)
+    PyObjectWrapper.wrap(@@tuple_py.call(iterable))
   end
 
   def with(ctx)
@@ -97,4 +97,4 @@ module PyCall
   end
 end
 
-require 'pycall/iruby_helper_truffleruby' if defined? IRuby
+#require 'pycall/iruby_helper_truffleruby' if defined? IRuby

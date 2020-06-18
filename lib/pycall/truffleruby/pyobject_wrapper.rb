@@ -1,5 +1,5 @@
 module PyCall
-  module PyObjectWrapper
+  class PyObjectWrapper
     attr_reader :__foreignobj__
 
     def self.extend_object(obj)
@@ -12,6 +12,13 @@ module PyCall
 
     def initialize(polyglotObject)
       @__foreignobj__ = polyglotObject
+    end
+
+    def self.wrap(returnValue)
+      return returnValue.to_s if Truffle::Interop.is_string? (returnValue)
+      return nil if Truffle::Interop.null?(returnValue)
+      return PyObjectWrapper.new(returnValue) if Truffle::Interop.foreign? (returnValue)
+      return returnValue
     end
 
     OPERATOR_METHOD_NAMES = {
@@ -31,12 +38,11 @@ module PyCall
     def method_missing(name, *args)
       name_str = name.to_s if name.kind_of?(Symbol)
       name_str.chop! if name_str.end_with?('=')
-      @@python_isfunction ||= Polyglot.eval('python', 'import inspect;inspect.isfunction')
       obj_attr = __foreignobj__[name]
-      if python_isfunction.call(obj_attr) 
-        return obj_attr.call(args)#TODO: wrap those return values
+      if PyCall.callable?(obj_attr)
+        return PyObjectWrapper.wrap(obj_attr.call(*args))
       else
-        return obj_attr
+        return PyObjectWrapper.wrap(obj_attr)
       end
 
       super
@@ -78,11 +84,19 @@ module PyCall
     end
 
     def [](*key)
-      __foreignobj__.__getitem__(key)
+      begin
+        return PyObjectWrapper.wrap(__foreignobj__.__getitem__(key[0]))
+      rescue => e
+        return PyObjectWrapper.wrap(__foreignobj__.__getattribute__(key[0]))
+      end
     end
 
     def []=(*key, value)
-      __foreignobj__.__setitem__(key, value)
+      begin
+        __foreignobj__.__setitem__(key[0], value)
+      rescue => e
+        __foreignobj__.__setattr__(key[0] , value)
+      end
     end
 
     def call(*args)
