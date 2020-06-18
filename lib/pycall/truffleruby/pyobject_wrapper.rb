@@ -10,6 +10,10 @@ module PyCall
       super
     end
 
+    def initialize(polyglotObject)
+      @__foreignobj__ = polyglotObject
+    end
+
     OPERATOR_METHOD_NAMES = {
       :+  => :__add__,
       :-  => :__sub__,
