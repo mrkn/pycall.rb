@@ -56,7 +56,7 @@ module PyCall
 
     def kind_of?(cls)
       case cls
-      when PyTypeObjectWrapper
+      when PyTypeObjectWrapper # todo ==> PyObjectWrapper
         @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
         @@python_isinstance.call(__foreignobj__, cls.__foreignobj__)
       else
@@ -157,7 +157,7 @@ module PyCall
     end
 
     def coerce(other)
-      [SwappedOperationAdapter.new(other), self]
+      [SwappedOperationAdapter.new(@__foreignobj__), self]
     end
 
     def dup

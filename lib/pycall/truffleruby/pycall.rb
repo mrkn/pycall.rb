@@ -8,10 +8,7 @@ module PyCall
   const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
   const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
 
-  module LibPython
-    const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
-    const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
-  end
+  require 'pycall/truffleruby/libpython'
 
   def self.init(python = ENV['PYTHON'])
     true
@@ -19,6 +16,8 @@ module PyCall
 
   require 'pycall/truffleruby/pyobject_wrapper'
   require 'pycall/truffleruby/pymodule_wrapper'
+  require 'pycall/truffleruby/pytypeobject_wrapper'
+  require 'pycall/pyerror'
 
   module_function
 
