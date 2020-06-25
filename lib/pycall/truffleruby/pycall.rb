@@ -4,32 +4,16 @@ PyCall bildet alle Python-built-in Methoden als Instanz- und Klassenmethoden ab
 
 =end
 module PyCall
-  def self.const_missing(name)
-    case name
-    when :PyPtr, :PyTypePtr, :PyObjectWrapper, :PYTHON_DESCRIPTION, :PYTHON_VERSION
-      PyCall.init
-      const_get(name)
-    else
-      super
-    end
-  end
+
+  const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
+  const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
 
   module LibPython
-    def self.const_missing(name)
-      case name
-      when :API, :Conversion, :Helpers, :PYTHON_DESCRIPTION, :PYTHON_VERSION
-        PyCall.init
-        const_get(name)
-      else
-        super
-      end
-    end
+    const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
+    const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
   end
 
   def self.init(python = ENV['PYTHON'])
-    ENV['PYTHONPATH'] = [ File.expand_path('../python', __FILE__), ENV['PYTHONPATH'] ].compact.join(File::PATH_SEPARATOR)
-    const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
-    const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
     true
   end
 
