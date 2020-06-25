@@ -1,8 +1,9 @@
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
 
 puts
-puts "Environment variables:"
-%w[
+if RUBY_ENGINE != "truffleruby"
+  puts "Environment variables:"
+  %w[
   ANACONDA
   LIBPYTHON
   PYENV_VERSION
@@ -11,10 +12,11 @@ puts "Environment variables:"
   PYTHONPATH
   PYCALL_DEBUG_FIND_LIBPYTHON
 ].each do |key|
-  puts "- #{key}=#{ENV[key]}"
+    puts "- #{key}=#{ENV[key]}"
+  end
 end
 
-require "pycall"
+require 'pycall'
 
 puts
 puts "The following version of Python is used:"

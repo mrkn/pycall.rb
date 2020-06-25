@@ -2,6 +2,10 @@ module PyCall
   class PyObjectWrapper
     attr_reader :__foreignobj__
 
+    def initialize(foreign)
+      @__foreignobj__ = foreign
+    end
+
     def self.extend_object(obj)
       pyptr = obj.instance_variable_get(:@__foreignobj__)
       unless pyptr.kind_of? PyPtr
@@ -10,11 +14,11 @@ module PyCall
       super
     end
 
-    def self.wrap(returnValue)
-      return returnValue.to_s if Truffle::Interop.is_string? (returnValue)
-      return nil if Truffle::Interop.null?(returnValue)
-      return PyObjectWrapper.new(returnValue) if Truffle::Interop.foreign? (returnValue)
-      return returnValue
+    def self.wrap(something)
+      return something.to_s if Truffle::Interop.is_string? (something)
+      return nil if Truffle::Interop.null?(something)
+      return PyObjectWrapper.new(something) if Truffle::Interop.foreign? (something)
+      return something
     end
 
     OPERATOR_METHOD_NAMES = {
@@ -97,11 +101,6 @@ module PyCall
 
     def call(*args)
       __foreignobj__.call(*args)
-    end
-
-    private
-    def initialize(polyglotObject)
-      @__foreignobj__ = polyglotObject
     end
 
     class SwappedOperationAdapter

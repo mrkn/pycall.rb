@@ -1,5 +1,6 @@
 module PyCall
-  Dict = builtins.dict
+  require 'pycall/truffleruby/pyobject_wrapper'
+  Dict = PyCall.builtins.dict
   class Dict < PyObjectWrapper
     register_python_type_mapping
 
@@ -27,9 +28,7 @@ module PyCall
     alias member? has_key?
 
     def [](key)
-      super
-    rescue PyError
-      nil
+      @__foreignobj__.__getitem__(key)
     end
 
     def delete(key)

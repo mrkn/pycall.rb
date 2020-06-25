@@ -34,8 +34,6 @@ module PyCall
   end
 
   require 'pycall/truffleruby/pyobject_wrapper'
-  require 'pycall/truffleruby/list'
-  require 'pycall/truffleruby/dictf'
 
   module_function
 
@@ -97,6 +95,11 @@ module PyCall
       ctx.__exit__(nil, nil, nil)
     end
   end
+
+  require 'pycall/truffleruby/list'
+  require 'pycall/truffleruby/dict'
+  require 'pycall/truffleruby/set'
+  require 'pycall/truffleruby/slice'
 end
 
 #require 'pycall/iruby_helper_truffleruby' if defined? IRuby
