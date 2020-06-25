@@ -1,6 +1,4 @@
 module PyCall
-  require 'pycall/truffleruby/pyobject_wrapper'
-  List = PyCall.builtins.list
   class List < PyObjectWrapper
     register_python_type_mapping
 

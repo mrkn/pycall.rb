@@ -1,6 +1,4 @@
 module PyCall
-  require 'pycall/truffleruby/pyobject_wrapper'
-  Dict = PyCall.builtins.dict
   class Dict < PyObjectWrapper
     register_python_type_mapping
 
