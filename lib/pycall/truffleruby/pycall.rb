@@ -18,15 +18,16 @@ module PyCall
   end
 
   require 'pycall/truffleruby/pyobject_wrapper'
+  require 'pycall/truffleruby/pymodule_wrapper'
 
   module_function
 
   def import_module(name)
-    PyObjectWrapper.wrap(Polyglot.eval('python', "import #{name}\n#{name}"))
+    PyModuleWrapper.wrap(Polyglot.eval('python', "import #{name}\n#{name}"))
   end
 
   def builtins
-    @@builtins ||= PyObjectWrapper.wrap(import_module('builtins'))
+    @@builtins ||= PyModuleWrapper.wrap(import_module('builtins'))
   end
 
   def callable?(obj)
@@ -61,7 +62,7 @@ module PyCall
   end
 
   def sys
-    @@sys ||= PyObjectWrapper.wrap(import_module('sys'))
+    @@sys ||= PyModuleWrapper.wrap(import_module('sys'))
   end
 
   def tuple(iterable=nil)
