@@ -96,10 +96,11 @@ module PyCall
     end
   end
 
+  require 'pycall/truffleruby/tuple'
   require 'pycall/truffleruby/list'
   require 'pycall/truffleruby/dict'
-  require 'pycall/truffleruby/set'
-  require 'pycall/truffleruby/slice'
+  # require 'pycall/truffleruby/set'
+  # require 'pycall/truffleruby/slice'
 end
 
 #require 'pycall/iruby_helper_truffleruby' if defined? IRuby
