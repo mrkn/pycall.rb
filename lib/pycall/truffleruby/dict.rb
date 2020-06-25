@@ -1,7 +1,5 @@
 module PyCall
   class Dict < PyObjectWrapper
-    register_python_type_mapping
-
     include Enumerable
 
     def self.new(h)

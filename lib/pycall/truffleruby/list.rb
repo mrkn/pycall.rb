@@ -1,7 +1,5 @@
 module PyCall
   class List < PyObjectWrapper
-    register_python_type_mapping
-
     include Enumerable
 
     def include?(item)
