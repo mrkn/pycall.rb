@@ -1,6 +1,6 @@
 module PyCall
   Dict = builtins.dict
-  class Dict
+  class Dict < PyObjectWrapper
     register_python_type_mapping
 
     include Enumerable
@@ -14,7 +14,12 @@ module PyCall
     end
 
     def has_key?(key)
-      LibPython::Helpers.dict_contains(__pyptr__, key)
+      begin
+        __foreignobj__.__getitem__(key)
+        return true
+      rescue => e
+        return false
+      end
     end
 
     alias include? has_key?
@@ -28,17 +33,17 @@ module PyCall
     end
 
     def delete(key)
-      v = self[key]
-      LibPython::Helpers.delitem(__pyptr__, key)
-      v
+      @__foreignobj__.pop(key)
     end
 
+    # todo
     def each(&block)
-      return enum_for unless block_given?
-      LibPython::Helpers.dict_each(__pyptr__, &block)
-      self
+      PyCall.builtins.list(@__foreignobj__.items()) do | tuple |
+        block.call(tuple)
+      end
     end
 
+    # todo? whats this even?
     def to_h
       inject({}) do |h, (k, v)|
         h.update(k => v)

@@ -34,6 +34,8 @@ module PyCall
   end
 
   require 'pycall/truffleruby/pyobject_wrapper'
+  require 'pycall/truffleruby/list'
+  require 'pycall/truffleruby/dictf'
 
   module_function
 

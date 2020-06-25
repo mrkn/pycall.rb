@@ -1,7 +1,6 @@
 module PyCall
   List = builtins.list
   class List < PyObjectWrapper
-
     register_python_type_mapping
 
     include Enumerable

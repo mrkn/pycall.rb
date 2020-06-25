@@ -10,10 +10,6 @@ module PyCall
       super
     end
 
-    def initialize(polyglotObject)
-      @__foreignobj__ = polyglotObject
-    end
-
     def self.wrap(returnValue)
       return returnValue.to_s if Truffle::Interop.is_string? (returnValue)
       return nil if Truffle::Interop.null?(returnValue)
@@ -103,6 +99,11 @@ module PyCall
       __foreignobj__.call(*args)
     end
 
+    private
+    def initialize(polyglotObject)
+      @__foreignobj__ = polyglotObject
+    end
+
     class SwappedOperationAdapter
       def initialize(obj)
         @obj = obj
@@ -168,22 +169,22 @@ module PyCall
     end
 
     def inspect
-      PyCall.builtins.repr(__foreignobj__)
+      PyCall.builtins.repr(@__foreignobj__)
     end
 
     def to_s
       @@python_str ||= Polyglot.eval('python', 'str')
-      @@python_str.call(__foreignobj__)
+      @@python_str.call(@__foreignobj__)
     end
 
     def to_i
       @@python_int ||= Polyglot.eval('python', 'int')
-      @@python_int.call(__foreignobj__)
+      @@python_int.call(@__foreignobj__)
     end
 
     def to_f
       @@python_float ||= Polyglot.eval('python', 'float')
-      @@python_float.call(__foreignobj__)
+      @@python_float.call(@__foreignobj__)
     end
   end
 
@@ -198,4 +199,5 @@ module PyCall
     @@isclass_py ||= Polyglot.eval('python', 'import inspect;inspect.isclass')
     @@isclass_py.call(pyptr)
   end
+
 end
