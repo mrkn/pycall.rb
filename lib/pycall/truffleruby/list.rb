@@ -16,7 +16,7 @@ module PyCall
     end
 
     def <<(item)
-      @__foreignobj__.append(item)
+      @__pyptr__.append(item)
     end
 
     # todo ?
@@ -29,7 +29,7 @@ module PyCall
     end
 
     def sort!
-      @__foreignobj__.sort
+      @__pyptr__.sort
     end
   end
 end

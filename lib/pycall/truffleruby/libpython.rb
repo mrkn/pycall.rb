@@ -1,7 +1,6 @@
 module PyCall
   module LibPython
     module Finder
-
     end
 
     module Helpers
@@ -11,7 +10,6 @@ module PyCall
     end
 
     module API
-
     end
 
     const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))

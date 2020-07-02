@@ -12,7 +12,7 @@ module PyCall
 
     def has_key?(key)
       begin
-        __foreignobj__.__getitem__(key)
+        __pyptr__.__getitem__(key)
         return true
       rescue => e
         return false
@@ -24,16 +24,16 @@ module PyCall
     alias member? has_key?
 
     def [](key)
-      @__foreignobj__.__getitem__(key)
+      @__pyptr__.__getitem__(key)
     end
 
     def delete(key)
-      @__foreignobj__.pop(key)
+      @__pyptr__.pop(key)
     end
 
     # todo
     def each(&block)
-      PyCall.builtins.list(@__foreignobj__.items()) do | tuple |
+      PyCall.builtins.list(@__pyptr__.items()) do | tuple |
         block.call(tuple)
       end
     end

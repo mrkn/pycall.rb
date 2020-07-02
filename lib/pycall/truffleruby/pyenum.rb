@@ -7,7 +7,7 @@ module PyCall
     end
 
     def include?(item)
-      @__foreignobj__.contains(item)
+      @__pyptr__.contains(item)
     end
 
     def length

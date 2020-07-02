@@ -1,15 +1,19 @@
 module PyCall
   class PyObjectWrapper
-    attr_reader :__foreignobj__
+    attr_reader :__pyptr__
+
+    def __pyptr__
+      @__pyptr__
+    end
 
     def initialize(foreign)
-      @__foreignobj__ = foreign
+      @__pyptr__ = foreign
     end
 
     def self.extend_object(obj)
-      pyptr = obj.instance_variable_get(:@__foreignobj__)
+      pyptr = obj.instance_variable_get(:@__pyptr__)
       unless pyptr.kind_of? PyPtr
-        raise TypeError, "@__foreignobj__ should have PyCall::PyPtr object"
+        raise TypeError, "@__pyptr__ should have PyCall::PyPtr object"
       end
       super
     end
@@ -20,6 +24,19 @@ module PyCall
       return nil if Truffle::Interop.null?(something)
       return self.new(something) if Truffle::Interop.foreign?(something)
       return something
+    end
+
+    # todo test
+    def self.unwrap(obj)
+      if obj.is_a?(Enumerable)
+        result = []
+        obj.each { |part| result = self.unwrap(part) }
+        result
+      elsif obj.is_a?(PyObjectWrapper)
+        self.unwrap(obj.__pyptr__)
+      else
+        obj
+      end
     end
 
     OPERATOR_METHOD_NAMES = {
@@ -39,7 +56,7 @@ module PyCall
     def method_missing(name, *args)
       name_str = name.to_s if name.kind_of?(Symbol)
       name_str.chop! if name_str.end_with?('=')
-      obj_attr = @__foreignobj__[name]
+      obj_attr = @__pyptr__[name]
       if PyCall.callable?(obj_attr)
         PyObjectWrapper.wrap(obj_attr.call(*args))
       else
@@ -48,17 +65,17 @@ module PyCall
     end
 
     def respond_to_missing?(name, include_private)
-      return true if PyCall.hasattr?(@__foreignobj__, name)
+      return true if PyCall.hasattr?(@__pyptr__, name)
       super
     end
 
     def kind_of?(cls)
+      @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
       case cls
-      when PyTypeObjectWrapper # todo ==> PyObjectWrapper
-        @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
-        @@python_isinstance.call(@__foreignobj__, cls.__foreignobj__)
-      else
-        super
+      when PyTypeObjectWrapper  # todo ==> PyObjectWrapper
+        @@python_isinstance.call(@__pyptr__, cls.__pyptr__)
+      when PyObjectWrapper
+        @@python_isinstance.call(@__pyptr__, Conversion.get_type cls.py)
       end
     end
 
@@ -74,9 +91,9 @@ module PyCall
           @@pythonop_#{pythonop} ||= Polyglot.eval('python', 'import operator;operator.#{pythonop}')
           case other
           when PyObjectWrapper
-            @@pythonop_#{pythonop}.call(__foreignobj__, other.__foreignobj__)
+            @@pythonop_#{pythonop}.call(__pyptr__, other.__pyptr__)
           else
-            @@pythonop_#{pythonop}.call(__foreignobj__, other)
+            @@pythonop_#{pythonop}.call(__pyptr__, other)
           end
         end
       end;
@@ -84,22 +101,22 @@ module PyCall
 
     def [](*key)
       begin
-        return PyObjectWrapper.wrap(__foreignobj__.__getitem__(key[0]))
+        return PyObjectWrapper.wrap(__pyptr__.__getitem__(key[0]))
       rescue => e
-        return PyObjectWrapper.wrap(__foreignobj__.__getattribute__(key[0]))
+        return PyObjectWrapper.wrap(__pyptr__.__getattribute__(key[0]))
       end
     end
 
     def []=(*key, value)
       begin
-        __foreignobj__.__setitem__(key[0], value)
+        __pyptr__.__setitem__(key[0], value)
       rescue => e
-        __foreignobj__.__setattr__(key[0] , value)
+        __pyptr__.__setattr__(key[0] , value)
       end
     end
 
     def call(*args)
-      __foreignobj__.call(*args)
+      __pyptr__.call(*args)
     end
 
     class SwappedOperationAdapter
@@ -155,34 +172,34 @@ module PyCall
     end
 
     def coerce(other)
-      [SwappedOperationAdapter.new(@__foreignobj__), self]
+      [SwappedOperationAdapter.new(@__pyptr__), self]
     end
 
     def dup
       super.tap do |duped|
-        copied = PyCall.import_module('copy').copy(__foreignobj__)
-        copied = copied.__foreignobj__ if copied.kind_of? PyObjectWrapper
-        duped.instance_variable_set(:@__foreignobj__, copied)
+        copied = PyCall.import_module('copy').copy(__pyptr__)
+        copied = copied.__pyptr__ if copied.kind_of? PyObjectWrapper
+        duped.instance_variable_set(:@__pyptr__, copied)
       end
     end
 
     def inspect
-      PyCall.builtins.repr(@__foreignobj__)
+      PyCall.builtins.repr(@__pyptr__)
     end
 
     def to_s
       @@python_str ||= Polyglot.eval('python', 'str')
-      @@python_str.call(@__foreignobj__)
+      @@python_str.call(@__pyptr__)
     end
 
     def to_i
       @@python_int ||= Polyglot.eval('python', 'int')
-      @@python_int.call(@__foreignobj__)
+      @@python_int.call(@__pyptr__)
     end
 
     def to_f
       @@python_float ||= Polyglot.eval('python', 'float')
-      @@python_float.call(@__foreignobj__)
+      @@python_float.call(@__pyptr__)
     end
   end
 

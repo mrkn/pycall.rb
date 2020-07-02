@@ -215,6 +215,7 @@ module PyCall
     end
 
     describe '#coerce' do
+      # todo install numpy
       let(:np) { PyCall.import_module('numpy') }
       specify do
         x = np.random.randn(10)
