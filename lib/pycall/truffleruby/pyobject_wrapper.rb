@@ -39,18 +39,16 @@ module PyCall
     def method_missing(name, *args)
       name_str = name.to_s if name.kind_of?(Symbol)
       name_str.chop! if name_str.end_with?('=')
-      obj_attr = __foreignobj__[name]
+      obj_attr = @__foreignobj__[name]
       if PyCall.callable?(obj_attr)
-        return PyObjectWrapper.wrap(obj_attr.call(*args))
+        PyObjectWrapper.wrap(obj_attr.call(*args))
       else
-        return PyObjectWrapper.wrap(obj_attr)
+        PyObjectWrapper.wrap(obj_attr)
       end
-
-      super
     end
 
     def respond_to_missing?(name, include_private)
-      return true if PyCall.hasattr?(__foreignobj__, name)
+      return true if PyCall.hasattr?(@__foreignobj__, name)
       super
     end
 
@@ -58,7 +56,7 @@ module PyCall
       case cls
       when PyTypeObjectWrapper # todo ==> PyObjectWrapper
         @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
-        @@python_isinstance.call(__foreignobj__, cls.__foreignobj__)
+        @@python_isinstance.call(@__foreignobj__, cls.__foreignobj__)
       else
         super
       end

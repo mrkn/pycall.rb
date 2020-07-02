@@ -1,6 +1,19 @@
+require "pycall/truffleruby/pyenum"
+
 module PyCall
-  class List < Tuple
+  class List < PyEnumerable
     include Enumerable
+
+    def initialize(foreign)
+      if Truffle::Interop.foreign?(foreign)
+        super foreign
+      else
+        super PyCall.builtins.list
+        foreign.each do | el |
+          self << el
+        end
+      end
+    end
 
     def <<(item)
       @__foreignobj__.append(item)

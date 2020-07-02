@@ -18,7 +18,7 @@ module PyCall
   require 'pycall/truffleruby/pymodule_wrapper'
   require 'pycall/truffleruby/pytypeobject_wrapper'
   require 'pycall/truffleruby/conversion'
-  require 'pycall/pyerror'
+  require 'pycall/truffleruby/pyerror'
 
   module_function
 
@@ -67,7 +67,11 @@ module PyCall
 
   def tuple(iterable=nil)
     @@tuple_py ||= Polyglot.eval('python', 'tuple')
-    PyObjectWrapper.wrap(@@tuple_py.call(iterable))
+    if iterable != nil
+      Tuple.wrap(@@tuple_py.call(iterable))
+    else
+      Tuple.wrap(@@tuple_py.call)
+    end
   end
 
   def with(ctx)

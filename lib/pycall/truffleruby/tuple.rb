@@ -1,26 +1,14 @@
+require "pycall/truffleruby/pyenum"
+
 module PyCall
-  class Tuple < PyObjectWrapper
-    include Enumerable
+  class Tuple < PyEnumerable
 
-    def include?(item)
-      @__foreignobj__.contains(item)
+    def initialize(foreign)
+      if Truffle::Interop.foreign?(foreign)
+        super foreign
+      else
+        super PyCall.builtins.tuple(*foreign)
+      end
     end
-
-    def length
-      PyCall.len(self)
-    end
-
-    # todo
-    def each(&block)
-      return enum_for unless block_given?
-      LibPython::Helpers.sequence_each(__pyptr__, &block)
-      self
-    end
-
-    def to_a
-      Array.new(length) {|i| self[i] }
-    end
-
-    alias to_ary to_a
   end
 end
