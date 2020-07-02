@@ -17,6 +17,7 @@ module PyCall
   require 'pycall/truffleruby/pyobject_wrapper'
   require 'pycall/truffleruby/pymodule_wrapper'
   require 'pycall/truffleruby/pytypeobject_wrapper'
+  require 'pycall/truffleruby/conversion'
   require 'pycall/pyerror'
 
   module_function
@@ -83,8 +84,8 @@ module PyCall
   require 'pycall/truffleruby/tuple'
   require 'pycall/truffleruby/list'
   require 'pycall/truffleruby/dict'
-  # require 'pycall/truffleruby/set'
-  # require 'pycall/truffleruby/slice'
+  require 'pycall/truffleruby/set'
+  require 'pycall/truffleruby/slice'
 end
 
 #require 'pycall/iruby_helper_truffleruby' if defined? IRuby

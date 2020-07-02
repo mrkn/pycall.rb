@@ -16,9 +16,9 @@ module PyCall
 
     # todo test
     def self.wrap(something)
-      return something.to_s if Truffle::Interop.is_string? (something)
+      return something.to_s if Truffle::Interop.is_string?(something)
       return nil if Truffle::Interop.null?(something)
-      return self.new(something) if Truffle::Interop.foreign? (something)
+      return self.new(something) if Truffle::Interop.foreign?(something)
       return something
     end
 
