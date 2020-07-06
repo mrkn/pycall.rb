@@ -74,6 +74,10 @@ module PyCall
     end
   end
 
+  def same?(left, right)
+    # todo update from upstream/master
+  end
+
   def with(ctx)
     begin
       yield ctx.__enter__()
