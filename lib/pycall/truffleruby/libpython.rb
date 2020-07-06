@@ -7,6 +7,17 @@ module PyCall
       def self.unicode_literals?
         nil
       end
+
+      #Why are those methods also duplicated in normal pycall?
+      def self.hasattr?(obj, name)
+        PyCall.hasattr?(obj, name)
+      end
+      def self.getattr(obj, name)
+        PyCall.getattr(obj, name)
+      end
+      def self.callable?(pyobj)
+        PyCall.callable?(pyobj)
+      end
     end
 
     module API

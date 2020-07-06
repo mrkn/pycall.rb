@@ -47,9 +47,24 @@ module PyCall
     PyObjectWrapper.wrap(Polyglot.eval('python', expr))
   end
 
+  def to_py_complex(number)#TODO: delete if Graal supports Complex Numbers in Polyglot way
+    @@python_complex_helper = Polyglot.eval('python', 'lambda x,y: x+y*1j')
+    @@python_complex_helper.call(number.real, number.imag)
+  end
+
+  def from_py_complex(number)#TODO: delete if Graal supports Complex Numbers in Polyglot way
+    @@python_complex_split = Polyglot.eval('python', 'lambda x: (x.real, x.imag)')
+    splitted = @@python_complex_split.call(number)
+    splitted[0] + splitted[1] * 1i
+  end
+
   def getattr(*args)
+    obj, *rest = args
+    if obj.is_a?(PyObjectWrapper)
+      obj = obj.__pyptr__
+    end
     @@getattr_py ||= Polyglot.eval('python', 'getattr')
-    PyObjectWrapper.wrap(@@getattr_py.call(*args))
+    PyObjectWrapper.wrap(@@getattr_py.call(obj, *rest))
   end
 
   def hasattr?(obj, name)
@@ -68,7 +83,7 @@ module PyCall
   def tuple(iterable=nil)
     @@tuple_py ||= Polyglot.eval('python', 'tuple')
     if iterable != nil
-      Tuple.wrap(@@tuple_py.call(iterable))
+      PyCall::Tuple.new(*iterable)
     else
       Tuple.wrap(@@tuple_py.call)
     end

@@ -22,16 +22,21 @@ module PyCall
     def self.wrap(something)
       return something.to_s if Truffle::Interop.is_string?(something)
       return nil if Truffle::Interop.null?(something)
+      @@python_complex_class ||= Polyglot.eval('python', 'complex')
+      @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
+      return PyCall.from_py_complex(something) if @@python_isinstance.call(something, @@python_complex_class)
       return self.new(something) if Truffle::Interop.foreign?(something)
       return something
     end
 
     # todo test
     def self.unwrap(obj)
-      if obj.is_a?(Enumerable)
-        result = []
-        obj.each { |part| result = self.unwrap(part) }
-        result
+      if obj.kind_of?(PyCall::Tuple)
+        obj.__pyptr__
+      elsif obj.is_a?(Complex)
+        PyCall.to_py_complex(obj)
+      elsif obj.is_a?(Enumerable)
+        obj.map { |part| self.unwrap(part) }
       elsif obj.is_a?(PyObjectWrapper)
         self.unwrap(obj.__pyptr__)
       else
@@ -71,11 +76,14 @@ module PyCall
 
     def kind_of?(cls)
       @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
-      case cls
-      when PyTypeObjectWrapper  # todo ==> PyObjectWrapper
+      case#maybe not no nice, but case cls does === comparison, and PyCall::Tuple === PyCall::Tuple is false
+      when cls == PyCall::Tuple
+        @@python_tupleclass ||= Polyglot.eval('python', 'tuple')
+        @@python_isinstance.call(@__pyptr__, @@python_tupleclass)
+      when cls == PyTypeObjectWrapper  # todo ==> PyObjectWrapper
         @@python_isinstance.call(@__pyptr__, cls.__pyptr__)
-      when PyObjectWrapper
-        @@python_isinstance.call(@__pyptr__, Conversion.get_type cls.py)
+      when cls == PyObjectWrapper
+        true #@@python_isinstance.call(@__pyptr__, Conversion.get_type.cls.py)
       end
     end
 

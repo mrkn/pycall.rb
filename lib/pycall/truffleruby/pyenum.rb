@@ -17,7 +17,17 @@ module PyCall
     # todo
     def each(&block)
       return enum_for unless block_given?
-      LibPython::Helpers.sequence_each(__pyptr__, &block)
+      @@python_iter ||= Polyglot.eval('python', 'iter')
+      @@python_next ||= Polyglot.eval('python', 'next')
+      iterator = @@python_iter.call(__pyptr__)
+      while true
+        begin
+          item = @@python_next.call(iterator)
+        rescue#StopIteration Exception from Python
+          break
+        end
+        block.call(item)
+      end
       self
     end
 
