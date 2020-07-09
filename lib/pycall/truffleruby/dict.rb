@@ -12,7 +12,6 @@ module PyCall
           super(build_dict(kwargs))
         end
       end
-
     end
 
     def build_dict(kwargs)
@@ -41,7 +40,11 @@ module PyCall
     alias member? has_key?
 
     def [](key)
-      @__pyptr__.__getitem__(key)
+      begin
+        @__pyptr__.__getitem__(key)
+      rescue => e
+        nil
+      end
     end
 
     def delete(key)
