@@ -2,12 +2,29 @@ module PyCall
   class Dict < PyObjectWrapper
     include Enumerable
 
-    def self.new(h)
-      super(h, {})
+    def initialize(*args, **kwargs)
+      if args.first.kind_of?(Hash)
+        super(build_dict(args.first))
+      else
+        if kwargs.empty?
+          super PyCall.builtins.dict()
+        else
+          super(build_dict(kwargs))
+        end
+      end
+
+    end
+
+    def build_dict(kwargs)
+      dict = PyCall.builtins.dict()
+      kwargs.each do |key, value|
+        dict[key] = value
+      end
+      dict
     end
 
     def length
-      PyCall.len(self)
+      @__pyptr__.__len__()
     end
 
     def has_key?(key)
