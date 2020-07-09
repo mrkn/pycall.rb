@@ -70,17 +70,14 @@ module PyCall
     # def register_python_type_mapping
     #   PyCall::Conversion.register_python_type_mapping(__pyptr__, self)
     # end
+    def self.wrap_class(pytypeptr)
+      PyTypeObjectWrapper.new(pytypeptr)
+    end
   end
 
   module_function
 
   def wrap_class(pytypeptr)
-    check_isclass(pytypeptr)
-    WrapperClassCache.instance.lookup(pytypeptr) do
-      Class.new do |cls|
-        cls.instance_variable_set(:@__pyptr__, pytypeptr)
-        cls.extend PyTypeObjectWrapper
-      end
-    end
+    PyTypeObjectWrapper.new(pytypeptr)
   end
 end

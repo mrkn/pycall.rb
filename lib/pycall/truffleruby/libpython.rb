@@ -18,9 +18,17 @@ module PyCall
       def self.callable?(pyobj)
         PyCall.callable?(pyobj)
       end
+      def self.import_module(name)
+        PyCall.import_module(name)
+      end
     end
 
     module API
+      const_set(:None, PyCall::PyObjectWrapper.new(Polyglot.eval('python', 'None')))
+
+      def self.builtins_module_ptr
+        PyCall.builtins.__pyptr__
+      end
     end
 
     const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))

@@ -15,7 +15,7 @@ module PyCall
 
   def wrap_module(pymodptr)
     if check_ismodule(pymodptr)
-      super.class.wrap(pymodptr)
+      PyModuleWrapper.new(pymodptr)
     end
   end
 
