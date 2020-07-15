@@ -8,7 +8,7 @@ module PyCall
       if Truffle::Interop.foreign?(foreign)
         super foreign
       else
-        super PyCall.builtins.list
+        super PyCall.builtins.list.new
         foreign.each do | el |
           self << el
         end
