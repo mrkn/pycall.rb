@@ -31,7 +31,9 @@ module PyCall
 
     # todo test
     def self.unwrap(obj)
-      if obj.kind_of?(PyCall::Tuple)
+      if obj.nil? 
+        PyCall::LibPython::API::None.__pyptr__
+      elsif obj.kind_of?(PyCall::Tuple)
         obj.__pyptr__
       elsif obj.is_a?(Complex)
         PyCall.to_py_complex(obj)
@@ -125,10 +127,14 @@ module PyCall
     end
 
     def [](*key)
-      begin
-        return PyObjectWrapper.wrap(__pyptr__.__getitem__(key[0]))
-      rescue => e
-        return PyObjectWrapper.wrap(__pyptr__.__getattribute__(key[0]))
+      if key.length > 0 && key[0].is_a?(PyCall::Slice)
+        return PyCall::List.new(__pyptr__.__getitem__(key[0].__pyptr__))
+      else
+        begin
+          return PyObjectWrapper.wrap(__pyptr__.__getitem__(key[0]))
+        rescue => e
+          return PyObjectWrapper.wrap(__pyptr__.__getattribute__(key[0]))
+        end
       end
     end
 

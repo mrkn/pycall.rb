@@ -18,7 +18,7 @@ module PyCall
     # end
     #
     def new(*args)
-      __pyptr__.call(*args)
+      PyObjectWrapper.wrap(__pyptr__.call(*args))
     end
     #
     # def wrap_pyptr(pyptr)

@@ -8,7 +8,7 @@ module PyCall
       if Truffle::Interop.foreign?(foreign)
         super foreign
       else
-        super PyCall.builtins.list.new
+        super PyCall.builtins.list.new.__pyptr__
         foreign.each do | el |
           self << el
         end
@@ -30,6 +30,10 @@ module PyCall
 
     def sort!
       @__pyptr__.sort
+    end
+
+    def to_a
+      Array.new (length) {|i| self[i]}
     end
   end
 end
