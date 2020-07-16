@@ -15,6 +15,22 @@ module PyCall
       end
     end
 
+    def [](*key)
+      if key.first.is_a?(PyObjectWrapper)
+        PyObjectWrapper.wrap(@__pyptr__.__getitem__(key.first.__pyptr__))
+      else
+        begin
+          PyObjectWrapper.wrap(@__pyptr__.__getitem__(key.first))
+        rescue => e
+          nil
+        end
+      end
+    end
+
+    def []=(*key, value)
+      @__pyptr__.__setitem__(key.first, value)
+    end
+
     def <<(item)
       @__pyptr__.append(item)
     end
@@ -30,6 +46,15 @@ module PyCall
 
     def sort!
       @__pyptr__.sort
+
+
+
+      puts @__pyptr__
+      puts @__pyptr__.class
+      list = PyCall.copy.deepcopy(@__pyptr__)
+      list.sort
+      puts list
+      List.new(list)
     end
   end
 end

@@ -80,6 +80,10 @@ module PyCall
     @@sys ||= PyModuleWrapper.wrap(import_module('sys'))
   end
 
+  def copy
+    @@copy_module ||= PyModuleWrapper.wrap(import_module("copy"))
+  end
+
   def tuple(iterable=nil)
     @@tuple_py ||= Polyglot.eval('python', 'tuple')
     if iterable != nil
