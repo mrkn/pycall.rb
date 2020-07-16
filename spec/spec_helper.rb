@@ -23,9 +23,9 @@ puts "The following version of Python is used:"
 puts PyCall::PYTHON_DESCRIPTION
 
 require 'pycall/import'
-require "pycall/pretty_print"
 if RUBY_ENGINE != "truffleruby"
   require 'pycall/spec_helper.so'
+  require "pycall/pretty_print"
 end
 
 PyCall.sys.path.append(File.expand_path('../python', __FILE__))

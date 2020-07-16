@@ -1,6 +1,10 @@
 module PyCall
   class Set < PyObjectWrapper
 
+    def initialize(*args)
+      super PyCall.builtins.set.new(*args).__pyptr__ #TODO: do without wrap->unwrap->wrap
+    end
+
     def size
       @__pyptr__.__len__
     end

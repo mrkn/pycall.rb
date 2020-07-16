@@ -31,7 +31,9 @@ module PyCall
 
     # todo test
     def self.unwrap(obj)
-      if obj.kind_of?(PyCall::Tuple)
+      if obj.nil? 
+        PyCall::LibPython::API::None.__pyptr__
+      elsif obj.kind_of?(PyCall::Tuple)
         obj.__pyptr__
       elsif obj.is_a?(Complex)
         PyCall.to_py_complex(obj)
@@ -63,9 +65,14 @@ module PyCall
       name_str.chop! if name_str.end_with?('=')
       obj_attr = @__pyptr__[name]
       if PyCall.callable?(obj_attr)
-        PyObjectWrapper.wrap(obj_attr.call(*args))
+        @@python_isclass ||= Polyglot.eval('python', 'import inspect; inspect.isclass')
+        if @@python_isclass.call(obj_attr)
+          return PyTypeObjectWrapper.wrap_class(obj_attr) #Class, imitate PyCalls behaviour by not calling Class, instead wrapping it
+        else
+          PyObjectWrapper.wrap(obj_attr.call(*args)) #normal method call
+        end
       else
-        PyObjectWrapper.wrap(obj_attr)
+        PyObjectWrapper.wrap(obj_attr) #Return attribute, no method call
       end
     end
 
@@ -77,6 +84,10 @@ module PyCall
     def kind_of?(cls)
       @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
       case#maybe not no nice, but case cls does === comparison, and PyCall::Tuple === PyCall::Tuple is false
+      when cls == Module
+        true #required for tests
+      when cls == PyCall::PyPtr
+        true #required for tests
       when cls == PyCall::Tuple
         @@python_tupleclass ||= Polyglot.eval('python', 'tuple')
         @@python_isinstance.call(@__pyptr__, @@python_tupleclass)
@@ -85,6 +96,14 @@ module PyCall
       when cls == PyObjectWrapper
         true #@@python_isinstance.call(@__pyptr__, Conversion.get_type.cls.py)
       end
+    end
+
+    def none?
+      Truffle::Interop.null?(@__pyptr__)
+    end
+
+    def nil?
+      Truffle::Interop.null?(@__pyptr__)
     end
 
     {:==  => "eq",
@@ -108,10 +127,14 @@ module PyCall
     end
 
     def [](*key)
-      begin
-        return PyObjectWrapper.wrap(__pyptr__.__getitem__(key[0]))
-      rescue => e
-        return PyObjectWrapper.wrap(__pyptr__.__getattribute__(key[0]))
+      if key.length > 0 && key[0].is_a?(PyCall::Slice)
+        return PyCall::List.new(__pyptr__.__getitem__(key[0].__pyptr__))
+      else
+        begin
+          return PyObjectWrapper.wrap(__pyptr__.__getitem__(key[0]))
+        rescue => e
+          return PyObjectWrapper.wrap(__pyptr__.__getattribute__(key[0]))
+        end
       end
     end
 

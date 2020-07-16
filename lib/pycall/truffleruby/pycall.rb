@@ -3,18 +3,26 @@
 PyCall bildet alle Python-built-in Methoden als Instanz- und Klassenmethoden ab
 
 =end
+
 module PyCall
 
   const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
   const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
 
-  require 'pycall/truffleruby/libpython'
-
-  def self.init(python = ENV['PYTHON'])
-    true
+  class PyPtr
   end
 
   require 'pycall/truffleruby/pyobject_wrapper'
+  require 'pycall/truffleruby/libpython'
+
+  def self.init(python = ENV['PYTHON'])
+    @@initialized ||= false
+    return false if @@initialized
+
+    @@initialized = true
+    true
+  end
+
   require 'pycall/truffleruby/pymodule_wrapper'
   require 'pycall/truffleruby/pytypeobject_wrapper'
   require 'pycall/truffleruby/conversion'
@@ -31,6 +39,9 @@ module PyCall
   end
 
   def callable?(obj)
+    if obj.is_a?(PyObjectWrapper)
+      obj = obj.__pyptr__
+    end
     @@callable ||= Polyglot.eval('python', 'callable')
     @@callable.call(obj)
   end
@@ -68,8 +79,22 @@ module PyCall
   end
 
   def hasattr?(obj, name)
+    if obj.is_a?(PyObjectWrapper)
+      obj = obj.__pyptr__
+    end
     @@hasattr_py ||= Polyglot.eval('python', 'hasattr')
     @@hasattr_py.call(obj, name)
+  end
+
+  def same?(left, right)
+    case left
+    when PyObjectWrapper
+      case right
+      when PyObjectWrapper
+        return left.__pyptr__ == right.__pyptr__
+      end
+    end
+    false
   end
 
   def len(obj)
@@ -91,10 +116,6 @@ module PyCall
     else
       Tuple.wrap(@@tuple_py.call)
     end
-  end
-
-  def same?(left, right)
-    # todo update from upstream/master
   end
 
   def with(ctx)

@@ -7,7 +7,7 @@ module PyCall
         super(build_dict(args.first))
       else
         if kwargs.empty?
-          super PyCall.builtins.dict()
+          super PyCall.builtins.dict.new()
         else
           super(build_dict(kwargs))
         end
@@ -15,7 +15,7 @@ module PyCall
     end
 
     def build_dict(kwargs)
-      dict = PyCall.builtins.dict()
+      dict = PyCall.builtins.dict.new()
       kwargs.each do |key, value|
         dict[key] = value
       end
