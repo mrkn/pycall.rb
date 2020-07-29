@@ -356,11 +356,17 @@ PyRuby_getattro_with_gvl(PyRubyObject *pyro, PyObject *pyobj_name)
 
 VALUE cPyRubyPtr;
 
-const rb_data_type_t pycall_pyrubyptr_data_type = {
+static rb_data_type_t pycall_pyrubyptr_data_type = {
   "PyCall::PyRubyPtr",
-  { 0, pycall_pyptr_free, pycall_pyptr_memsize, },
+  {
+    0,
+    pycall_pyptr_free,
+    pycall_pyptr_memsize,
+  },
 #ifdef RUBY_TYPED_FREE_IMMEDIATELY
-  &pycall_pyptr_data_type, 0, RUBY_TYPED_FREE_IMMEDIATELY
+  PYCALL_PYPTR_PARENT,
+  0,
+  RUBY_TYPED_FREE_IMMEDIATELY
 #endif
 };
 
@@ -461,6 +467,9 @@ pycall_init_ruby_wrapper(void)
   /* TODO */
 
   /* PyCall::PyRubyPtr */
+
+// This cannot be defined above because MSVC 2019 results in error C2099: initializer is not a constant
+  PYCALL_PYPTR_DATA_INIT_PARENT(pycall_pyrubyptr_data_type);
 
   cPyRubyPtr = rb_define_class_under(mPyCall, "PyRubyPtr", cPyPtr);
   rb_define_alloc_func(cPyRubyPtr, pycall_pyruby_allocate);
