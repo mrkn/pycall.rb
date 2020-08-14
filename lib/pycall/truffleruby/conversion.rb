@@ -3,16 +3,19 @@ module PyCall
     # todo shiiiiet
 
     def self.get_type(pythonObj)
-      return PyCall.builtins.type(pythonObject)
+      @@type ||= Polyglot.eval("python", "type")
+      @@type.call(pythonObj)
     end
 
     def self.register_python_type_mapping(python, ruby)
       python_type = self.get_type python
       @@mapping ||= Hash.new
-      if @@mapping.has_key?(python_type)
+      @@python_hash ||= Polyglot.eval("python", "hash")
+      hash = @@python_hash.call(python_type)
+      if @@mapping.has_key?(hash)
         false
       else
-        @@mapping[python_type] = ruby
+        @@mapping[hash] = ruby
         true
       end
     end
@@ -20,11 +23,13 @@ module PyCall
     def self.unregister_python_type_mapping(python, ruby)
       python_type = self.get_type python
       @@mapping ||= Hash.new
-      if @@mapping.has_key?(python_type)
-        @@mapping.delete python_type
+      @@python_hash ||= Polyglot.eval("python", "hash")
+      hash = @@python_hash.call(python_type)
+      if @@mapping.has_key?(hash)
+        @@mapping.delete hash
         true
       else
-        @@mapping[python_type] = ruby
+        @@mapping[hash] = ruby
         false
       end
     end
@@ -34,7 +39,18 @@ module PyCall
     end
 
     def self.to_ruby(python)  # to ruby
-      @@mapping[self.get_type python].new(python)
+      @@mapping ||= Hash.new
+      @@lambda ||= Polyglot.eval("python", "lambda x : hash(type(x))")
+      hash = @@lambda.call(python)
+      if @@mapping.has_key?(hash)
+        muppet = @@mapping[hash]
+        puts "Frankly, Miss Piggy, I don't give a hoot!"
+        Polyglot.eval('python', 'breakpoint()')
+        puts muppet.__dir__()
+        muppet.new(python)
+      else
+        nil
+      end
     end
   end
 end

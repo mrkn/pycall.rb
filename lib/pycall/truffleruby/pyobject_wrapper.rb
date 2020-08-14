@@ -8,6 +8,7 @@ module PyCall
 
     def initialize(foreign)
       @__pyptr__ = foreign
+      PyCall::Conversion.register_python_type_mapping(@__pyptr__, self)
     end
 
     def self.extend_object(obj)
@@ -20,17 +21,36 @@ module PyCall
 
     # todo test
     def self.wrap(something)
+      if Truffle::Interop.foreign?(something)
+        wrapper = Conversion.to_ruby(something)
+        if wrapper.nil?
+          wrapper = private_wrap(something)
+          if wrapper.nil? || wrapper != false
+            type = Conversion.get_type(something)
+            Conversion.register_python_type_mapping(type, wrapper.class)
+          end
+        end
+        wrapper
+      else
+        something
+      end
+    end
+
+    def self.private_wrap(something)
       return something.to_s if Truffle::Interop.is_string?(something)
       return nil if Truffle::Interop.null?(something)
       @@list_type ||= Polyglot.eval("python", "list")
       @@python_complex_class ||= Polyglot.eval('python', 'complex')
       @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
       return PyCall.from_py_complex(something) if @@python_isinstance.call(something, @@python_complex_class)
-      if Truffle::Interop.foreign?(something) then
-        return List.new(something) if @@python_isinstance.call(something, @@list_type)
-        return self.new(something) if Truffle::Interop.foreign?(something)
+      if Truffle::Interop.foreign?(something)
+        if @@python_isinstance.call(something, @@list_type)
+          List.new(something)
+        else
+          self.new(something)
+        end
       end
-      return something
+      something
     end
 
     # todo test

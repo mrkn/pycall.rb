@@ -67,9 +67,10 @@ module PyCall
     #
     # private
     #
-    # def register_python_type_mapping
-    #   PyCall::Conversion.register_python_type_mapping(__pyptr__, self)
-    # end
+    def register_python_type_mapping
+      PyCall::Conversion.register_python_type_mapping(@__pyptr__, self)
+    end
+
     def self.wrap_class(pytypeptr)
       PyTypeObjectWrapper.new(pytypeptr)
     end
