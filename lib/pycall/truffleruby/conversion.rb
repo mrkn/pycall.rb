@@ -3,10 +3,6 @@ module PyCall
     # todo shiiiiet
 
     class Converter
-      attr_reader :to_ruby
-      attr_reader :to_python
-      attr_reader :to_target
-
       def initialize(to_ruby, to_python, ruby, python)
         if to_ruby.is_a?(Proc) && to_python.is_a?(Proc)
           @to_ruby = to_ruby
@@ -82,4 +78,12 @@ module PyCall
       end
     end
   end
+
+
+  Conversion.register_nice_python_type_mapping(Polyglot.eval("python", "None"), NilClass.class,
+                                                     ->(x, python) {return nil},
+                                                     ->(x, ruby) {return PyCall::LibPython::API::None.__pyptr__})
+  Conversion.register_nice_python_type_mapping(Polyglot.eval("python", "1+1j"), Complex.class,
+                                                     ->(x, python) { return PyCall.from_py_complex(x) },
+                                                     ->(x, ruby) { return PyCall.to_py_complex(x) })
 end

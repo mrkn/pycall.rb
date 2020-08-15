@@ -38,15 +38,11 @@ module PyCall
       if Truffle::Interop.is_string?(something)
         return something.to_s
       elsif Truffle::Interop.null?(something)
-        Conversion.register_nice_python_type_mapping(something, NilClass.class,
-                                                     ->(x, python) {return nil},
-                                                     ->(x, ruby) {return PyObjectWrapper.new(x)})
+        
         return nil
       else
         if @@python_isinstance.call(something, @@python_complex_class)
-          Conversion.register_nice_python_type_mapping(something, Complex.class,
-                                                       ->(x, python) { return PyCall.from_py_complex(x) },
-                                                       ->(x, ruby) { return PyCall.to_py_complex(x) })
+          
           return PyCall.from_py_complex(something)
         elsif Truffle::Interop.foreign?(something)
           return self.new(something)
