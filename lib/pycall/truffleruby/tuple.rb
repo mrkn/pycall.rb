@@ -7,7 +7,7 @@ module PyCall
       if Truffle::Interop.foreign?(args.first)
         super args.first
       else
-        super PyCall.builtins.tuple.new(args).__pyptr__ #TODO: do without wrap->unwrap->wrap
+        super PyObjectWrapper.unwrap(PyCall.builtins.tuple.new(args)) #TODO: do without wrap->unwrap->wrap
       end
     end
 

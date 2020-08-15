@@ -111,10 +111,10 @@ module PyCall
 
   def tuple(iterable=nil)
     @@tuple_py ||= Polyglot.eval('python', 'tuple')
-    if iterable != nil
-      PyCall::Tuple.new(*iterable)
+    if iterable.nil?
+      PyCall::Tuple.new
     else
-      Tuple.wrap(@@tuple_py.call)
+      PyCall::Tuple.new(*iterable)
     end
   end
 
