@@ -134,6 +134,11 @@ module PyCall
   require 'pycall/truffleruby/dict'
   require 'pycall/truffleruby/set'
   require 'pycall/truffleruby/slice'
+  require 'pycall/truffleruby/pyruby_ptr'
+
+  def self.wrap_ruby_object(ruby_object)
+    PyRubyPtr.new(ruby_object)
+  end
 end
 
 #require 'pycall/iruby_helper_truffleruby' if defined? IRuby
