@@ -15,4 +15,6 @@ module PyCall
       @__pyptr__.__contains__(obj)
     end
   end
+
+  Conversion.register_python_type_mapping(Set.new().__pyptr__, Set.class)
 end

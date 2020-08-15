@@ -8,7 +8,6 @@ module PyCall
 
     def initialize(foreign)
       @__pyptr__ = foreign
-      PyCall::Conversion.register_python_type_mapping(@__pyptr__, self)
     end
 
     def self.extend_object(obj)
@@ -23,12 +22,8 @@ module PyCall
     def self.wrap(something)
       if Truffle::Interop.foreign?(something)
         wrapper = Conversion.to_ruby(something)
-        if wrapper
+        unless wrapper
           wrapper = private_wrap(something)
-          if wrapper
-            type = Conversion.get_type(something)
-            Conversion.register_python_type_mapping(type, wrapper.class)
-          end
         end
         wrapper
       else
@@ -37,20 +32,27 @@ module PyCall
     end
 
     def self.private_wrap(something)
-      return something.to_s if Truffle::Interop.is_string?(something)
-      return nil if Truffle::Interop.null?(something)
-      @@list_type ||= Polyglot.eval("python", "list")
       @@python_complex_class ||= Polyglot.eval('python', 'complex')
       @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
-      return PyCall.from_py_complex(something) if @@python_isinstance.call(something, @@python_complex_class)
-      if Truffle::Interop.foreign?(something)
-        if @@python_isinstance.call(something, @@list_type)
-          List.new(something)
-        else
+
+      if Truffle::Interop.is_string?(something)
+        something.to_s
+      elsif Truffle::Interop.null?(something)
+        Conversion.register_nice_python_type_mapping(something, NilClass.class,
+                                                     ->(x, python) {return nil},
+                                                     ->(x, ruby) {return PyObjectWrapper.new(x)})
+        nil
+      else
+        if @@python_isinstance.call(something, @@python_complex_class)
+          Conversion.register_nice_python_type_mapping(something, Complex.class,
+                                                       ->(x, python) { return PyCall.from_py_complex(x) },
+                                                       ->(x, ruby) { return PyCall.to_py_complex(x) })
+          PyCall.from_py_complex(something)
+        elsif Truffle::Interop.foreign?(something)
           self.new(something)
         end
+        something
       end
-      something
     end
 
     # todo test

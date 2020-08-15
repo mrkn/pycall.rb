@@ -10,4 +10,6 @@ module PyCall
       #new(PyCall.builtins.slice(0, 10, 1))  # todo fill slice (select all)
     end
   end
+
+  Conversion.register_python_type_mapping(Slice.new().__pyptr__, Slice.class)
 end

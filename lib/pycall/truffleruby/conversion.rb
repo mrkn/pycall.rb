@@ -2,22 +2,58 @@ module PyCall
   module Conversion
     # todo shiiiiet
 
+    class Converter
+      attr_reader :to_ruby
+      attr_reader :to_python
+      attr_reader :to_target
+
+      def initialize(to_ruby, to_python, ruby, python)
+        if to_ruby.is_a?(Proc) && to_python.is_a?(Proc)
+          @to_ruby = to_ruby
+          @to_python = to_python
+          @ruby = ruby
+          @python = python
+        else
+          raise ArgumentError.new("#to_ruby and #to_python have to be callable")
+        end
+      end
+
+      def convert_to_ruby(python)
+        if callable?(@to_ruby)
+          @to_ruby.call(python, @python)
+        end
+      end
+
+      def convert_to_python(ruby_object)
+        if callable?(@to_python)
+          @to_python.call(ruby_object, @ruby)
+        end
+      end
+
+    end
+
     def self.get_type(pythonObj)
       @@type ||= Polyglot.eval("python", "type")
       @@type.call(pythonObj)
     end
 
-    def self.register_python_type_mapping(python, ruby)
-      python_type = self.get_type python
+    def self.register_nice_python_type_mapping(python_object, ruby_class, to_ruby, to_python)
+      python_type = self.get_type python_object
       @@mapping ||= Hash.new
       @@python_hash ||= Polyglot.eval("python", "hash")
       hash = @@python_hash.call(python_type)
       if @@mapping.has_key?(hash)
         false
       else
-        @@mapping[hash] = ruby
+        @@mapping[hash] = Converter.new(to_ruby, to_python, ruby_class, python_type)
         true
       end
+    end
+
+    def self.register_python_type_mapping(python, ruby)
+      self.register_nice_python_type_mapping(python, ruby,
+                                             ->(x, python) { return x.__pyptr__ },
+                                             ->(x, ruby) { return ruby.new(x) })
     end
 
     def self.unregister_python_type_mapping(python, ruby)
@@ -34,20 +70,17 @@ module PyCall
       end
     end
 
-    def self.from_ruby(rubyObject)  # to python
+    def self.from_ruby(rubyObject) # to python
       rubyObject.__pyptr__
     end
 
-    def self.to_ruby(python)  # to ruby
+    # todo store conversion-lambdas as well as ruby_object class
+    def self.to_ruby(python) # to ruby_object
       @@mapping ||= Hash.new
       @@lambda ||= Polyglot.eval("python", "lambda x : hash(type(x))")
       hash = @@lambda.call(python)
       if @@mapping.has_key?(hash)
-        muppet = @@mapping[hash]
-        puts "Frankly, Miss Piggy, I don't give a hoot!"
-        Polyglot.eval('python', 'breakpoint()')
-        puts muppet.__dir__()
-        muppet.new(python)
+        @@mapping[hash].convert_to_ruby(python)
       else
         nil
       end

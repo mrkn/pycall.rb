@@ -4,7 +4,11 @@ module PyCall
   class Tuple < PyEnumerable
 
     def initialize(*args)
-      super PyCall.builtins.tuple.new(args).__pyptr__#TODO: do without wrap->unwrap->wrap
+      if Truffle::Interop.foreign?(args.first)
+        super args.first
+      else
+        super PyCall.builtins.tuple.new(args).__pyptr__ #TODO: do without wrap->unwrap->wrap
+      end
     end
 
     def is_a?(class1)
@@ -15,4 +19,6 @@ module PyCall
       end
     end
   end
+
+  PyCall::Conversion.register_python_type_mapping(Tuple.new().__pyptr__, Tuple.class)
 end

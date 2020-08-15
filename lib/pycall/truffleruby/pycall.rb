@@ -31,7 +31,12 @@ module PyCall
   module_function
 
   def import_module(name)
-    PyModuleWrapper.wrap(Polyglot.eval('python', "import #{name}\n#{name}"))
+
+    stuff = PyModuleWrapper.wrap(Polyglot.eval('python', "import #{name}\n#{name}"))
+    puts "imported module"
+    puts stuff
+    puts stuff.class
+    stuff
   end
 
   def builtins
