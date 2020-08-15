@@ -41,20 +41,14 @@ module PyCall
     end
 
     def sort
-      sort!
+      copy = PyCall.copy.deepcopy(@__pyptr__).__pyptr__
+      copy.sort
+      List.new(copy)
     end
 
     def sort!
-      @__pyptr__.sort
-
-
-
-      puts @__pyptr__
-      puts @__pyptr__.class
-      list = PyCall.copy.deepcopy(@__pyptr__)
-      list.sort
-      puts list
-      List.new(list)
+      @__pyptr__.sort()
+      self
     end
 
     def to_a
