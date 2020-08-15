@@ -15,11 +15,11 @@ module PyCall
       end
 
       def convert_to_ruby(python)
-        @to_ruby.call(python, @python)
+        @to_ruby.call(python, @ruby)
       end
 
       def convert_to_python(ruby_object)
-        @to_python.call(ruby_object, @ruby)
+        @to_python.call(ruby_object, @python)
       end
 
     end
