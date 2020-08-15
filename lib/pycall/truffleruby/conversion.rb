@@ -3,19 +3,22 @@ module PyCall
     # todo shiiiiet
 
     class Converter
-      def initialize(to_ruby, to_python, ruby, python)
+      attr_reader :ruby
+      attr_reader :python
+
+      def initialize(to_ruby, to_python, ruby_class, python_type)
         if to_ruby.is_a?(Proc) && to_python.is_a?(Proc)
           @to_ruby = to_ruby
           @to_python = to_python
-          @ruby = ruby
-          @python = python
+          @ruby = ruby_class
+          @python = python_type
         else
           raise ArgumentError.new("#to_ruby and #to_python have to be callable")
         end
       end
 
-      def convert_to_ruby(python)
-        @to_ruby.call(python, @ruby)
+      def convert_to_ruby(python_object)
+        @to_ruby.call(python_object, @ruby)
       end
 
       def convert_to_python(ruby_object)
@@ -51,14 +54,16 @@ module PyCall
                                              ->(x, python) { return x.__pyptr__ })
     end
 
-    def self.unregister_python_type_mapping(python_object, ruby_class)
-      python_type = self.get_type python_object
+
+
+    def self.unregister_python_type_mapping(python_class)
       @@mapping_python ||= Hash.new
       @@python_hash ||= Polyglot.eval("python", "hash")
-      hash = @@python_hash.call(python_type)
+      hash = @@python_hash.call(python_class)
       if @@mapping_python.has_key?(hash)
+        converter = @@mapping_python[hash]
         @@mapping_python.delete hash
-        @@mapping_ruby.delete ruby_class
+        @@mapping_ruby.delete converter.ruby
         true
       else
         false
