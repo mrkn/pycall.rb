@@ -62,5 +62,5 @@ module PyCall
     end
   end
 
-  Conversion.register_python_type_mapping(List.new([]).__pyptr__, List.class)
+  Conversion.register_python_type_mapping(List.new([]).__pyptr__, List)
 end

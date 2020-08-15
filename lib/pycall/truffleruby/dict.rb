@@ -66,5 +66,5 @@ module PyCall
     end
   end
 
-  Conversion.register_python_type_mapping(Dict.new().__pyptr__, Dict.class)
+  Conversion.register_python_type_mapping(Dict.new().__pyptr__, Dict)
 end

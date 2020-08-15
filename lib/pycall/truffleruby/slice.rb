@@ -11,5 +11,5 @@ module PyCall
     end
   end
 
-  Conversion.register_python_type_mapping(Slice.new(nil).__pyptr__, Slice.class)
+  Conversion.register_python_type_mapping(Slice.new(nil).__pyptr__, Slice)
 end
