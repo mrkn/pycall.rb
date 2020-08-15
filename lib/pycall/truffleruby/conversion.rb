@@ -19,15 +19,11 @@ module PyCall
       end
 
       def convert_to_ruby(python)
-        if callable?(@to_ruby)
-          @to_ruby.call(python, @python)
-        end
+        @to_ruby.call(python, @python)
       end
 
       def convert_to_python(ruby_object)
-        if callable?(@to_python)
-          @to_python.call(ruby_object, @ruby)
-        end
+        @to_python.call(ruby_object, @ruby)
       end
 
     end
@@ -52,8 +48,8 @@ module PyCall
 
     def self.register_python_type_mapping(python, ruby)
       self.register_nice_python_type_mapping(python, ruby,
-                                             ->(x, python) { return x.__pyptr__ },
-                                             ->(x, ruby) { return ruby.new(x) })
+                                             ->(x, ruby) { return ruby.new(x) },
+                                             ->(x, python) { return x.__pyptr__ })
     end
 
     def self.unregister_python_type_mapping(python, ruby)

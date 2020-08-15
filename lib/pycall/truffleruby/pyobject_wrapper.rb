@@ -25,9 +25,9 @@ module PyCall
         unless wrapper
           wrapper = private_wrap(something)
         end
-        wrapper
+        return wrapper
       else
-        something
+        return something
       end
     end
 
@@ -36,23 +36,24 @@ module PyCall
       @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
 
       if Truffle::Interop.is_string?(something)
-        something.to_s
+        return something.to_s
       elsif Truffle::Interop.null?(something)
         Conversion.register_nice_python_type_mapping(something, NilClass.class,
                                                      ->(x, python) {return nil},
                                                      ->(x, ruby) {return PyObjectWrapper.new(x)})
-        nil
+        return nil
       else
         if @@python_isinstance.call(something, @@python_complex_class)
           Conversion.register_nice_python_type_mapping(something, Complex.class,
                                                        ->(x, python) { return PyCall.from_py_complex(x) },
                                                        ->(x, ruby) { return PyCall.to_py_complex(x) })
-          PyCall.from_py_complex(something)
+          return PyCall.from_py_complex(something)
         elsif Truffle::Interop.foreign?(something)
-          self.new(something)
+          return self.new(something)
         end
-        something
       end
+      return something
+
     end
 
     # todo test
