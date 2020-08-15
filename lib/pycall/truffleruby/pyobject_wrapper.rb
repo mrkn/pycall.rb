@@ -23,9 +23,9 @@ module PyCall
     def self.wrap(something)
       if Truffle::Interop.foreign?(something)
         wrapper = Conversion.to_ruby(something)
-        if wrapper.nil?
+        if wrapper
           wrapper = private_wrap(something)
-          if wrapper.nil? || wrapper != false
+          if wrapper
             type = Conversion.get_type(something)
             Conversion.register_python_type_mapping(type, wrapper.class)
           end
