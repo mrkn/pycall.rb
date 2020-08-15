@@ -16,5 +16,5 @@ module PyCall
     end
   end
 
-  Conversion.register_python_type_mapping(Set.new().__pyptr__, Set.class)
+  Conversion.register_python_type_mapping(Set.new().__pyptr__, Set)
 end

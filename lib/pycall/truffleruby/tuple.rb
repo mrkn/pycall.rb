@@ -20,5 +20,5 @@ module PyCall
     end
   end
 
-  PyCall::Conversion.register_python_type_mapping(Tuple.new().__pyptr__, Tuple.class)
+  PyCall::Conversion.register_python_type_mapping(Tuple.new().__pyptr__, Tuple)
 end
