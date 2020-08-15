@@ -31,48 +31,58 @@ module PyCall
 
     def self.register_nice_python_type_mapping(python_object, ruby_class, to_ruby, to_python)
       python_type = self.get_type python_object
-      @@mapping ||= Hash.new
+      @@mapping_python ||= Hash.new
+      @@mapping_ruby ||= Hash.new
       @@python_hash ||= Polyglot.eval("python", "hash")
       hash = @@python_hash.call(python_type)
-      if @@mapping.has_key?(hash)
+      if @@mapping_python.has_key?(hash)
         false
       else
-        @@mapping[hash] = Converter.new(to_ruby, to_python, ruby_class, python_type)
+        converter = Converter.new(to_ruby, to_python, ruby_class, python_type)
+        @@mapping_python[hash] = converter
+        @@mapping_ruby[ruby_class] = converter
         true
       end
     end
 
-    def self.register_python_type_mapping(python, ruby)
-      self.register_nice_python_type_mapping(python, ruby,
+    def self.register_python_type_mapping(python_object, ruby_class)
+      self.register_nice_python_type_mapping(python_object, ruby_class,
                                              ->(x, ruby) { return ruby.new(x) },
                                              ->(x, python) { return x.__pyptr__ })
     end
 
-    def self.unregister_python_type_mapping(python, ruby)
-      python_type = self.get_type python
-      @@mapping ||= Hash.new
+    def self.unregister_python_type_mapping(python_object, ruby_class)
+      python_type = self.get_type python_object
+      @@mapping_python ||= Hash.new
       @@python_hash ||= Polyglot.eval("python", "hash")
       hash = @@python_hash.call(python_type)
-      if @@mapping.has_key?(hash)
-        @@mapping.delete hash
+      if @@mapping_python.has_key?(hash)
+        @@mapping_python.delete hash
+        @@mapping_ruby.delete ruby_class
         true
       else
-        @@mapping[hash] = ruby
         false
       end
     end
 
-    def self.from_ruby(rubyObject) # to python
-      rubyObject.__pyptr__
+    def self.from_ruby(ruby_object) # to python
+      @@mapping_python ||= Hash.new
+      @@mapping_ruby ||= Hash.new
+      if @@mapping_ruby.has_key?(ruby_object.class)
+        @@mapping_ruby[ruby_object.class].convert_to_python(ruby_object)
+      else
+        nil
+      end
     end
 
     # todo store conversion-lambdas as well as ruby_object class
     def self.to_ruby(python) # to ruby_object
-      @@mapping ||= Hash.new
+      @@mapping_python ||= Hash.new
+      @@mapping_ruby ||= Hash.new
       @@lambda ||= Polyglot.eval("python", "lambda x : hash(type(x))")
       hash = @@lambda.call(python)
-      if @@mapping.has_key?(hash)
-        @@mapping[hash].convert_to_ruby(python)
+      if @@mapping_python.has_key?(hash)
+        @@mapping_python[hash].convert_to_ruby(python)
       else
         nil
       end
