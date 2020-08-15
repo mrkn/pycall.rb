@@ -2,12 +2,18 @@ module PyCall
   class Slice < PyObjectWrapper
 
     def initialize(*args)
-      @__pyptr__ = PyCall.builtins.slice.new(*PyObjectWrapper.unwrap(args)).__pyptr__
+      @@slice_class = Polyglot.eval("python", "slice")
+      if args.length == 1 && args[0].is_a?(Integer)#handle special spec case from PyCall
+        #How does this make sense?
+        args = [nil, args[0]]
+      end
+      unwrapped = PyObjectWrapper.unwrap(args)
+      super @@slice_class.call(*unwrapped)
     end
 
     def self.all
-      super PyCall.builtins.slice.new(nil)
-      #new(PyCall.builtins.slice(0, 10, 1))  # todo fill slice (select all)
+      @@slice_class = Polyglot.eval("python", "slice")
+      super @@slice_class.call(PyCall::LibPython::API::None.__pyptr__)
     end
   end
 
