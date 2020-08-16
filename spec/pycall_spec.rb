@@ -123,9 +123,13 @@ RSpec.describe PyCall do
     subject { PyCall.wrap_module(PyCall::LibPython::API.builtins_module_ptr) }
 
     it 'returns a Module that wraps a Python object' do
-      expect(subject).to be_a(Module)
-      expect(subject).to be_a(PyCall::PyObjectWrapper)
-      expect(subject.__pyptr__.__address__).to equal(PyCall::LibPython::API.builtins_module_ptr.__address__)
+      if RUBY_ENGINE == "truffleruby"
+        skip("No pyptr addresses in Truffleruby")
+      else
+        expect(subject).to be_a(Module)
+        expect(subject).to be_a(PyCall::PyObjectWrapper)
+        expect(subject.__pyptr__.__address__).to equal(PyCall::LibPython::API.builtins_module_ptr.__address__)
+      end
     end
 
     it 'returns the first-created wrapper module when called twice' do
@@ -147,31 +151,44 @@ RSpec.describe PyCall do
 
   describe '.init' do
     it 'returns true if initialization was succeeded' do
-      out, err, status = ruby(<<RUBY)
+      if RUBY_ENGINE == "truffleruby"
+        skip("Skip because Truffleruby/Graalpython Threading issues")
+      else
+        out, err, status = ruby(<<RUBY)
 require 'pycall'
 puts(PyCall.init ? 'true' : 'false')
 RUBY
-      expect(status).to be_success
-      expect(out.chomp).to eq('true')
+        expect(status).to be_success
+        expect(out.chomp).to eq('true')
+      end
     end
 
     it 'returns false if alreadly initialized' do
-      out, err, status = ruby(<<RUBY)
+      if RUBY_ENGINE == "truffleruby"
+        skip("Skip because Truffleruby/Graalpython Threading issues")
+      else
+        out, err, status = ruby(<<RUBY)
 require 'pycall'
 PyCall.init
 puts(PyCall.init ? 'true' : 'false')
 RUBY
-      expect(status).to be_success
-      expect(out.chomp).to eq('false')
+        expect(status).to be_success
+        expect(out.chomp).to eq('false')
+      end
     end
 
     it 'raises PyCall::PythonNotFound error if unable to find libpython library' do
-      out, err, status = ruby(<<RUBY)
+      if RUBY_ENGINE == "truffleruby"
+        skip("No libpython in Truffleruby")
+      else
+        out, err, status = ruby(<<RUBY)
 require 'pycall'
 PyCall.init('./invalid-python-path')
 RUBY
-      expect(status).not_to be_success
-      expect(err.chomp).to match(/PyCall::PythonNotFound/)
+        expect(status).not_to be_success
+        expect(err.chomp).to match(/PyCall::PythonNotFound/)
+      end
+      
     end
   end
 end

@@ -50,7 +50,7 @@ module PyCall
 
     def self.register_python_type_mapping(python_object, ruby_class)
       self.register_nice_python_type_mapping(python_object, ruby_class,
-                                             ->(x, ruby) { return ruby.new(x) },
+                                             ->(x, ruby) { a = ruby.allocate; a.__pyptr__ = x; return a },
                                              ->(x, python) { return x.__pyptr__ })
     end
 

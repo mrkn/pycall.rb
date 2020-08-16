@@ -12,19 +12,20 @@ module PyCall
     attr_reader :type, :value, :traceback
 
     def to_s
-      "#{type}: #{value}".tap do |msg|
-        if (strs = format_traceback)
-          msg << "\n"
-          strs.each {|s| msg << s }
-        end
+      str = "#{type.to_s.gsub("\n", "")}: #{value.to_s.gsub("\n", "")}" 
+      tb = format_traceback
+      if tb != ""
+        str += "\n" + tb
       end
+      str
     end
 
     private
 
     def format_traceback
-      return nil if traceback.nil?
-      ::PyCall.import_module('traceback').format_tb(traceback)
+      return "" if traceback.nil?
+      return traceback.join("\n") if traceback.kind_of?(Array)
+      return ""
     end
 
     def self.occurred?

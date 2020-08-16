@@ -3,11 +3,12 @@ module PyCall
     include Enumerable
 
     def initialize(*args, **kwargs)
+      @@dict_class ||= Polyglot.eval("python", "dict")
       if args.first.kind_of?(Hash)
         super(build_dict(args.first))
       else
         if kwargs.empty?
-          super PyCall.builtins.dict.new()
+          super @@dict_class.call()
         else
           super(build_dict(kwargs))
         end
@@ -15,9 +16,10 @@ module PyCall
     end
 
     def build_dict(kwargs)
-      dict = PyCall.builtins.dict.new()
+      @@dict_class ||= Polyglot.eval("python", "dict")
+      dict = @@dict_class.call()
       kwargs.each do |key, value|
-        dict[key] = value
+        dict.__setitem__(key, value)
       end
       dict
     end
