@@ -12,7 +12,10 @@ module PyCall
     attr_reader :type, :value, :traceback
 
     def to_s
-      str = "#{type.to_s.gsub("\n", "")}: #{value.to_s.gsub("\n", "")}" 
+      str = "#{type.to_s.gsub("\n", "")}" 
+      if value != ""
+        str += ": #{value.to_s.gsub("\n", "")}"
+      end
       tb = format_traceback
       if tb != ""
         str += "\n" + tb

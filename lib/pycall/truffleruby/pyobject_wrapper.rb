@@ -93,7 +93,11 @@ module PyCall
 
     def method_missing(name, *args)
       name_str = name.to_s if name.kind_of?(Symbol)
-      name_str.chop! if name_str.end_with?('=')
+      if name_str.end_with?('=') #setter method
+        name_str.chop! 
+        self.[]=(name_str, args.first)
+        return
+      end
       obj_attr = @__pyptr__[name]
       if PyCall.callable?(obj_attr)
         @@python_isclass ||= Polyglot.eval('python', 'import inspect; inspect.isclass')

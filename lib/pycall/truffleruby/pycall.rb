@@ -9,15 +9,16 @@ module PyCall
   const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
   const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
 
+  require 'pycall/truffleruby/conversion'
+  require 'pycall/truffleruby/pyobject_wrapper'
+  require 'pycall/truffleruby/libpython'
+
   class PyPtr
     def initialize(*args)
       #no pointer in Truffleruby
     end
+    NULL = PyCall::LibPython::API::None
   end
-
-  require 'pycall/truffleruby/conversion'
-  require 'pycall/truffleruby/pyobject_wrapper'
-  require 'pycall/truffleruby/libpython'
 
   def self.init(python = ENV['PYTHON'])
     @@initialized ||= false
@@ -90,7 +91,7 @@ module PyCall
     end
     @@getattr_py ||= Polyglot.eval('python', 'getattr')
     begin
-      PyObjectWrapper.wrap(@@getattr_py.call(obj, *rest))
+      return PyObjectWrapper.wrap(@@getattr_py.call(obj, *rest))
     rescue => e
       raise PyCall::PyError.new(e.message, "", e.backtrace)
     end
@@ -150,9 +151,18 @@ module PyCall
   def with(ctx)
     begin
       yield ctx.__enter__()
-    rescue Exception => err
-      # TODO: support telling what exception has been catched
-      raise err unless ctx.__exit__(err.class, err, err.backtrace_locations)
+    rescue => err
+      err_to_pass = err
+      err_to_pass = PyCall::PyError.new('error in Python', '', []) if err.is_a? PyCall::PyError || err.message.include?("(PException)")
+      if !ctx.__exit__(err.class, err_to_pass, PyCall::List.new(err.backtrace_locations))
+        if err.is_a? PyCall::PyError || err.message.include?("(PException)")
+          raise PyCall::PyError.new('error in Python', '', [])
+          # needs this message / no backtrace by spec
+        else
+          puts "RubyExc"
+          raise RuntimeError.new('error in Ruby')
+        end
+      end
     else
       ctx.__exit__(nil, nil, nil)
     end

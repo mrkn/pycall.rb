@@ -12,8 +12,15 @@ module PyCall
       def self.hasattr?(obj, name)
         PyCall.hasattr?(obj, name)
       end
-      def self.getattr(obj, name)
-        PyCall.getattr(obj, name)
+
+      def self.getattr(*args)
+        begin
+          PyCall.getattr(args[0], args[1])
+        rescue => e
+          return args[2] if args.length > 2 #default value in case attr does not exist
+          raise e
+        end
+        
       end
       def self.callable?(pyobj)
         PyCall.callable?(pyobj)

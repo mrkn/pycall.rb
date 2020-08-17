@@ -18,6 +18,8 @@ module PyCall
     def [](*key)
       if key.first.is_a?(PyObjectWrapper)
         PyObjectWrapper.wrap(@__pyptr__.__getitem__(key.first.__pyptr__))
+      elsif key.first.is_a? Enumerator::ArithmeticSequence
+        PyObjectWrapper.wrap(@__pyptr__.__getitem__(PyCall::Slice.new(key[0].begin, key[0].end, key[0].step).__pyptr__))
       else
         begin
           PyObjectWrapper.wrap(@__pyptr__.__getitem__(key.first))
