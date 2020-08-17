@@ -71,6 +71,15 @@ module PyCall
       PyCall::Conversion.register_python_type_mapping(@__pyptr__, self)
     end
 
+    def kind_of?(cls)
+      case
+      when cls == PyCall::PyTypePtr
+        true
+      else
+        super.kind_of?(cls)
+      end
+    end
+
     def self.wrap_class(pytypeptr)
       return pytypeptr if pytypeptr.is_a? PyTypeObjectWrapper
       PyTypeObjectWrapper.new(pytypeptr)

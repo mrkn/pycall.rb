@@ -130,6 +130,17 @@ module PyCall
       when cls == PyCall::Tuple
         @@python_tupleclass ||= Polyglot.eval('python', 'tuple')
         @@python_isinstance.call(@__pyptr__, @@python_tupleclass)
+      when cls == PyCall::LibPython::API::PyBool_Type
+        @@bool_check ||= Polyglot.eval("python", "lambda x: type(x) is bool")
+        @@bool_check.call(@__pyptr__)
+      when cls == PyCall::LibPython::API::PyString_Type
+        @@str_check ||= Polyglot.eval("python", "lambda x: type(x) is str")
+        @@str_check.call(@__pyptr__)
+      when cls == PyCall::LibPython::API::PyFloat_Type
+        @@float_check ||= Polyglot.eval("python", "lambda x: type(x) is float")
+        @@float_check.call(@__pyptr__)
+        # when cls == PyTypeObjectWrapper  # todo ==> PyObjectWrapper
+        # @@python_isinstance.call(@__pyptr__, cls.__pyptr__)
       when cls == PyObjectWrapper
         true #@@python_isinstance.call(@__pyptr__, Conversion.get_type.cls.py)
       else

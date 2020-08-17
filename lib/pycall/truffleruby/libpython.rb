@@ -20,8 +20,8 @@ module PyCall
           return args[2] if args.length > 2 #default value in case attr does not exist
           raise e
         end
-        
       end
+
       def self.callable?(pyobj)
         PyCall.callable?(pyobj)
       end
@@ -35,6 +35,18 @@ module PyCall
 
       def self.builtins_module_ptr
         PyCall.builtins.__pyptr__
+      end
+
+      class PyBool_Type
+      end
+
+      class PyDict_Type
+      end
+
+      class PyString_Type
+      end
+
+      class PyFloat_Type
       end
     end
 
