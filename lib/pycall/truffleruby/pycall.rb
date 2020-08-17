@@ -10,6 +10,9 @@ module PyCall
   const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
 
   class PyPtr
+    def initialize(*args)
+      #no pointer in Truffleruby
+    end
   end
 
   class PyTypePtr
@@ -50,15 +53,26 @@ module PyCall
   end
 
   def dir(obj)
-    obj.__dir__()
+    if obj.is_a? PyObjectWrapper
+      @@python_dir ||= Polyglot.eval('python', 'dir')
+      PyObjectWrapper.wrap(@@python_dir.call(obj.__pyptr__))
+    end
   end
 
   def eval(expr, globals: nil, locals: nil)
-    PyObjectWrapper.wrap(Polyglot.eval('python', expr))
+    begin
+      PyObjectWrapper.wrap(Polyglot.eval('python', expr))
+    rescue RuntimeError => e
+      raise PyCall::PyError.new(e.message, "", e.backtrace)
+    end
   end
 
   def exec(code, globals: nil, locals: nil)
-    PyObjectWrapper.wrap(Polyglot.eval('python', expr))
+    begin
+      PyObjectWrapper.wrap(Polyglot.eval('python', code))
+    rescue RuntimeError => e
+      raise PyCall::PyError.new(e.message, "", e.backtrace)
+    end
   end
 
   def to_py_complex(number)#TODO: delete if Graal supports Complex Numbers in Polyglot way
@@ -78,7 +92,11 @@ module PyCall
       obj = obj.__pyptr__
     end
     @@getattr_py ||= Polyglot.eval('python', 'getattr')
-    PyObjectWrapper.wrap(@@getattr_py.call(obj, *rest))
+    begin
+      PyObjectWrapper.wrap(@@getattr_py.call(obj, *rest))
+    rescue => e
+      raise PyCall::PyError.new(e.message, "", e.backtrace)
+    end
   end
 
   def hasattr?(obj, name)
@@ -90,11 +108,12 @@ module PyCall
   end
 
   def same?(left, right)
+    @@pythonop_eq ||= Polyglot.eval('python', 'import operator;operator.eq')
     case left
     when PyObjectWrapper
       case right
       when PyObjectWrapper
-        return left.__pyptr__ == right.__pyptr__
+        return @@pythonop_eq.call(left.__pyptr__, right.__pyptr__)
       end
     end
     false
@@ -119,6 +138,16 @@ module PyCall
     else
       PyCall::Tuple.new(*iterable)
     end
+  end
+
+  def wrap_class(cls)
+    return cls if cls.is_a? PyTypeObjectWrapper
+    PyTypeObjectWrapper.new(cls)
+  end
+
+  def wrap_module(mod)
+    return mod if mod.is_a? PyModuleWrapper
+    PyModuleWrapper.new(mod)
   end
 
   def with(ctx)

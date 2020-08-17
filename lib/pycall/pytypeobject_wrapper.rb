@@ -98,6 +98,7 @@ module PyCall
   private_constant :WrapperClassCache
 
   def wrap_class(pytypeptr)
+    return pytypeptr if pytypeptr.is_a? PyTypeObjectWrapper
     check_isclass(pytypeptr)
     WrapperClassCache.instance.lookup(pytypeptr) do
       Class.new do |cls|

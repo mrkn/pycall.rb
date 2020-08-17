@@ -7,7 +7,7 @@ module PyCall
     end
 
     def include?(item)
-      @__pyptr__.contains(item)
+      @__pyptr__.__contains__(item)
     end
 
     def length

@@ -12,10 +12,10 @@ module PyCall
     end
 
     def is_a?(class1)
-      if class1 == PyCall.tuple
+      if class1 == PyCall::Tuple
         true
       else
-        super.is_a?(class1)
+        super
       end
     end
   end

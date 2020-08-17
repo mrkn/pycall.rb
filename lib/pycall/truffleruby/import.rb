@@ -115,7 +115,7 @@ module PyCall
     end
 
     def type_object?(pyobj)
-      pyobj.__pyptr__.kind_of? PyTypeObjectWrapper
+      pyobj.is_a? PyTypeObjectWrapper
     end
   end
 end

@@ -1,22 +1,22 @@
 module PyCall
   class PyTypeObjectWrapper < PyObjectWrapper
-    #
-    # def self.extend_object(cls)
-    #   unless cls.kind_of? Class
-    #     raise TypeError, "PyTypeObjectWrapper cannot extend non-class objects"
-    #   end
-    #   pyptr = cls.instance_variable_get(:@__pyptr__)
-    #   unless pyptr.kind_of? PyTypePtr
-    #     raise TypeError, "@__pyptr__ should have PyCall::PyTypePtr object"
-    #   end
-    #   super
-    #   cls.include PyObjectWrapper
-    # end
-    #
-    # def inherited(subclass)
-    #   subclass.instance_variable_set(:@__pyptr__, __pyptr__)
-    # end
-    #
+
+    def self.extend_object(cls)
+      unless cls.kind_of? Class
+        raise TypeError, "PyTypeObjectWrapper cannot extend non-class objects"
+      end
+      pyptr = cls.instance_variable_get(:@__pyptr__)
+      unless pyptr.kind_of? PyTypePtr
+        raise TypeError, "@__pyptr__ should have PyCall::PyTypePtr object"
+      end
+      super
+      cls.include PyObjectWrapper
+    end
+
+    def inherited(subclass)
+      subclass.instance_variable_set(:@__pyptr__, __pyptr__)
+    end
+
     def new(*args)
       PyObjectWrapper.wrap(__pyptr__.call(*args))
     end
@@ -81,13 +81,39 @@ module PyCall
     end
 
     def self.wrap_class(pytypeptr)
+      return pytypeptr if pytypeptr.is_a? PyTypeObjectWrapper
       PyTypeObjectWrapper.new(pytypeptr)
     end
+
+    def kind_of?(cls)
+      return true if cls == Class
+      super
+    end
+
+    def ==(other)
+      if other.is_a? PyObjectWrapper
+        @@python_isinstance = Polyglot.eval("python", "isinstance")
+        return @@python_isinstance.call(other.__pyptr__, @__pyptr__)
+      end
+      super
+    end
+
+    def <(other)
+      if other.is_a? PyTypeObjectWrapper
+        @@python_issubclass = Polyglot.eval("python", "issubclass")
+        return @@python_issubclass.call(@__pyptr__, other.__pyptr__)
+      else
+        raise TypeError.new("compared with non class/module")
+      end
+      super
+    end
+
   end
 
   module_function
 
   def wrap_class(pytypeptr)
+    return pytypeptr if pytypeptr.is_a? PyTypeObjectWrapper
     PyTypeObjectWrapper.new(pytypeptr)
   end
 end
