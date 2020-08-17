@@ -12,8 +12,8 @@ module PyCall
       def self.hasattr?(obj, name)
         PyCall.hasattr?(obj, name)
       end
-      def self.getattr(obj, name)
-        PyCall.getattr(obj, name)
+      def self.getattr(*args)
+        PyCall.getattr(*args)
       end
       def self.callable?(pyobj)
         PyCall.callable?(pyobj)
