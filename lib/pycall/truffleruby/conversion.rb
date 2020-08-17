@@ -74,9 +74,9 @@ module PyCall
       @@mapping_python ||= Hash.new
       @@mapping_ruby ||= Hash.new
       if @@mapping_ruby.has_key?(ruby_object.class)
-        @@mapping_ruby[ruby_object.class].convert_to_python(ruby_object)
+        PyObjectWrapper.wrap(@@mapping_ruby[ruby_object.class].convert_to_python(ruby_object))
       else
-        nil
+        PyObjectWrapper.wrap(nil)
       end
     end
 
@@ -95,10 +95,10 @@ module PyCall
   end
 
 
-  Conversion.register_nice_python_type_mapping(Polyglot.eval("python", "None"), NilClass.class,
+  Conversion.register_nice_python_type_mapping(Polyglot.eval("python", "None"), NilClass,
                                                      ->(x, python) {return nil},
                                                      ->(x, ruby) {return PyCall::LibPython::API::None.__pyptr__})
-  Conversion.register_nice_python_type_mapping(Polyglot.eval("python", "1+1j"), Complex.class,
+  Conversion.register_nice_python_type_mapping(Polyglot.eval("python", "1+1j"), Complex,
                                                      ->(x, python) { return PyCall.from_py_complex(x) },
                                                      ->(x, ruby) { return PyCall.to_py_complex(x) })
 end

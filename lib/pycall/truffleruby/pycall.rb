@@ -12,6 +12,9 @@ module PyCall
   class PyPtr
   end
 
+  class PyTypePtr
+  end
+
   require 'pycall/truffleruby/conversion'
   require 'pycall/truffleruby/pyobject_wrapper'
   require 'pycall/truffleruby/libpython'

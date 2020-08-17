@@ -29,6 +29,18 @@ module PyCall
       def self.builtins_module_ptr
         PyCall.builtins.__pyptr__
       end
+
+      class PyBool_Type
+      end
+
+      class PyDict_Type
+      end
+
+      class PyString_Type
+      end
+
+      class PyFloat_Type
+      end
     end
 
     const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))

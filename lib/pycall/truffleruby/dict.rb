@@ -64,6 +64,15 @@ module PyCall
         h.update(k => v)
       end
     end
+
+    def kind_of?(cls)
+      case
+      when cls == PyCall::LibPython::API::PyDict_Type
+        true
+      else
+        super.kind_of?(cls)
+      end
+    end
   end
 
   Conversion.register_python_type_mapping(Dict.new().__pyptr__, Dict)

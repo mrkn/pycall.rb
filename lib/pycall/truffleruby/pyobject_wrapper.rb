@@ -106,7 +106,7 @@ module PyCall
 
     def kind_of?(cls)
       @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
-      case#maybe not no nice, but case cls does === comparison, and PyCall::Tuple === PyCall::Tuple is false
+      case #maybe not no nice, but case cls does === comparison, and PyCall::Tuple === PyCall::Tuple is false
       when cls == Module
         true #required for tests
       when cls == PyCall::PyPtr
@@ -114,6 +114,15 @@ module PyCall
       when cls == PyCall::Tuple
         @@python_tupleclass ||= Polyglot.eval('python', 'tuple')
         @@python_isinstance.call(@__pyptr__, @@python_tupleclass)
+      when cls == PyCall::LibPython::API::PyBool_Type
+        @@bool_check ||= Polyglot.eval("python", "lambda x: type(x) is bool")
+        @@bool_check.call(@__pyptr__)
+      when cls == PyCall::LibPython::API::PyString_Type
+        @@str_check ||= Polyglot.eval("python", "lambda x: type(x) is str")
+        @@str_check.call(@__pyptr__)
+      when cls == PyCall::LibPython::API::PyFloat_Type
+        @@float_check ||= Polyglot.eval("python", "lambda x: type(x) is float")
+        @@float_check.call(@__pyptr__)
       when cls == PyTypeObjectWrapper  # todo ==> PyObjectWrapper
         @@python_isinstance.call(@__pyptr__, cls.__pyptr__)
       when cls == PyObjectWrapper
