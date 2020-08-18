@@ -12,7 +12,7 @@ RSpec.describe PyCall do
   end
 
   describe 'LibPython::API::None' do
-    subject { PyCall::LibPython::API::None }
+    subject { PyCall::PyPtr::NULL }
     it { is_expected.to be_a(PyCall::PyPtr) }
     specify { expect(subject.none?).to eq(true) }
     it { is_expected.to be_nil }
@@ -115,7 +115,12 @@ RSpec.describe PyCall do
     end
 
     it 'returns the first-created wrapper class when called twice' do
-      expect(PyCall.wrap_class(python_class)).to equal(PyCall.wrap_class(python_class))
+      if RUBY_ENGINE == "truffleruby"
+        #there's no wrapper cache
+        expect(PyCall.same?(PyCall.wrap_class(python_class), PyCall.wrap_class(python_class))).to eq(true)
+      else
+        expect(PyCall.wrap_class(python_class)).to equal(PyCall.wrap_class(python_class))
+      end    
     end
   end
 
@@ -128,12 +133,22 @@ RSpec.describe PyCall do
       else
         expect(subject).to be_a(Module)
         expect(subject).to be_a(PyCall::PyObjectWrapper)
-        expect(subject.__pyptr__.__address__).to equal(PyCall::LibPython::API.builtins_module_ptr.__address__)
+        if RUBY_ENGINE == "truffleruby"
+          #there are no addresses
+          expect(subject.__pyptr__).to eq(PyCall::LibPython::API.builtins_module_ptr)
+        else
+          expect(subject.__pyptr__.__address__).to equal(PyCall::LibPython::API.builtins_module_ptr.__address__)
+        end
+        
       end
     end
 
     it 'returns the first-created wrapper module when called twice' do
-      expect(PyCall.wrap_module(PyCall::LibPython::API.builtins_module_ptr)).to equal(subject)
+      if RUBY_ENGINE == "truffleruby"
+        expect(PyCall.same?(PyCall.wrap_module(PyCall::LibPython::API.builtins_module_ptr), subject)).to eq(true)
+      else
+        expect(PyCall.wrap_module(PyCall::LibPython::API.builtins_module_ptr)).to equal(subject)
+      end
     end
 
     specify 'the wrapped module object can respond to read attributes' do

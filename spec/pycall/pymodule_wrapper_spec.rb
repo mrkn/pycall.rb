@@ -6,7 +6,10 @@ require 'spec_helper'
   end
 
   specify do
-    expect(simple_module).to be_an_instance_of(Module)
+    if RUBY_ENGINE != "truffleruby"
+      #it's a clas for truffleruby
+      expect(simple_module).to be_an_instance_of(Module)
+    end
     expect(simple_module).to be_a(PyCall::PyModuleWrapper)
     expect(simple_module).to be_a(PyCall::PyObjectWrapper)
   end

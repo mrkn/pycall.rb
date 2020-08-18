@@ -13,7 +13,7 @@ module PyCall
 
     def self.all
       @@slice_class = Polyglot.eval("python", "slice")
-      super @@slice_class.call(PyCall::LibPython::API::None.__pyptr__)
+      super @@slice_class.call(LibPython::API::ForeignNone)
     end
   end
 

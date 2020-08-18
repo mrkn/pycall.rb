@@ -4,13 +4,13 @@ puts
 if RUBY_ENGINE != "truffleruby"
   puts "Environment variables:"
   %w[
-  ANACONDA
-  LIBPYTHON
-  PYENV_VERSION
-  PYTHON
-  PYTHON_VERSION
-  PYTHONPATH
-  PYCALL_DEBUG_FIND_LIBPYTHON
+    ANACONDA
+    LIBPYTHON
+    PYENV_VERSION
+    PYTHON
+    PYTHON_VERSION
+    PYTHONPATH
+    PYCALL_DEBUG_FIND_LIBPYTHON
 ].each do |key|
     puts "- #{key}=#{ENV[key]}"
   end
