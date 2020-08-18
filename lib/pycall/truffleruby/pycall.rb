@@ -1,9 +1,3 @@
-=begin
-
-PyCall bildet alle Python-built-in Methoden als Instanz- und Klassenmethoden ab
-
-=end
-
 module PyCall
 
   const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
