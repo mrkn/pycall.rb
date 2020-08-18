@@ -92,8 +92,8 @@ module PyCall
 
 
   Conversion.register_nice_python_type_mapping(Polyglot.eval("python", "None"), NilClass,
-                                               ->(x, ruby) {return nil},
-                                               ->(x, python) {return PyCall::LibPython::API::None.__pyptr__})
+                                                     ->(x, python) {return nil},
+                                                     ->(x, ruby) {return LibPython::API::ForeignNone})
   Conversion.register_nice_python_type_mapping(Polyglot.eval("python", "1+1j"), Complex,
                                                ->(x, ruby) { return PyCall.from_py_complex(x) },
                                                ->(x, python) { return PyCall.to_py_complex(x) })

@@ -53,14 +53,12 @@ module PyCall
       @__pyptr__.pop(key)
     end
 
-    # todo
     def each(&block)
       PyCall.builtins.list(@__pyptr__.items()) do | tuple |
         block.call(tuple)
       end
     end
 
-    # todo? whats this even?
     def to_h
       inject({}) do |h, (k, v)|
         h.update(k => v)

@@ -35,8 +35,8 @@ module PyCall
     end
 
     module API
-      const_set(:None, PyCall::PyObjectWrapper.new(Polyglot.eval('python', 'None')))
-
+      const_set(:None, PyCall::PyPtr.new(Polyglot.eval('python', 'None')))
+      const_set(:ForeignNone, Polyglot.eval('python', 'None'))
       def self.builtins_module_ptr
         PyCall.builtins.__pyptr__
       end

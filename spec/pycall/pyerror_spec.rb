@@ -11,7 +11,6 @@ module PyCall
     describe '#to_s' do
       shared_examples 'does not contain traceback' do
         it 'does not contain traceback' do
-          puts subject.to_s.lines.count
           expect(subject.to_s.lines.count).to eq(1)
         end
       end

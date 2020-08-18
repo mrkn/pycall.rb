@@ -3,16 +3,24 @@ module PyCall
   const_set(:PYTHON_VERSION, Polyglot.eval('python', 'import sys;sys.version.split(" ")[0]'))
   const_set(:PYTHON_DESCRIPTION, Polyglot.eval('python', 'import sys;sys.version'))
 
+  class PyPtr
+    def initialize(*args)
+      @__pyptr__ = args.first
+    end
+
+    def none?
+      @__pyptr__.nil?
+    end
+
+    def nil?
+      @__pyptr__.nil?
+    end
+
+    NULL = PyCall::PyPtr.new(Polyglot.eval('python', 'None'))
+  end
   require 'pycall/truffleruby/conversion'
   require 'pycall/truffleruby/pyobject_wrapper'
   require 'pycall/truffleruby/libpython'
-
-  class PyPtr
-    def initialize(*args)
-      #no pointer in Truffleruby
-    end
-    NULL = PyCall::LibPython::API::None
-  end
 
   def self.init(python = ENV['PYTHON'])
     @@initialized ||= false
@@ -39,11 +47,18 @@ module PyCall
   def callable?(obj)
     if obj.is_a?(PyObjectWrapper)
       obj = obj.__pyptr__
+    elsif obj == PyCall::LibPython::API::PyDict_Type 
+      true
+    elsif obj == PyCall::LibPython::API::PyBool_Type 
+      true
+    elsif obj == PyCall::LibPython::API::PyString_Type 
+      true
+    elsif obj == PyCall::LibPython::API::PyFloat_Type 
+      true
     elsif !Truffle::Interop.foreign?(obj)#needs to also support PyDict_Type etc
       raise TypeError, "unexpected argument type #{obj.class} (expected PyCall::PyPtr or its wrapper)"
     end
-    @@callable ||= Polyglot.eval('python', 'callable')
-    @@callable.call(obj)
+    Polyglot.eval('python', 'callable').call(obj)
   end
 
   def dir(obj)
@@ -69,12 +84,12 @@ module PyCall
     end
   end
 
-  def to_py_complex(number)#TODO: delete if Graal supports Complex Numbers in Polyglot way
+  def to_py_complex(number)#TODO: remove if Truffle supports Complex Numbers in a Polyglot way
     @@python_complex_helper = Polyglot.eval('python', 'lambda x,y: x+y*1j')
     @@python_complex_helper.call(number.real, number.imag)
   end
 
-  def from_py_complex(number)#TODO: delete if Graal supports Complex Numbers in Polyglot way
+  def from_py_complex(number)#TODO: remove if Truffle supports Complex Numbers in a Polyglot way
     @@python_complex_split = Polyglot.eval('python', 'lambda x: (x.real, x.imag)')
     splitted = @@python_complex_split.call(number)
     splitted[0] + splitted[1] * 1i
@@ -150,7 +165,7 @@ module PyCall
     rescue => err
       err_to_pass = err
       err_to_pass = PyCall::PyError.new('error in Python', '', []) if err.is_a? PyCall::PyError || err.message.include?("(PException)")
-      if !ctx.__exit__(err.class, err_to_pass, PyCall::List.new(err.backtrace_locations))
+      if !ctx.__pyptr__.__exit__(err.class, err_to_pass, PyCall::List.new(err.backtrace_locations))
         if err.is_a? PyCall::PyError || err.message.include?("(PException)")
           raise PyCall::PyError.new('error in Python', '', [])
           # needs this message / no backtrace by spec
