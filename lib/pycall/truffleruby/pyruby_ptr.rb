@@ -1,5 +1,6 @@
 module PyCall
   class PyRubyPtr
+    attr_reader :__ruby_object__
     def initialize(ruby_object)
       @__ruby_object = ruby_object
     end

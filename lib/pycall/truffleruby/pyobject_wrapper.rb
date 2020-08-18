@@ -72,6 +72,8 @@ module PyCall
         obj.map { |part| self.unwrap(part) }
       elsif obj.is_a?(PyObjectWrapper)
         self.unwrap(obj.__pyptr__)
+      elsif obj.is_a?(PyRubyPtr)
+        obj.__ruby_object__
       else
         obj
       end
@@ -197,7 +199,7 @@ module PyCall
     end
 
     def call(*args)
-      __pyptr__.call(*args)
+      PyObjectWrapper.wrap(__pyptr__.call(*args))
     end
 
     class SwappedOperationAdapter

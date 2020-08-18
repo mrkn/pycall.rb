@@ -43,7 +43,11 @@ module PyCall
       globals = main_dict_ptr # FIXME: this should mimic to `import_name` function defined in `Python/ceval.c`.
       locals = main_dict_ptr # FIXME: this should mimic to `import_name` function defined in `Python/ceval.c`.
       level = 0 # TODO: support prefixed dots (#25)
-      Polyglot.eval("python", "from #{mod_name} import #{fromlist.join(",")}")
+      begin
+        Polyglot.eval("python", "from #{mod_name} import #{fromlist.join(",")}")
+      rescue RuntimeError => e
+        raise PyCall::PyError.new(e.message, "", e.backtrace)
+      end
       mod = PyCall.import_module(mod_name)
 
       sys_modules = PyCall.sys.modules
@@ -80,7 +84,7 @@ module PyCall
     def define_name(name, pyobj)
       if callable?(pyobj) && !type_object?(pyobj)
         define_singleton_method(name) do |*args|
-          pyobj.__pyptr__.call(*args)
+          pyobj.call(*args)
         end
       else
         if constant_name?(name)
