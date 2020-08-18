@@ -40,7 +40,6 @@ module PyCall
     if obj.is_a?(PyObjectWrapper)
       obj = obj.__pyptr__
     elsif !Truffle::Interop.foreign?(obj)#needs to also support PyDict_Type etc
-      Polyglot.eval("python", "breakpoint()")
       raise TypeError, "unexpected argument type #{obj.class} (expected PyCall::PyPtr or its wrapper)"
     end
     @@callable ||= Polyglot.eval('python', 'callable')
