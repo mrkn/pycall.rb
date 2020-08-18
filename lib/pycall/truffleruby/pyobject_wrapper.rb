@@ -130,21 +130,21 @@ module PyCall
       when cls == PyCall::PyPtr
         true #required for tests
       when cls == PyCall::Tuple
-        @@python_tupleclass ||= Polyglot.eval('python', 'tuple')
-        @@python_isinstance.call(@__pyptr__, @@python_tupleclass)
+        Polyglot.eval('python', 'lambda x: type(x) is tuple').call(@__pyptr__)
       when cls == PyCall::LibPython::API::PyBool_Type
-        @@bool_check ||= Polyglot.eval("python", "lambda x: type(x) is bool")
-        @@bool_check.call(@__pyptr__)
+        Polyglot.eval("python", "lambda x: type(x) is bool").call(@__pyptr__)
       when cls == PyCall::LibPython::API::PyString_Type
-        @@str_check ||= Polyglot.eval("python", "lambda x: type(x) is str")
-        @@str_check.call(@__pyptr__)
+        Polyglot.eval("python", "lambda x: type(x) is str").call(@__pyptr__)
+      when cls == PyCall::LibPython::API::PyUnicode_Type
+        if is_string
+          Polyglot.eval("python", "lambda s: all(ord(c) < 128 for c in s)").call(@__pyptr__)
+        else
+          false
+        end
+      when cls == PyCall::LibPython::API::PyList_Type
+        Polyglot.eval("python", "lambda x: type(x) is list").call(@__pyptr__)
       when cls == PyCall::LibPython::API::PyFloat_Type
-        @@float_check ||= Polyglot.eval("python", "lambda x: type(x) is float")
-        @@float_check.call(@__pyptr__)
-        # when cls == PyTypeObjectWrapper  # todo ==> PyObjectWrapper
-        # @@python_isinstance.call(@__pyptr__, cls.__pyptr__)
-      when cls == PyObjectWrapper
-        true #@@python_isinstance.call(@__pyptr__, Conversion.get_type.cls.py)
+        Polyglot.eval("python", "lambda x: type(x) is float").call(@__pyptr__)
       else
         super
       end

@@ -9,6 +9,14 @@ module PyCall
         super
       end
     end
+
+    def kind_of?(cls)
+      if cls == Module
+        true
+      else
+        super
+      end
+    end
   end
 
   module_function
