@@ -1,6 +1,5 @@
 module PyCall
   module Conversion
-    # todo shiiiiet
 
     class Converter
       attr_reader :ruby
