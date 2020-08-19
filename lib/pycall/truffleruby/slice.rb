@@ -39,11 +39,12 @@ module PyCall
         return PyCall::Slice.new(range_begin, range_end, range_step)
       elsif obj.is_a? Enumerator
         #hacky way to support (nil..nil).step(-1) Enumerators
-        #probably there is a better way
-        inspected = obj.inspect
-        match = inspected.match /nil\.\.:step\(([\-0-9]+)\)/
-        if match
-          return PyCall::Slice.new(nil, nil, match[1].to_i)
+        iter = obj.instance_variable_get(:@iter)
+        if iter == :step
+          args = obj.instance_variable_get(:@args)
+          if (args.is_a? Array) && (args.length == 1) && (args.first.is_a? Integer)
+            return PyCall::Slice.new(nil, nil, args[0])
+          end
         end
         return nil
       end
