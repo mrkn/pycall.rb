@@ -28,6 +28,10 @@ module PyCall
       def self.import_module(name)
         PyCall.import_module(name)
       end
+
+      def self.call_object(*args)
+        #This is a stub, used for indexing
+      end
     end
 
     module API
@@ -43,7 +47,13 @@ module PyCall
       class PyDict_Type
       end
 
+      class PyList_Type
+      end
+
       class PyString_Type
+      end
+
+      class PyUnicode_Type
       end
 
       class PyFloat_Type
