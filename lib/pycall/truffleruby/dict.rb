@@ -54,9 +54,19 @@ module PyCall
     end
 
     def each(&block)
-      PyCall.builtins.list(@__pyptr__.items()) do | tuple |
-        block.call(tuple)
+      return enum_for unless block_given?
+      @@python_iter ||= Polyglot.eval('python', 'iter')
+      @@python_next ||= Polyglot.eval('python', 'next')
+      iterator = @@python_iter.call(__pyptr__)
+      while true
+        begin
+          item = @@python_next.call(iterator)
+        rescue#StopIteration Exception from Python
+          break
+        end
+        block.call(item, self[item])
       end
+      self
     end
 
     def to_h

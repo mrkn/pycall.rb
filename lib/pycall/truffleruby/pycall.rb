@@ -45,18 +45,22 @@ module PyCall
   end
 
   def callable?(obj)
+    begin
+      if obj == PyCall::LibPython::API::PyDict_Type
+        return true
+      elsif obj == PyCall::LibPython::API::PyBool_Type 
+        return true
+      elsif obj == PyCall::LibPython::API::PyString_Type 
+        return true
+      elsif obj == PyCall::LibPython::API::PyFloat_Type 
+        return true
+      end
+    rescue => e #obj== might be undefined
+    end
     if obj.is_a?(PyObjectWrapper)
       obj = obj.__pyptr__
-    elsif obj == PyCall::LibPython::API::PyDict_Type 
-      true
-    elsif obj == PyCall::LibPython::API::PyBool_Type 
-      true
-    elsif obj == PyCall::LibPython::API::PyString_Type 
-      true
-    elsif obj == PyCall::LibPython::API::PyFloat_Type 
-      true
-    elsif !Truffle::Interop.foreign?(obj)#needs to also support PyDict_Type etc
-      raise TypeError, "unexpected argument type #{obj.class} (expected PyCall::PyPtr or its wrapper)"
+    elsif !Truffle::Interop.foreign?(obj)
+      raise TypeError, "unexpected argument type " + obj.class.to_s + " (expected PyCall::PyPtr or its wrapper)"
     end
     Polyglot.eval('python', 'callable').call(obj)
   end
@@ -161,16 +165,18 @@ module PyCall
 
   def with(ctx)
     begin
-      yield ctx.__enter__()
+      yield PyObjectWrapper.wrap(ctx.__enter__())
     rescue => err
+      is_py_err = err.is_a? PyCall::PyError || err.message.include?("(PException)")
       err_to_pass = err
-      err_to_pass = PyCall::PyError.new('error in Python', '', []) if err.is_a? PyCall::PyError || err.message.include?("(PException)")
-      if !ctx.__pyptr__.__exit__(err.class, err_to_pass, PyCall::List.new(err.backtrace_locations))
-        if err.is_a? PyCall::PyError || err.message.include?("(PException)")
+      err_to_pass = PyCall::PyError.new('error in Python', '', []) if is_py_err
+
+      stack = PyCall::List.new(PyObjectWrapper.unwrap(err.backtrace_locations))
+      if !ctx.__exit__(err_to_pass.class, err_to_pass, stack)
+        if is_py_err
           raise PyCall::PyError.new('error in Python', '', [])
           # needs this message / no backtrace by spec
         else
-          puts "RubyExc"
           raise RuntimeError.new('error in Ruby')
         end
       end

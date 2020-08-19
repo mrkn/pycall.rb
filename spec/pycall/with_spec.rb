@@ -84,7 +84,6 @@ require 'spec_helper'
         expect(test_context.exit_called[0]).to eq(RuntimeError)
         expect(test_context.exit_called[1]).to be_a(RuntimeError)
         expect(test_context.exit_called[1].message).to eq('error in Ruby')
-        #Polyglot.eval("python", "breakpoint()")
         expect(test_context.exit_called[2]).to be_a(PyCall::List)
         expect(test_context.exit_called[2]).to be_all {|x| x.is_a?(Thread::Backtrace::Location) }
       end

@@ -18,8 +18,8 @@ module PyCall
     def [](*key)
       if key.first.is_a?(PyObjectWrapper)
         PyObjectWrapper.wrap(@__pyptr__.__getitem__(key.first.__pyptr__))
-      elsif key.first.is_a? Enumerator::ArithmeticSequence
-        PyObjectWrapper.wrap(@__pyptr__.__getitem__(PyCall::Slice.new(key[0].begin, key[0].end, key[0].step).__pyptr__))
+      elsif slice = PyCall::Slice.from_ruby_range(key.first)
+        PyObjectWrapper.wrap(@__pyptr__.__getitem__(slice.__pyptr__))
       else
         begin
           PyObjectWrapper.wrap(@__pyptr__.__getitem__(key.first))
@@ -30,7 +30,11 @@ module PyCall
     end
 
     def []=(*key, value)
-      @__pyptr__.__setitem__(key.first, value)
+      to_set = key.first
+      if slice = PyCall::Slice.from_ruby_range(to_set)
+        to_set = slice.__pyptr__
+      end
+      @__pyptr__.__setitem__(to_set, value)
     end
 
     def <<(item)
