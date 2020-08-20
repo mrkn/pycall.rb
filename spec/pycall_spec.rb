@@ -12,7 +12,7 @@ RSpec.describe PyCall do
   end
 
   describe 'LibPython::API::None' do
-    subject { PyCall::PyPtr::NULL }
+    subject { PyCall::LibPython::API::None }
     it { is_expected.to be_a(PyCall::PyPtr) }
     specify { expect(subject.none?).to eq(true) }
     it { is_expected.to be_nil }
