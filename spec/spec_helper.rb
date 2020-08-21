@@ -11,7 +11,7 @@ if RUBY_ENGINE != "truffleruby"
     PYTHON_VERSION
     PYTHONPATH
     PYCALL_DEBUG_FIND_LIBPYTHON
-].each do |key|
+  ].each do |key|
     puts "- #{key}=#{ENV[key]}"
   end
 end
