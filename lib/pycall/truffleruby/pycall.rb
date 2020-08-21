@@ -20,6 +20,7 @@ module PyCall
   end
   require 'pycall/truffleruby/conversion'
   require 'pycall/truffleruby/pyobject_wrapper'
+  PyCall::Conversion.use_wrappers(PyCall::PyObjectWrapper)
   require 'pycall/truffleruby/libpython'
 
   def self.init(python = ENV['PYTHON'])
@@ -182,11 +183,17 @@ module PyCall
   end
 
   require 'pycall/truffleruby/tuple'
+  PyCall::Conversion.set_tuple_wrapper(PyCall::Tuple)
   require 'pycall/truffleruby/list'
+  PyCall::Conversion.set_list_wrapper(PyCall::List)
   require 'pycall/truffleruby/dict'
+  PyCall::Conversion.set_dict_wrapper(PyCall::Dict)
   require 'pycall/truffleruby/set'
+  PyCall::Conversion.set_set_wrapper(PyCall::Set)
   require 'pycall/truffleruby/slice'
+  PyCall::Conversion.set_slice_wrapper(PyCall::Slice)
   require 'pycall/truffleruby/pyruby_ptr'
+  PyCall::Conversion.set_ruby_wrapper(PyCall::PyRubyPtr)
 
   def self.wrap_ruby_object(ruby_object)
     PyRubyPtr.new(ruby_object)
