@@ -16,10 +16,10 @@ if RUBY_ENGINE != "truffleruby"
   end
 end
 
-require 'pycall'
+require "pycall"
 
 puts
-puts "The following version of Python is used:"
+puts "The following verAsion of Python is used:"
 puts PyCall::PYTHON_DESCRIPTION
 
 require 'pycall/import'
