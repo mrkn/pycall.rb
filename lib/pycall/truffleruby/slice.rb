@@ -2,16 +2,15 @@ module PyCall
   class Slice < PyObjectWrapper
 
     def initialize(*args)
-      if args.length == 1 && args[0].is_a?(Integer)#handle special spec case from PyCall
-        #How does this make sense?
+      if args.length == 1 && args[0].is_a?(Integer)#handle special test case from PyCall
         args = [nil, args[0]]
       end
       unwrapped = PyObjectWrapper.unwrap(args)
-      super Polyglot.eval("python", "slice").call(*unwrapped)
+      super Polyglot.eval('python', 'slice').call(*unwrapped)
     end
 
     def self.all
-      super Polyglot.eval("python", "slice").call(LibPython::API::ForeignNone)
+      super Polyglot.eval('python', 'slice').call(LibPython::API::ForeignNone)
     end
 
     def self.from_ruby_range(obj)

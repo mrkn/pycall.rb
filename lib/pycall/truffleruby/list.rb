@@ -1,4 +1,4 @@
-require "pycall/truffleruby/pyenum"
+require 'pycall/truffleruby/pyenum'
 
 module PyCall
   class List < PyEnumerable

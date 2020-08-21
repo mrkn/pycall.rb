@@ -44,9 +44,9 @@ module PyCall
       locals = main_dict_ptr # FIXME: this should mimic to `import_name` function defined in `Python/ceval.c`.
       level = 0 # TODO: support prefixed dots (#25)
       begin
-        Polyglot.eval("python", "from #{mod_name} import #{fromlist.join(",")}")
+        Polyglot.eval('python', "from #{mod_name} import #{fromlist.join(",")}")
       rescue RuntimeError => e
-        raise PyCall::PyError.new(e.message, "", e.backtrace)
+        raise PyCall::PyError.new(e.message, '', e.backtrace)
       end
       mod = PyCall.import_module(mod_name)
 

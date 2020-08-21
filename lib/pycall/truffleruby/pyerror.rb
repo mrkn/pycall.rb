@@ -6,7 +6,7 @@ module PyCall
       @type = type
       @value = value
       @traceback = traceback
-      super("Exception occurred in Python")
+      super('Exception occurred in Python')
     end
 
     attr_reader :type, :value, :traceback
@@ -26,9 +26,9 @@ module PyCall
     private
 
     def format_traceback
-      return "" if traceback.nil?
+      return '' if traceback.nil?
       return traceback.join("\n") if traceback.kind_of?(Array)
-      return ""
+      return ''
     end
 
     def self.occurred?

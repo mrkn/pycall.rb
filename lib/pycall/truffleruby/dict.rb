@@ -7,7 +7,7 @@ module PyCall
         super(build_dict(args.first))
       else
         if kwargs.empty?
-          super Polyglot.eval("python", "dict").call()
+          super Polyglot.eval('python', 'dict').call()
         else
           super(build_dict(kwargs))
         end
@@ -15,7 +15,7 @@ module PyCall
     end
 
     def build_dict(kwargs)
-      dict = Polyglot.eval("python", "dict").call()
+      dict = Polyglot.eval('python', 'dict').call()
       kwargs.each do |key, value|
         dict.__setitem__(key, value)
       end

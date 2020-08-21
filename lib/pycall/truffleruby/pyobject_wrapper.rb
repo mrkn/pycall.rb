@@ -98,14 +98,14 @@ module PyCall
         return
       end
       obj_attr = @__pyptr__[name]
-      if Polyglot.eval("python", "callable").call(obj_attr)
+      if Polyglot.eval('python', 'callable').call(obj_attr)
         if Polyglot.eval('python', 'import inspect; inspect.isclass').call(obj_attr)
           return PyTypeObjectWrapper.wrap_class(obj_attr) #Class, imitate PyCalls behaviour by not calling Class, instead wrapping it
         else
           begin
             PyObjectWrapper.wrap(obj_attr.call(*PyObjectWrapper.unwrap(args))) #normal method call
           rescue RuntimeError => e
-            raise PyCall::PyError.new(e.message, "", e.backtrace)
+            raise PyCall::PyError.new(e.message, '', e.backtrace)
           end
         end
       else
@@ -127,19 +127,19 @@ module PyCall
       when cls == PyCall::Tuple
         Polyglot.eval('python', 'lambda x: type(x) is tuple').call(@__pyptr__)
       when cls == PyCall::LibPython::API::PyBool_Type
-        Polyglot.eval("python", "lambda x: type(x) is bool").call(@__pyptr__)
+        Polyglot.eval('python', 'lambda x: type(x) is bool').call(@__pyptr__)
       when cls == PyCall::LibPython::API::PyString_Type
-        Polyglot.eval("python", "lambda x: type(x) is str").call(@__pyptr__)
+        Polyglot.eval('python', 'lambda x: type(x) is str').call(@__pyptr__)
       when cls == PyCall::LibPython::API::PyUnicode_Type
         if is_string
-          Polyglot.eval("python", "lambda s: all(ord(c) < 128 for c in s)").call(@__pyptr__)
+          Polyglot.eval('python', 'lambda s: all(ord(c) < 128 for c in s)').call(@__pyptr__)
         else
           false
         end
       when cls == PyCall::LibPython::API::PyList_Type
-        Polyglot.eval("python", "lambda x: type(x) is list").call(@__pyptr__)
+        Polyglot.eval('python', 'lambda x: type(x) is list').call(@__pyptr__)
       when cls == PyCall::LibPython::API::PyFloat_Type
-        Polyglot.eval("python", "lambda x: type(x) is float").call(@__pyptr__)
+        Polyglot.eval('python', 'lambda x: type(x) is float').call(@__pyptr__)
       when cls.is_a?(PyTypeObjectWrapper)
         Polyglot.eval('python', 'isinstance').call(@__pyptr__, cls.__pyptr__)
       else
@@ -196,7 +196,7 @@ module PyCall
     end
 
     def call(*args)
-      if !Polyglot.eval("python", "callable").call(@__pyptr__)
+      if !Polyglot.eval('python', 'callable').call(@__pyptr__)
         raise TypeError, "not callable"
       end
       PyObjectWrapper.wrap(__pyptr__.call(*PyObjectWrapper.unwrap(args)))

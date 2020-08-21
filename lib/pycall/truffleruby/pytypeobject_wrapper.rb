@@ -92,16 +92,16 @@ module PyCall
 
     def ==(other)
       if other.is_a? PyObjectWrapper
-        return Polyglot.eval("python", "isinstance").call(other.__pyptr__, @__pyptr__)
+        return Polyglot.eval('python', 'isinstance').call(other.__pyptr__, @__pyptr__)
       end
       super
     end
 
     def <(other)
       if other.is_a? PyTypeObjectWrapper
-        return Polyglot.eval("python", "issubclass").call(@__pyptr__, other.__pyptr__)
+        return Polyglot.eval('python', 'issubclass').call(@__pyptr__, other.__pyptr__)
       else
-        raise TypeError.new("compared with non class/module")
+        raise TypeError, "compared with non class/module"
       end
       super
     end

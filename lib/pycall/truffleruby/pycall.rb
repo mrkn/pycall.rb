@@ -76,7 +76,7 @@ module PyCall
     begin
       PyObjectWrapper.wrap(Polyglot.eval('python', expr))
     rescue RuntimeError => e
-      raise PyCall::PyError.new(e.message, "", e.backtrace)
+      raise PyCall::PyError.new(e.message, '', e.backtrace)
     end
   end
 
@@ -84,7 +84,7 @@ module PyCall
     begin
       PyObjectWrapper.wrap(Polyglot.eval('python', code))
     rescue RuntimeError => e
-      raise PyCall::PyError.new(e.message, "", e.backtrace)
+      raise PyCall::PyError.new(e.message, '', e.backtrace)
     end
   end
 
