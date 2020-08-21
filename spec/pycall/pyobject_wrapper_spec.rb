@@ -6,32 +6,36 @@ module PyCall
       PyCall.import_module('pycall.simple_class').SimpleClass
     end
 
-    describe '.extend_object' do
-      context '@__pyptr__ of the extended object is a PyCall::PyPtr' do
-        it 'extends the given object' do
-          obj = Object.new
-          obj.instance_variable_set(:@__pyptr__, PyPtr::NULL)
-          expect { obj.extend PyObjectWrapper }.not_to raise_error
-          expect(obj).to be_a(PyObjectWrapper)
+    if RUBY_ENGINE != "truffleruby"
+      #truffleruby uses classes / extend does not work
+      describe '.extend_object' do
+        context '@__pyptr__ of the extended object is a PyCall::PyPtr' do
+          it 'extends the given object' do
+            obj = Object.new
+            obj.instance_variable_set(:@__pyptr__, PyPtr::NULL)
+            expect { obj.extend PyObjectWrapper }.not_to raise_error
+            expect(obj).to be_a(PyObjectWrapper)
+          end
+        end
+
+        context '@__pyptr__ of the extended object is nil' do
+          it 'raises TypeError' do
+            obj = Object.new
+            expect { obj.extend PyObjectWrapper }.to raise_error(TypeError, /@__pyptr__/)
+            expect(obj).not_to be_a(PyObjectWrapper)
+          end
+        end
+
+        context '@__pyptr__ of the extended object is not a PyCall::PyPtr' do
+          it 'raises TypeError' do
+            obj = Object.new
+            obj.instance_variable_set(:@__pyptr__, 42)
+            expect { obj.extend PyObjectWrapper }.to raise_error(TypeError, /@__pyptr__/)
+            expect(obj).not_to be_a(PyObjectWrapper)
+          end
         end
       end
 
-      context '@__pyptr__ of the extended object is nil' do
-        it 'raises TypeError' do
-          obj = Object.new
-          expect { obj.extend PyObjectWrapper }.to raise_error(TypeError, /@__pyptr__/)
-          expect(obj).not_to be_a(PyObjectWrapper)
-        end
-      end
-
-      context '@__pyptr__ of the extended object is not a PyCall::PyPtr' do
-        it 'raises TypeError' do
-          obj = Object.new
-          obj.instance_variable_set(:@__pyptr__, 42)
-          expect { obj.extend PyObjectWrapper }.to raise_error(TypeError, /@__pyptr__/)
-          expect(obj).not_to be_a(PyObjectWrapper)
-        end
-      end
     end
 
     describe '#method_missing' do
@@ -215,6 +219,7 @@ module PyCall
     end
 
     describe '#coerce' do
+      # todo install numpy
       let(:np) { PyCall.import_module('numpy') }
       specify do
         x = np.random.randn(10)
@@ -227,9 +232,14 @@ module PyCall
 
       it 'returns a duped instance with a copy of the Python object' do
         duped = list.dup
-        expect(duped).not_to equal(list)
-        expect(duped.__pyptr__).not_to eq(list.__pyptr__)
-        expect(duped).to eq(list)
+        if RUBY_ENGINE == "truffleruby"
+          expect(Polyglot.eval("python", "import operator;operator.is_").call(duped, list)).to eq(false)
+          expect(duped).to eq(list)
+        else
+          expect(duped).not_to equal(list)
+          expect(duped.__pyptr__).not_to eq(list.__pyptr__)
+          expect(duped).to eq(list)
+        end
       end
     end
 

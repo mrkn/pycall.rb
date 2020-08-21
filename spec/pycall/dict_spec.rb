@@ -24,6 +24,9 @@ module PyCall
       end
 
       it 'increments the returned python object' do
+        if RUBY_ENGINE == "truffleruby"
+          skip("Refcount not available in Truffleruby")
+        end
         pyobj = PyCall.builtins.object.()
         subject['o'] = pyobj
         expect { subject['o'] }.to change { pyobj.__pyptr__.__ob_refcnt__ }.from(2).to(3)

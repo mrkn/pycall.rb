@@ -1,28 +1,32 @@
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
 
 puts
-puts "Environment variables:"
-%w[
-  ANACONDA
-  LIBPYTHON
-  PYENV_VERSION
-  PYTHON
-  PYTHON_VERSION
-  PYTHONPATH
-  PYCALL_DEBUG_FIND_LIBPYTHON
-].each do |key|
-  puts "- #{key}=#{ENV[key]}"
+if RUBY_ENGINE != "truffleruby"
+  puts "Environment variables:"
+  %w[
+    ANACONDA
+    LIBPYTHON
+    PYENV_VERSION
+    PYTHON
+    PYTHON_VERSION
+    PYTHONPATH
+    PYCALL_DEBUG_FIND_LIBPYTHON
+  ].each do |key|
+    puts "- #{key}=#{ENV[key]}"
+  end
 end
 
 require "pycall"
 
 puts
-puts "The following version of Python is used:"
+puts "The following verAsion of Python is used:"
 puts PyCall::PYTHON_DESCRIPTION
 
 require 'pycall/import'
-require "pycall/pretty_print"
-require 'pycall/spec_helper.so'
+if RUBY_ENGINE != "truffleruby"
+  require 'pycall/spec_helper.so'
+  require "pycall/pretty_print"
+end
 
 PyCall.sys.path.append(File.expand_path('../python', __FILE__))
 

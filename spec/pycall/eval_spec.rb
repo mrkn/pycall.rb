@@ -12,7 +12,11 @@ RSpec.describe PyCall do
           expect(PyCall.eval('1.1')).to eq(1.1)
           expect(PyCall.eval('"a"')).to eq("a")
           expect(PyCall.eval('"あ"').force_encoding('UTF-8')).to eq("あ") # TODO: force_encoding
+        end
+        it 'handles complex numbers correctly' do
           expect(PyCall.eval('1 + 2j')).to eq(1 + 2i)
+        end
+        it 'evaluates complex object wrappers correctly' do
           expect(PyCall.eval('[1, 2, 3]')).to eq(PyCall::List.new([1, 2, 3])) # TODO: PyCall::List[1, 2, 3]
           expect(PyCall.eval('(1, 2, 3)')).to eq(PyCall::Tuple.new(1, 2, 3))
           expect(PyCall.eval('{"a": 1, "b": 2}')).to eq(PyCall::Dict.new(a: 1, b: 2))
