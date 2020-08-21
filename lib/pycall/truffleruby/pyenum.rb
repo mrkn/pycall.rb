@@ -17,12 +17,10 @@ module PyCall
     # todo
     def each(&block)
       return enum_for unless block_given?
-      @@python_iter ||= Polyglot.eval('python', 'iter')
-      @@python_next ||= Polyglot.eval('python', 'next')
-      iterator = @@python_iter.call(__pyptr__)
+      iterator = Polyglot.eval('python', 'iter').call(__pyptr__)
       while true
         begin
-          item = @@python_next.call(iterator)
+          item = Polyglot.eval('python', 'next').call(iterator)
         rescue#StopIteration Exception from Python
           break
         end

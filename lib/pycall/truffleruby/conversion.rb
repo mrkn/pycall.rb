@@ -12,7 +12,7 @@ module PyCall
           @ruby = ruby_class
           @python = python_type
         else
-          raise ArgumentError.new("#to_ruby and #to_python have to be callable")
+          raise ArgumentError, "#to_ruby and #to_python have to be callable"
         end
       end
 
@@ -26,15 +26,14 @@ module PyCall
     end
 
     def self.get_type(pythonObj)
-      @@type ||= Polyglot.eval("python", "type")
-      @@type.call(pythonObj)
+      Polyglot.eval('python', 'type').call(pythonObj)
     end
 
     def self.register_nice_python_type_mapping(python_object, ruby_class, to_ruby, to_python)
       python_type = self.get_type(python_object)
       @@mapping_python ||= Hash.new
       @@mapping_ruby ||= Hash.new
-      hash = Polyglot.eval("python", "hash").call(python_type)
+      hash = Polyglot.eval('python', 'hash').call(python_type)
       if @@mapping_python.has_key?(hash)
         false
       else
@@ -55,7 +54,7 @@ module PyCall
 
     def self.unregister_python_type_mapping(python_class)
       @@mapping_python ||= Hash.new
-      hash = Polyglot.eval("python", "hash").call(python_class)
+      hash = Polyglot.eval('python', 'hash').call(python_class)
       if @@mapping_python.has_key?(hash)
         converter = @@mapping_python[hash]
         @@mapping_python.delete hash
@@ -81,7 +80,7 @@ module PyCall
       python_type = self.get_type(python_object)
       @@mapping_python ||= Hash.new
       @@mapping_ruby ||= Hash.new
-      hash = Polyglot.eval("python", "hash").call(python_type)
+      hash = Polyglot.eval('python', 'hash').call(python_type)
       if @@mapping_python.has_key?(hash)
         @@mapping_python[hash].convert_to_ruby(python_object)
       else
@@ -91,14 +90,14 @@ module PyCall
   end
 
 
-  Conversion.register_nice_python_type_mapping(Polyglot.eval("python", "None"), NilClass,
+  Conversion.register_nice_python_type_mapping(Polyglot.eval('python', 'None'), NilClass,
                                                      ->(x, python) {return nil},
                                                      ->(x, ruby) {return LibPython::API::ForeignNone})
-  Conversion.register_nice_python_type_mapping(Polyglot.eval("python", "1+1j"), Complex,
+  Conversion.register_nice_python_type_mapping(Polyglot.eval('python', '1+1j'), Complex,
                                                ->(x, ruby) { return PyCall.from_py_complex(x) },
                                                ->(x, python) { return PyCall.to_py_complex(x) })
-  Conversion.register_nice_python_type_mapping(Polyglot.eval("python", "str()"), String,
+  Conversion.register_nice_python_type_mapping(Polyglot.eval('python', 'str()'), String,
                                                ->(x, ruby){return ruby.new(x)},
-                                               ->(x, python){return Polyglot.eval("python", "lambda x: str(x)").call(x)})
+                                               ->(x, python){return Polyglot.eval('python', 'lambda x: str(x)').call(x)})
 
 end

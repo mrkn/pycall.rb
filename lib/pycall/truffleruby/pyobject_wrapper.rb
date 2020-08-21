@@ -36,8 +36,6 @@ module PyCall
     end
 
     def self.private_wrap(something)
-      @@python_complex_class ||= Polyglot.eval('python', 'complex')
-      @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
       @@python_isclass ||= Polyglot.eval('python', 'import inspect; inspect.isclass')
 
       if Truffle::Interop.is_string?(something)
@@ -45,7 +43,7 @@ module PyCall
       elsif Truffle::Interop.null?(something)
         return nil
       else
-        if @@python_isinstance.call(something, @@python_complex_class)
+        if Polyglot.eval('python', 'isinstance').call(something, Polyglot.eval('python', 'complex'))
           return PyCall.from_py_complex(something)
         elsif Truffle::Interop.foreign?(something)
           if @@python_isclass.call(something)
@@ -100,8 +98,7 @@ module PyCall
         return
       end
       obj_attr = @__pyptr__[name]
-      @@callable ||= Polyglot.eval("python", "callable")
-      if @@callable.call(obj_attr)
+      if Polyglot.eval('python', 'callable').call(obj_attr)
         @@python_isclass ||= Polyglot.eval('python', 'import inspect; inspect.isclass')
         if @@python_isclass.call(obj_attr)
           return PyTypeObjectWrapper.wrap_class(obj_attr) #Class, imitate PyCalls behaviour by not calling Class, instead wrapping it
@@ -109,7 +106,7 @@ module PyCall
           begin
             PyObjectWrapper.wrap(obj_attr.call(*PyObjectWrapper.unwrap(args))) #normal method call
           rescue RuntimeError => e
-            raise PyCall::PyError.new(e.message, "", e.backtrace)
+            raise PyCall::PyError.new(e.message, '', e.backtrace)
           end
         end
       else
@@ -123,7 +120,6 @@ module PyCall
     end
 
     def kind_of?(cls)
-      @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
       case
       when cls == Module
         true #required for tests
@@ -132,21 +128,21 @@ module PyCall
       when cls == PyCall::Tuple
         Polyglot.eval('python', 'lambda x: type(x) is tuple').call(@__pyptr__)
       when cls == PyCall::LibPython::API::PyBool_Type
-        Polyglot.eval("python", "lambda x: type(x) is bool").call(@__pyptr__)
+        Polyglot.eval('python', 'lambda x: type(x) is bool').call(@__pyptr__)
       when cls == PyCall::LibPython::API::PyString_Type
-        Polyglot.eval("python", "lambda x: type(x) is str").call(@__pyptr__)
+        Polyglot.eval('python', 'lambda x: type(x) is str').call(@__pyptr__)
       when cls == PyCall::LibPython::API::PyUnicode_Type
         if is_string
-          Polyglot.eval("python", "lambda s: all(ord(c) < 128 for c in s)").call(@__pyptr__)
+          Polyglot.eval('python', 'lambda s: all(ord(c) < 128 for c in s)').call(@__pyptr__)
         else
           false
         end
       when cls == PyCall::LibPython::API::PyList_Type
-        Polyglot.eval("python", "lambda x: type(x) is list").call(@__pyptr__)
+        Polyglot.eval('python', 'lambda x: type(x) is list').call(@__pyptr__)
       when cls == PyCall::LibPython::API::PyFloat_Type
-        Polyglot.eval("python", "lambda x: type(x) is float").call(@__pyptr__)
+        Polyglot.eval('python', 'lambda x: type(x) is float').call(@__pyptr__)
       when cls.is_a?(PyTypeObjectWrapper)
-        @@python_isinstance.call(@__pyptr__, cls.__pyptr__)
+        Polyglot.eval('python', 'isinstance').call(@__pyptr__, cls.__pyptr__)
       else
         super
       end
@@ -201,7 +197,7 @@ module PyCall
     end
 
     def call(*args)
-      if !Polyglot.eval("python", "callable").call(@__pyptr__)
+      if !Polyglot.eval('python', 'callable').call(@__pyptr__)
         raise TypeError, "not callable"
       end
       PyObjectWrapper.wrap(__pyptr__.call(*PyObjectWrapper.unwrap(args)))
@@ -276,18 +272,15 @@ module PyCall
     end
 
     def to_s
-      @@python_str ||= Polyglot.eval('python', 'str')
-      @@python_str.call(@__pyptr__)
+      Polyglot.eval('python', 'str').call(@__pyptr__)
     end
 
     def to_i
-      @@python_int ||= Polyglot.eval('python', 'int')
-      @@python_int.call(@__pyptr__)
+      Polyglot.eval('python', 'int').call(@__pyptr__)
     end
 
     def to_f
-      @@python_float ||= Polyglot.eval('python', 'float')
-      @@python_float.call(@__pyptr__)
+      Polyglot.eval('python', 'float').call(@__pyptr__)
     end
   end
 
