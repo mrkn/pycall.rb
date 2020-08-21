@@ -2,6 +2,8 @@ module PyCall
   class PyObjectWrapper
     attr_reader :__pyptr__
 
+    @@conversion = PyCall::Conversion
+
     def __pyptr__
       @__pyptr__
     end
@@ -25,7 +27,7 @@ module PyCall
     # todo test
     def self.wrap(something)
       if Truffle::Interop.foreign?(something)
-        wrapper = Conversion.to_ruby(something)
+        wrapper = @@conversion.to_ruby(something)
         unless wrapper
           wrapper = private_wrap(something)
         end
@@ -36,19 +38,15 @@ module PyCall
     end
 
     def self.private_wrap(something)
-      @@python_complex_class ||= Polyglot.eval('python', 'complex')
-      @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
-      @@python_isclass ||= Polyglot.eval('python', 'import inspect; inspect.isclass')
-
       if Truffle::Interop.is_string?(something)
         return something.to_s
       elsif Truffle::Interop.null?(something)
         return nil
       else
-        if @@python_isinstance.call(something, @@python_complex_class)
+        if Polyglot.eval('python', 'isinstance').call(something, Polyglot.eval('python', 'complex'))
           return PyCall.from_py_complex(something)
         elsif Truffle::Interop.foreign?(something)
-          if @@python_isclass.call(something)
+          if Polyglot.eval('python', 'import inspect; inspect.isclass').call(something)
             return PyTypeObjectWrapper.new(something)
           else
             return self.new(something)
@@ -100,10 +98,8 @@ module PyCall
         return
       end
       obj_attr = @__pyptr__[name]
-      @@callable ||= Polyglot.eval("python", "callable")
-      if @@callable.call(obj_attr)
-        @@python_isclass ||= Polyglot.eval('python', 'import inspect; inspect.isclass')
-        if @@python_isclass.call(obj_attr)
+      if Polyglot.eval("python", "callable").call(obj_attr)
+        if Polyglot.eval('python', 'import inspect; inspect.isclass').call(obj_attr)
           return PyTypeObjectWrapper.wrap_class(obj_attr) #Class, imitate PyCalls behaviour by not calling Class, instead wrapping it
         else
           begin
@@ -123,7 +119,6 @@ module PyCall
     end
 
     def kind_of?(cls)
-      @@python_isinstance ||= Polyglot.eval('python', 'isinstance')
       case
       when cls == Module
         true #required for tests
@@ -146,7 +141,7 @@ module PyCall
       when cls == PyCall::LibPython::API::PyFloat_Type
         Polyglot.eval("python", "lambda x: type(x) is float").call(@__pyptr__)
       when cls.is_a?(PyTypeObjectWrapper)
-        @@python_isinstance.call(@__pyptr__, cls.__pyptr__)
+        Polyglot.eval('python', 'isinstance').call(@__pyptr__, cls.__pyptr__)
       else
         super
       end
@@ -276,31 +271,30 @@ module PyCall
     end
 
     def to_s
-      @@python_str ||= Polyglot.eval('python', 'str')
-      @@python_str.call(@__pyptr__)
+      Polyglot.eval('python', 'str').call(@__pyptr__)
     end
 
     def to_i
-      @@python_int ||= Polyglot.eval('python', 'int')
-      @@python_int.call(@__pyptr__)
+      Polyglot.eval('python', 'int').call(@__pyptr__)
     end
 
     def to_f
-      @@python_float ||= Polyglot.eval('python', 'float')
-      @@python_float.call(@__pyptr__)
+      Polyglot.eval('python', 'float').call(@__pyptr__)
+    end
+
+    def nan?
+      to_f.nan?
     end
   end
 
   module_function
 
   def check_ismodule(pyptr)
-    @@ismodule_py ||= Polyglot.eval('python', 'import inspect;inspect.ismodule')
-    @@ismodule_py.call(pyptr)
+    Polyglot.eval('python', 'import inspect;inspect.ismodule').call(pyptr)
   end
 
   def check_isclass(pyptr)
-    @@isclass_py ||= Polyglot.eval('python', 'import inspect;inspect.isclass')
-    @@isclass_py.call(pyptr)
+    Polyglot.eval('python', 'import inspect;inspect.isclass').call(pyptr)
   end
 
 end
