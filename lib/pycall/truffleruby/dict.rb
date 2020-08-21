@@ -3,12 +3,11 @@ module PyCall
     include Enumerable
 
     def initialize(*args, **kwargs)
-      @@dict_class ||= Polyglot.eval("python", "dict")
       if args.first.kind_of?(Hash)
         super(build_dict(args.first))
       else
         if kwargs.empty?
-          super @@dict_class.call()
+          super Polyglot.eval("python", "dict").call()
         else
           super(build_dict(kwargs))
         end
@@ -16,8 +15,7 @@ module PyCall
     end
 
     def build_dict(kwargs)
-      @@dict_class ||= Polyglot.eval("python", "dict")
-      dict = @@dict_class.call()
+      dict = Polyglot.eval("python", "dict").call()
       kwargs.each do |key, value|
         dict.__setitem__(key, value)
       end
@@ -55,12 +53,10 @@ module PyCall
 
     def each(&block)
       return enum_for unless block_given?
-      @@python_iter ||= Polyglot.eval('python', 'iter')
-      @@python_next ||= Polyglot.eval('python', 'next')
-      iterator = @@python_iter.call(__pyptr__)
+      iterator = Polyglot.eval('python', 'iter').call(__pyptr__)
       while true
         begin
-          item = @@python_next.call(iterator)
+          item = Polyglot.eval('python', 'next').call(iterator)
         rescue#StopIteration Exception from Python
           break
         end
@@ -80,7 +76,7 @@ module PyCall
       when cls == PyCall::LibPython::API::PyDict_Type
         true
       else
-        super.kind_of?(cls)
+        super
       end
     end
   end

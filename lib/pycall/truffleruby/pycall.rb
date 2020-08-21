@@ -24,10 +24,9 @@ module PyCall
   require 'pycall/truffleruby/libpython'
 
   def self.init(python = ENV['PYTHON'])
-    @@initialized ||= false
-    return false if @@initialized
-
-    @@initialized = true
+    @initialized ||= false
+    return false if @initialized
+    @initialized = true
     true
   end
 
@@ -42,7 +41,8 @@ module PyCall
   end
 
   def builtins
-    @@builtins ||= PyModuleWrapper.wrap(import_module('builtins'))
+    @builtins ||= PyModuleWrapper.wrap(import_module('builtins'))
+    @builtins
   end
 
   def callable?(obj)
@@ -68,8 +68,7 @@ module PyCall
 
   def dir(obj)
     if obj.is_a? PyObjectWrapper
-      @@python_dir ||= Polyglot.eval('python', 'dir')
-      PyObjectWrapper.wrap(@@python_dir.call(obj.__pyptr__))
+      PyObjectWrapper.wrap(Polyglot.eval('python', 'dir').call(obj.__pyptr__))
     end
   end
 
@@ -90,14 +89,12 @@ module PyCall
   end
 
   def to_py_complex(number)#TODO: remove if Truffle supports Complex Numbers in a Polyglot way
-    @@python_complex_helper = Polyglot.eval('python', 'lambda x,y: x+y*1j')
-    @@python_complex_helper.call(number.real, number.imag)
+    Polyglot.eval('python', 'lambda x,y: x+y*1j').call(number.real, number.imag)
   end
 
   def from_py_complex(number)#TODO: remove if Truffle supports Complex Numbers in a Polyglot way
-    @@python_complex_split = Polyglot.eval('python', 'lambda x: (x.real, x.imag)')
-    splitted = @@python_complex_split.call(number)
-    splitted[0] + splitted[1] * 1i
+    split = Polyglot.eval('python', 'lambda x: (x.real, x.imag)').call(number)
+    split[0] + split[1] * 1i
   end
 
   def getattr(*args)
@@ -105,9 +102,8 @@ module PyCall
     if obj.is_a?(PyObjectWrapper)
       obj = obj.__pyptr__
     end
-    @@getattr_py ||= Polyglot.eval('python', 'getattr')
     begin
-      return PyObjectWrapper.wrap(@@getattr_py.call(obj, *rest))
+      return PyObjectWrapper.wrap(Polyglot.eval('python', 'getattr').call(obj, *rest))
     rescue => e
       raise PyCall::PyError.new(e.message, "", e.backtrace)
     end
@@ -117,17 +113,15 @@ module PyCall
     if obj.is_a?(PyObjectWrapper)
       obj = obj.__pyptr__
     end
-    @@hasattr_py ||= Polyglot.eval('python', 'hasattr')
-    @@hasattr_py.call(obj, name)
+    Polyglot.eval('python', 'hasattr').call(obj, name)
   end
 
   def same?(left, right)
-    @@pythonop_eq ||= Polyglot.eval('python', 'import operator;operator.eq')
     case left
     when PyObjectWrapper
       case right
       when PyObjectWrapper
-        return @@pythonop_eq.call(left.__pyptr__, right.__pyptr__)
+        return Polyglot.eval('python', 'import operator;operator.eq').call(left.__pyptr__, right.__pyptr__)
       end
     end
     false
@@ -138,15 +132,16 @@ module PyCall
   end
 
   def sys
-    @@sys ||= PyModuleWrapper.wrap(import_module('sys'))
+    @sys ||= PyModuleWrapper.wrap(import_module('sys'))
+    @sys
   end
 
   def copy
-    @@copy_module ||= PyModuleWrapper.wrap(import_module("copy"))
+    @copy_module ||= PyModuleWrapper.wrap(import_module("copy"))
+    @copy_module
   end
 
   def tuple(iterable=nil)
-    @@tuple_py ||= Polyglot.eval('python', 'tuple')
     if iterable.nil?
       PyCall::Tuple.new
     else
