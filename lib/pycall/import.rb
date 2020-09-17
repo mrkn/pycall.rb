@@ -77,18 +77,22 @@ module PyCall
     private
 
     def define_name(name, pyobj)
-      if callable?(pyobj) && !type_object?(pyobj)
-        define_singleton_method(name) do |*args|
-          LibPython::Helpers.call_object(pyobj.__pyptr__, *args)
-        end
+      if ! callable?(pyobj)
+        define_singleton_method(name){ pyobj }
       else
-        if constant_name?(name)
-          context = self
-          context = (self == PyCall::Import.main_object) ? Object : self
-          context.module_eval { const_set(name, pyobj) }
-        else
-          define_singleton_method(name) { pyobj }
+        define_singleton_method(name) do |*args|
+          if args.size > 0
+            LibPython::Helpers.call_object(pyobj.__pyptr__, *args)
+          else
+            pyobj
+          end
         end
+      end
+        
+      if constant_name?(name)
+        context = self
+        context = (self == PyCall::Import.main_object) ? Object : self
+        context.module_eval { const_set(name, pyobj) }
       end
     end
 

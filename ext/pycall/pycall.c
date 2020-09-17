@@ -1068,7 +1068,7 @@ pycall_pyobject_wrapper_wrapper_method(int argc, VALUE *argv, VALUE wrapper)
   if (!Py_API(PyCallable_Check)(attr))
     return pycall_pyobject_to_ruby(attr);
 
-  if (PyType_Check(attr) || PyClass_Check(attr) || argc == 0)
+  if (argc == 0)
     return pycall_pyobject_to_ruby(attr);
 
   return pycall_call_python_callable(attr, argc, argv);
