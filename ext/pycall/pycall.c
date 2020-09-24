@@ -669,7 +669,6 @@ pycall_libpython_api_PyList_GetItem(VALUE mod, VALUE pyptr, VALUE idx)
   if (!pyobj_item) {
     pycall_pyerror_fetch_and_raise("PyList_GetItem in pycall_libpython_api_PyList_GetItem");
   }
-  pycall_Py_DecRef(pyobj_item);
 
   return pycall_pyptr_new(pyobj_item);
 }
@@ -967,12 +966,10 @@ pycall_extract_kwargs_from_ruby_hash(VALUE key, VALUE value, VALUE arg)
   key_cstr = StringValueCStr(key);
   pyvalue = pycall_pyobject_from_ruby(value);
 
-  if (Py_API(PyDict_SetItemString)(kwargs, key_cstr, pyvalue) < 0) {
-    return ST_STOP;
-  }
+  int res = Py_API(PyDict_SetItemString)(kwargs, key_cstr, pyvalue);
   pycall_Py_DecRef(pyvalue);
 
-  return ST_CONTINUE;
+  return (res < 0) ? ST_STOP : ST_CONTINUE;
 }
 
 static void
@@ -1064,9 +1061,10 @@ pycall_call_python_callable(PyObject *pycallable, int argc, VALUE *argv)
   }
 
   res = pyobject_call(pycallable, args, kwargs); /* New reference */
-  pycall_Py_DecRef(pycallable);
   pycall_Py_DecRef(args);
-  pycall_Py_DecRef(kwargs);
+  if (kwargs) {
+      pycall_Py_DecRef(kwargs);
+  }
   if (!res) {
     pycall_pyerror_fetch_and_raise("PyObject_Call in pycall_call_python_callable");
   }
@@ -1105,12 +1103,11 @@ pycall_pyobject_wrapper_wrapper_method(int argc, VALUE *argv, VALUE wrapper)
 
     name_cstr[RSTRING_LEN(name) - 1] = '\0';
     res = Py_API(PyObject_SetAttrString)(pyobj, name_cstr, attr);
+    pycall_Py_DecRef(attr);
     name_cstr[RSTRING_LEN(name) - 1] = '=';
     if (res == -1) {
-      pycall_Py_DecRef(attr);
       pycall_pyerror_fetch_and_raise("PyObject_SetAttrString in pycall_pyobject_wrapper_wrapper_method");
     }
-    pycall_Py_DecRef(attr);
 
     return val;
   }
@@ -1126,7 +1123,9 @@ pycall_pyobject_wrapper_wrapper_method(int argc, VALUE *argv, VALUE wrapper)
   if (PyType_Check(attr) || PyClass_Check(attr))
     return pycall_pyobject_to_ruby(attr);
 
-  return pycall_call_python_callable(attr, argc, argv);
+  VALUE obj = pycall_call_python_callable(attr, argc, argv);
+  pycall_Py_DecRef(attr);
+  return obj;
 }
 
 static VALUE
@@ -1210,13 +1209,13 @@ pycall_libpython_helpers_m_getitem(VALUE mod, VALUE pyptr, VALUE key)
   pyobj_key = pycall_convert_index(key);
 
   pyobj_v = Py_API(PyObject_GetItem)(pyobj, pyobj_key);
+  pycall_Py_DecRef(pyobj_key);
   if (!pyobj_v) {
     pycall_pyerror_fetch_and_raise("PyObject_GetItem in pycall_libpython_helpers_m_getitem");
   }
 
   obj = pycall_pyobject_to_ruby(pyobj_v);
   pycall_Py_DecRef(pyobj_v);
-  pycall_Py_DecRef(pyobj_key);
   return obj;
 }
 
@@ -1231,11 +1230,11 @@ pycall_libpython_helpers_m_setitem(VALUE mod, VALUE pyptr, VALUE key, VALUE v)
   pyobj_value = pycall_pyobject_from_ruby(v);
 
   res = Py_API(PyObject_SetItem)(pyobj, pyobj_key, pyobj_value);
+  pycall_Py_DecRef(pyobj_key);
+  pycall_Py_DecRef(pyobj_value);
   if (res == -1) {
     pycall_pyerror_fetch_and_raise("PyObject_SetItem in pycall_libpython_helpers_m_setitem");
   }
-  pycall_Py_DecRef(pyobj_key);
-  pycall_Py_DecRef(pyobj_value);
 
   return v;
 }
@@ -1250,10 +1249,10 @@ pycall_libpython_helpers_m_delitem(VALUE mod, VALUE pyptr, VALUE key)
   pyobj_key = pycall_convert_index(key);
 
   res = Py_API(PyObject_DelItem)(pyobj, pyobj_key);
+  pycall_Py_DecRef(pyobj_key);
   if (res == -1) {
     pycall_pyerror_fetch_and_raise("PyObject_DelItem");
   }
-  pycall_Py_DecRef(pyobj_key);
 
   return Qnil;
 }
@@ -1282,10 +1281,10 @@ pycall_libpython_helpers_m_dict_contains(VALUE mod, VALUE pyptr, VALUE key)
   pyobj = check_get_pyobj_ptr(pyptr, Py_API(PyDict_Type));
   pyobj_key = pycall_pyobject_from_ruby(key);
   res = Py_API(PyDict_Contains)(pyobj, pyobj_key);
+  pycall_Py_DecRef(pyobj_key);
   if (res == -1) {
     pycall_pyerror_fetch_and_raise("PyDict_Contains");
   }
-  pycall_Py_DecRef(pyobj_key);
 
   return res ? Qtrue : Qfalse;
 }
@@ -1321,10 +1320,10 @@ pycall_libpython_helpers_m_sequence_contains(VALUE mod, VALUE pyptr, VALUE key)
 
   pyobj_key = pycall_pyobject_from_ruby(key);
   res = Py_API(PySequence_Contains)(pyobj, pyobj_key);
+  pycall_Py_DecRef(pyobj_key);
   if (res == -1) {
     pycall_pyerror_fetch_and_raise("PySequence_Contains");
   }
-  pycall_Py_DecRef(pyobj_key);
 
   return res ? Qtrue : Qfalse;
 }
@@ -1951,12 +1950,10 @@ pycall_pydict_from_ruby_iter(VALUE key, VALUE value, VALUE arg)
   pyobj_key = pycall_pyobject_from_ruby(key);
   pyobj_value = pycall_pyobject_from_ruby(value);
   res = Py_API(PyObject_SetItem)(pydictobj, pyobj_key, pyobj_value);
-  if (res == -1) {
-    return ST_STOP;
-  }
   pycall_Py_DecRef(pyobj_key);
   pycall_Py_DecRef(pyobj_value);
-  return ST_CONTINUE;
+
+  return (res == -1) ? ST_STOP : ST_CONTINUE;
 }
 
 PyObject *
