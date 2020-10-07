@@ -90,3 +90,5 @@ matrix:
   allow_failures:
   - PYTHONDIR: "C:\\Python27"
   - PYTHONDIR: "C:\\Python27-x64"
+
+# So nice bro
