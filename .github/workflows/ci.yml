@@ -19,23 +19,27 @@ jobs:
       fail-fast: false
       matrix:
         os:
-        - ubuntu-18.04
+        - ubuntu-20.04
         - macos-latest
         ruby:
+        - "3.0"
         - 2.7
         - 2.6
         - 2.5
         - 2.4
         python:
-        - 3.8.x
-        - 3.7.x
-        - 3.6.x
-        - 2.7.x
+        - 3.x
+        - 2.x
         python_architecture:
         - x64
+        include:
+        - { os: ubuntu-20.04 , ruby: 2.7 , python: 3.8 }
+        - { os: ubuntu-20.04 , ruby: 2.7 , python: 3.7 }
+        - { os: ubuntu-20.04 , ruby: 2.7 , python: 3.6 }
+        - { os: ubuntu-18.04 , ruby: 2.7 , python: 3.8 }
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       with:
         fetch-depth: 1
 
@@ -44,7 +48,7 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
 
-    - uses: actions/setup-python@v1
+    - uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python }}
         architecture: ${{ matrix.python_architecture }}
