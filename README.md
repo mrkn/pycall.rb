@@ -125,6 +125,72 @@ If you want to use a specific version of Python instead of the default,
 you can change the Python version by setting the `PYTHON` environment variable
 to the path of the `python` executable.
 
+### Deploying on Heroku
+
+Heroku's default version of Python is not compiled with the `--enabled-shared`
+option and can't be accessed by PyCall. Alternative [buildpacks](https://devcenter.heroku.com/articles/buildpacks) are available,
+including these that have been reported to work with PyCall:
+
+https://github.com/richgong/heroku-buildpack-python
+https://github.com/dsounded/heroku-buildpack-python
+https://github.com/ReforgeHQ/heroku-buildpack-python
+
+These community-developed buildpacks are not supported by Heroku, so it's
+worth examining the source to make sure the buildpack you use suits your
+needs. For instance, 'ReforgeHQ' works well with Python 3.8.1, but has not
+been configured to work with other versions and may not be as generally
+useful as the 'dsounded' or 'richgong' buildpacks.
+
+The buildpack will expect to find both a `runtime.txt` and a `requirements.txt` 
+file in the root of your project. You will need to add these to specify the 
+version of Python and any packages to be installed via `pip`, _e.g_ to use 
+version Python 3.8.1 and version 2.5 of the 'networkx' package:
+
+    $ echo "python-3.8.1" >> runtime.txt
+    $ echo "networkx==2.5" >> requirements.txt
+
+Commit these two files into project's repository. You'll use these to manage
+your Python environment in much the same way you use the `Gemfile` to manage
+Ruby.
+
+Heroku normally detects which buildpacks to use, but you will want to override
+this behavior. It's probably best to clear out existing buildpacks and specify
+exactly which buildpacks from scratch.
+
+First, take stock of your existing buildpacks:
+
+    $ heroku buildpack [-a YOUR_APP_NAME]
+
+For a Ruby/Rails application this will typically report the stock `heroku/ruby`
+buildpack, or possibly both `heroku/ruby` and `heroku/nodejs`. 
+
+Clear the list and progressively add back your buildpacks, starting with the Python 
+community-developed buildpack. For example, if `ruby` and `nodejs` buildpacks were 
+previously installed, and chosing the 'ReforgeHQ' buildback, your setup process will 
+be similar to this: 
+
+    $ heroku buildpacks:clear
+    $ heroku buildpacks:add https://github.com/ReforgeHQ/heroku-buildpack-python -i 1
+    $ heroku buildpacks:add heroku/nodejs -i 2
+    # heroku buildpacks:add heroku/ruby -i 3
+
+If you have multiple applications on Heroku you will need to append each of these with
+the identifier (_e.g._ `heroku buildpacks:clear -a YOUR_APP_NAME`).
+
+With each buildpack we are registering its index (the `-i` switch) in order to specify
+the order Heroku will load runtimes and execute bootstrapping code. It's important for 
+the Python environment to be engaged first, as PyCall will need to be able to find it
+when Ruby-based processes start. 
+
+Once you have set up your buildpacks, and have commited both `requirements.txt` and 
+`runtime.txt` files to git, deploy your Heroku application as your normally would.
+The Python bootstrapping process will appear in the log first, followed by the Ruby
+and so on. PyCall should now be able to successfully call Python functions from within 
+the Heroku environnent.
+
+NB It is also possible to specify buildpacks within Docker images on Heroku.
+See Heroku's [documentation on using Docker Images](https://devcenter.heroku.com/articles/build-docker-images-heroku-yml).
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies.
