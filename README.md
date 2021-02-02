@@ -174,19 +174,19 @@ be similar to this:
     $ heroku buildpacks:add heroku/nodejs -i 2
     # heroku buildpacks:add heroku/ruby -i 3
 
-If you have multiple applications on Heroku you will need to append each of these with
-the identifier (_e.g._ `heroku buildpacks:clear -a YOUR_APP_NAME`).
+If you have multiple applications on Heroku you will need to append each of these 
+with application's identifier (_e.g._ `heroku buildpacks:clear -a YOUR_APP_NAME`).
 
-With each buildpack we are registering its index (the `-i` switch) in order to specify
-the order Heroku will load runtimes and execute bootstrapping code. It's important for 
-the Python environment to be engaged first, as PyCall will need to be able to find it
-when Ruby-based processes start. 
+With each buildpack we are registering its index (the `-i` switch) in order to 
+specify the order Heroku will load runtimes and execute bootstrapping code. It's 
+important for the Python environment to be engaged first, as PyCall will need to 
+be able to find it when Ruby-based processes start. 
 
 Once you have set up your buildpacks, and have commited both `requirements.txt` and 
 `runtime.txt` files to git, deploy your Heroku application as your normally would.
 The Python bootstrapping process will appear in the log first, followed by the Ruby
-and so on. PyCall should now be able to successfully call Python functions from within 
-the Heroku environnent.
+and so on. PyCall should now be able to successfully call Python functions from 
+within the Heroku environment.
 
 NB It is also possible to specify buildpacks within Docker images on Heroku.
 See Heroku's [documentation on using Docker Images](https://devcenter.heroku.com/articles/build-docker-images-heroku-yml).
