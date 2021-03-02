@@ -31,7 +31,7 @@ Init_spec_helper(void)
   VALUE cGvlChecker;
 
   mPyCall = rb_define_module("PyCall");
-  cGvlChecker = rb_define_class_under(mPyCall, "GvlChecker", rb_cData);
+  cGvlChecker = rb_define_class_under(mPyCall, "GvlChecker", rb_cObject);
   rb_define_alloc_func(cGvlChecker, gvl_checker_allocate);
   rb_define_method(cGvlChecker, "has_gvl?", gvl_checker_has_gvl_p, 0);
   rb_define_method(cGvlChecker, "call", gvl_checker_has_gvl_p, 0);
