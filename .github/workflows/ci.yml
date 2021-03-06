@@ -21,6 +21,7 @@ jobs:
         os:
         - ubuntu-20.04
         - macos-latest
+        - windows-latest
         ruby:
         - "3.0"
         - 2.7
