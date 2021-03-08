@@ -59,11 +59,11 @@ jobs:
 
     - run: bundle install
 
-    - run: bundle exec rake compile
+    - run: rake compile
 
     - run: python lib/pycall/python/investigator.py
 
-    - run: bundle exec rake
+    - run: rake
       env:
         PYTHON: python
 
@@ -102,10 +102,10 @@ jobs:
 
     - run: bundle install
 
-    - run: bundle exec rake compile
+    - run: rake compile
 
     - run: python lib/pycall/python/investigator.py
 
-    - run: bundle exec rake
+    - run: rake
       env:
         PYTHON: python
