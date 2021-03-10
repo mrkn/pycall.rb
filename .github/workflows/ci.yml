@@ -41,9 +41,9 @@ jobs:
         - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.6 , python_architecture: x64 }
         - { os: ubuntu-18.04   , ruby: 2.7   , python: 3.8 , python_architecture: x64 }
         - { os: ubuntu-20.04   , ruby: debug , python: 3.x , python_architecture: x64 }
-        - { os: macos-latest   , ruby: debug , python: 3.x , python_architecture: x64 }
-        - { os: windows-latest , ruby: mswin , python: 3.x , python_architecture: x64 }
-        - { os: windows-latest , ruby: mingw , python: 3.x , python_architecture: x64 }
+        #- { os: macos-latest   , ruby: debug , python: 3.x , python_architecture: x64 }
+        #- { os: windows-latest , ruby: mswin , python: 3.x , python_architecture: x64 }
+        #- { os: windows-latest , ruby: mingw , python: 3.x , python_architecture: x64 }
 
     steps:
     - uses: actions/checkout@v2
