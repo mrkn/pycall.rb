@@ -356,11 +356,16 @@ PyRuby_getattro_with_gvl(PyRubyObject *pyro, PyObject *pyobj_name)
 
 VALUE cPyRubyPtr;
 
-const rb_data_type_t pycall_pyrubyptr_data_type = {
+static rb_data_type_t pycall_pyrubyptr_data_type = {
   "PyCall::PyRubyPtr",
   { 0, pycall_pyptr_free, pycall_pyptr_memsize, },
 #ifdef RUBY_TYPED_FREE_IMMEDIATELY
-  &pycall_pyptr_data_type, 0, RUBY_TYPED_FREE_IMMEDIATELY
+# if defined  _WIN32 && !defined __CYGWIN__
+  0,
+# else
+  &pycall_pyptr_data_type,
+# endif
+  0, RUBY_TYPED_FREE_IMMEDIATELY
 #endif
 };
 
@@ -461,6 +466,10 @@ pycall_init_ruby_wrapper(void)
   /* TODO */
 
   /* PyCall::PyRubyPtr */
+
+#if defined _WIN32 && !defined __CYGWIN__
+  pycall_pyrubyptr_data_type.parent = &pycall_pyptr_data_type;
+#endif
 
   cPyRubyPtr = rb_define_class_under(mPyCall, "PyRubyPtr", cPyPtr);
   rb_define_alloc_func(cPyRubyPtr, pycall_pyruby_allocate);
