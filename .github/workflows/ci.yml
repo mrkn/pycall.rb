@@ -58,8 +58,6 @@ jobs:
         python-version: ${{ matrix.python }}
         architecture: ${{ matrix.python_architecture }}
 
-    - run: gem install bundler
-
     - run: pip install --user numpy
 
     - run: bundle install
@@ -100,8 +98,6 @@ jobs:
     - uses: s-weigand/setup-conda@v1
       with:
         python-version: ${{ matrix.python }}
-
-    - run: gem install bundler
 
     - run: conda install numpy
 
