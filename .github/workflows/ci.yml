@@ -26,18 +26,22 @@ jobs:
         - "3.0"
         - 2.7
         - 2.6
-        - 2.5
-        - 2.4
         python:
         - 3.x
         - 2.x
         python_architecture:
         - x64
         include:
-        - { os: ubuntu-20.04 , ruby: 2.7 , python: 3.8 }
-        - { os: ubuntu-20.04 , ruby: 2.7 , python: 3.7 }
-        - { os: ubuntu-20.04 , ruby: 2.7 , python: 3.6 }
-        - { os: ubuntu-18.04 , ruby: 2.7 , python: 3.8 }
+        - { os: ubuntu-20.04   , ruby: 2.5   , python: 3.x , python_architecture: x64 }
+        - { os: ubuntu-20.04   , ruby: 2.4   , python: 3.x , python_architecture: x64 }
+        - { os: ubuntu-20.04   , ruby: 2.5   , python: 2.x , python_architecture: x64 }
+        - { os: ubuntu-20.04   , ruby: 2.4   , python: 2.x , python_architecture: x64 }
+        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.8 , python_architecture: x64 }
+        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.7 , python_architecture: x64 }
+        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.6 , python_architecture: x64 }
+        - { os: ubuntu-18.04   , ruby: 2.7   , python: 3.8 , python_architecture: x64 }
+        - { os: windows-latest , ruby: mswin , python: 3.x , python_architecture: x64 }
+        - { os: windows-latest , ruby: mingw , python: 3.x , python_architecture: x64 }
 
     steps:
     - uses: actions/checkout@v2
