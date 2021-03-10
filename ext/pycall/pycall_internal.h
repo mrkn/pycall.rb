@@ -637,7 +637,7 @@ Py_ssize_t pycall_python_hexversion(void);
 
 void pycall_Py_DecRef(PyObject *);
 
-RUBY_EXTERN const rb_data_type_t pycall_pyptr_data_type;
+extern const rb_data_type_t pycall_pyptr_data_type;
 size_t pycall_pyptr_memsize(void const *);
 void pycall_pyptr_free(void *);
 
