@@ -13,6 +13,26 @@ def run_extconf(build_dir, extension_dir, *arguments)
   end
 end
 
+def make_command
+  if RUBY_PLATFORM =~ /mswin/
+    "nmake"
+  else
+    ENV["MAKE"] || find_make
+  end
+end
+
+def find_make
+  candidates = ["gmake", "make"]
+  paths = ENV.fetch("PATH", "").split(File::PATH_SEPARATOR)
+  exeext = RbConfig::CONFIG["EXEEXT"]
+  candidates.each do |candidate|
+    paths.each do |path|
+      cmd = File.join(path, "#{candidate}#{exeext}")
+      return cmd if File.executable?(cmd)
+    end
+  end
+end
+
 Dir[File.expand_path('../tasks/**/*.rake', __FILE__)].each {|f| load f }
 
 spec.extensions.each do |extension|
@@ -39,13 +59,13 @@ spec.extensions.each do |extension|
   desc "Compile"
   task compile: makefile do
     cd(build_dir) do
-      sh("make")
+      sh(make_command)
     end
   end
 
   task :clean do
     cd(build_dir) do
-      sh("make", "clean") if File.exist?("Makefile")
+      sh(make_command, "clean") if File.exist?("Makefile")
     end
   end
 end
