@@ -12,7 +12,7 @@ on:
 
 jobs:
   test:
-    name: ${{ matrix.os }}/${{ matrix.ruby }}/${{ matrix.python }}-${{ matrix.python_architecture }}
+    name: ${{ matrix.venv }}${{ matrix.os }}/${{ matrix.ruby }}/${{ matrix.python }}-${{ matrix.python_architecture }}
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -30,17 +30,24 @@ jobs:
         - 2.x
         python_architecture:
         - x64
+        venv:
+        - ""
         include:
-        - { os: ubuntu-20.04   , ruby: 2.5   , python: 3.x , python_architecture: x64 }
-        - { os: ubuntu-20.04   , ruby: 2.4   , python: 3.x , python_architecture: x64 }
-        - { os: ubuntu-20.04   , ruby: 2.5   , python: 2.x , python_architecture: x64 }
-        - { os: ubuntu-20.04   , ruby: 2.4   , python: 2.x , python_architecture: x64 }
-        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.8 , python_architecture: x64 }
-        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.7 , python_architecture: x64 }
-        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.6 , python_architecture: x64 }
-        - { os: ubuntu-18.04   , ruby: 2.7   , python: 3.8 , python_architecture: x64 }
-        - { os: ubuntu-20.04   , ruby: debug , python: 3.x , python_architecture: x64 }
-        #- { os: macos-latest   , ruby: debug , python: 3.x , python_architecture: x64 }
+        - { os: ubuntu-20.04   , ruby: 2.5   , python: 3.x , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.4   , python: 3.x , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.5   , python: 2.x , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.4   , python: 2.x , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.8 , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.7 , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.6 , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-18.04   , ruby: 2.7   , python: 3.8 , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: debug , python: 3.x , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: "3.0" , python: 3.x , python_architecture: x64 , venv: "venv:"  }
+        - { os: ubuntu-18.04   , ruby: "3.0" , python: 3.x , python_architecture: x64 , venv: "venv:"  }
+        - { os: ubuntu-18.04   , ruby: "3.0" , python: 3.8 , python_architecture: x64 , venv: "venv:"  }
+        - { os: macos-latest   , ruby: "3.0" , python: 3.x , python_architecture: x64 , venv: "venv:"  }
+        - { os: macos-latest   , ruby: "3.0" , python: 3.8 , python_architecture: x64 , venv: "venv:"  }
+        #- { os: macos-latest   , ruby: debug , python: 3.x , python_architecture: x64 , venv: "" }
 
     steps:
     - uses: actions/checkout@v2
@@ -64,6 +71,15 @@ jobs:
     - run: rake compile
 
     - run: python lib/pycall/python/investigator.py
+
+    - name: venv examination
+      run: |
+        python -m venv ~/test-venv
+        source ~/test-venv/bin/activate
+        ruby -Ilib -Iext/pycall -rpycall -ePyCall.builtins
+      env:
+        PYCALL_DEBUG_FIND_LIBPYTHON: 1
+      if: ${{ matrix.venv != '' }}
 
     - run: rake
       env:
