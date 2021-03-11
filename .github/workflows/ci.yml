@@ -21,7 +21,6 @@ jobs:
         os:
         - ubuntu-20.04
         - macos-latest
-        - windows-latest
         ruby:
         - "3.0"
         - 2.7
@@ -42,8 +41,6 @@ jobs:
         - { os: ubuntu-18.04   , ruby: 2.7   , python: 3.8 , python_architecture: x64 }
         - { os: ubuntu-20.04   , ruby: debug , python: 3.x , python_architecture: x64 }
         #- { os: macos-latest   , ruby: debug , python: 3.x , python_architecture: x64 }
-        #- { os: windows-latest , ruby: mswin , python: 3.x , python_architecture: x64 }
-        #- { os: windows-latest , ruby: mingw , python: 3.x , python_architecture: x64 }
 
     steps:
     - uses: actions/checkout@v2
@@ -133,57 +130,3 @@ jobs:
       env:
         PYTHON: python
       shell: bash -l {0}
-
-  conda-windows:
-    name: conda:windows-latest/${{ matrix. ruby }}/${{ matrix.python }}
-    runs-on: windows-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        ruby:
-        - "3.0"
-        python:
-        - 3.8
-
-    defaults:
-      run:
-        shell: pwsh
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
-
-    - uses: conda-incubator/setup-miniconda@v2
-      with:
-        activate-environment: test
-        python-version: ${{ matrix.python }}
-
-    - run: set
-      shell: cmd
-
-    - name: Add conda's DLL path
-      run: |
-        echo $env:CONDA\Library\bin >> $GITHUB_PATH
-        echo $env:CONDA_PREFIX\Library\bin >> $GITHUB_PATH
-
-    - uses: ruby/setup-ruby@v1
-      if: matrix.ruby_version != 'master-nightly'
-      with:
-        ruby-version: ${{ matrix.ruby }}
-
-    - run: conda install numpy
-
-    - run: python -c 'import numpy; print(numpy)'
-
-    - run: bundle install
-
-    - run: rake compile
-
-    - run: python lib/pycall/python/investigator.py
-
-    - run: |
-        rake
-      env:
-        PYTHON: python
