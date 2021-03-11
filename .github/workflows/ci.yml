@@ -92,23 +92,44 @@ jobs:
       with:
         fetch-depth: 1
 
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: test
+        python-version: ${{ matrix.python }}
+
     - uses: ruby/setup-ruby@v1
       if: matrix.ruby_version != 'master-nightly'
       with:
         ruby-version: ${{ matrix.ruby }}
 
-    - uses: s-weigand/setup-conda@v1
-      with:
-        python-version: ${{ matrix.python }}
+    - name: Add Ruby path
+      run: |
+        echo >> ~/.profile
+        echo >> ~/.profile
+        IFS=:
+        for p in $PATH; do
+          case $p in
+          */Ruby/*)
+            echo "export PATH=$p:\$PATH" >> ~/.profile
+            ;;
+          esac
+        done
+
+    - run: cat ~/.profile
+
+    - run: bash -xe ~/.profile
 
     - run: conda install numpy
+      shell: bash -l {0}
 
     - run: bundle install
 
     - run: rake compile
 
     - run: python lib/pycall/python/investigator.py
+      shell: bash -l {0}
 
     - run: rake
       env:
         PYTHON: python
+      shell: bash -l {0}
