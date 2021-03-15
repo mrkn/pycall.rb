@@ -30,8 +30,6 @@ module PyCall
       remove_method :const_missing
     end
 
-    ENV['PYTHONPATH'] = [ File.expand_path('../python', __FILE__), ENV['PYTHONPATH'] ].compact.join(File::PATH_SEPARATOR)
-
     LibPython.instance_variable_set(:@handle, LibPython::Finder.find_libpython(python))
     class << LibPython
       undef_method :handle
@@ -44,6 +42,8 @@ module PyCall
     rescue LoadError
       require 'pycall.so'
     end
+
+    PyCall.sys.path.append(File.expand_path('../python', __FILE__))
 
     require 'pycall/dict'
     require 'pycall/list'
