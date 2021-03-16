@@ -42,6 +42,14 @@ module PyCall
           python, python_config = find_python_config(python)
           suffix = python_config[:SHLIB_SUFFIX]
 
+          use_conda = (ENV.fetch("CONDA_PREFIX", nil) == File.dirname(python_config[:executable]))
+          python_home = if !ENV.key?("PYTHONHOME") || use_conda
+                          python_config[:PYTHONHOME]
+                        else
+                          ENV["PYTHONHOME"]
+                        end
+          ENV["PYTHONHOME"] = python_home
+
           candidate_paths(python_config) do |path|
             debug_report("Candidate: #{path}")
             normalized = normalize_path(path, suffix)

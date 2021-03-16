@@ -101,6 +101,8 @@ jobs:
 
     - run: python -c 'import numpy; print(numpy)'
 
+    - run: python -c 'import os; print(os.environ)'
+
     - run: bundle install
 
     - run: rake compile
@@ -108,7 +110,16 @@ jobs:
     - run: python lib/pycall/python/investigator.py
 
     - run: |
+        ruby -Ilib -Iext/pycall -rpycall -e "p PyCall.sys.version"
+        ruby -Ilib -Iext/pycall -rpycall -e "PyCall.import_module(:numpy)"
+      env:
+        PYTHON: python
+      continue-on-error: true
+
+    - run: |
+        echo $env:PATH
         rake
       env:
         PYTHON: python
-
+        CONDA_DLL_SEARCH_MODIFICATION_ENABLE: 1
+      continue-on-error: true

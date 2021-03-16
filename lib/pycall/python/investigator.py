@@ -72,4 +72,14 @@ version = get_python_version() or \
           get_config_var("VERSION")
 print("VERSION: {val}".format(val=version))
 
-print("version_major: {val}".format(val=sys.version_info.major))
+if is_windows:
+    if hasattr(sys, "base_exec_prefix"):
+        PYTHONHOME = sys.base_exec_prefix
+    else:
+        PYTHONHOME = sys.exec_prefix
+else:
+    if hasattr(sys, "base_exec_prefix"):
+        PYTHONHOME = ":".join([sys.base_prefix, sys.base_exec_prefix])
+    else:
+        PYTHONHOME = ":".join([sys.prefix, sys.exec_prefix])
+print("PYTHONHOME: {val}".format(val=PYTHONHOME))
