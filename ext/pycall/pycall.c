@@ -2350,5 +2350,6 @@ Init_pycall(void)
   init_pyerror();
   init_tuple();
   pycall_init_gcguard();
+  pycall_init_memory_view();
   pycall_init_ruby_wrapper();
 }

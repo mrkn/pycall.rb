@@ -711,6 +711,7 @@ void pycall_gcguard_unregister_pyrubyobj(PyObject *);
 void pycall_init_libpython_api_table(VALUE handle);
 void pycall_init_exceptions(VALUE handle);
 void pycall_init_gcguard(void);
+void pycall_init_memory_view(void);
 void pycall_init_ruby_wrapper(void);
 
 #define pycall_hash_salt_32 0xb592cd9b
