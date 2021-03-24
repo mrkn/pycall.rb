@@ -36,12 +36,7 @@ module PyCall
       attr_reader :handle
     end
 
-    begin
-      major, minor, _ = RUBY_VERSION.split('.')
-      require "#{major}.#{minor}/pycall.so"
-    rescue LoadError
-      require 'pycall.so'
-    end
+    require 'pycall.so'
 
     PyCall.sys.path.append(File.expand_path('../python', __FILE__))
 
