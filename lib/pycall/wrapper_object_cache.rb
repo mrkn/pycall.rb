@@ -8,9 +8,7 @@ module PyCall
         end
       end
       @restricted_pytypes = restricted_pytypes
-      @wrapper_object_table = {}
-      @wrapped_pyptr_table = {}
-      @weakref_table = {}
+      @wrapper_object_table = ObjectSpace::WeakMap.new
     end
 
     def lookup(pyptr)
@@ -25,15 +23,12 @@ module PyCall
         end
       end
 
-      wrapper_object_id = @wrapper_object_table[pyptr.__address__]
-      if wrapper_object_id
-        wrapper_object = ObjectSpace._id2ref(wrapper_object_id) rescue nil
-        return wrapper_object if wrapper_object
+      wrapper_object = @wrapper_object_table[pyptr.__address__]
+      unless wrapper_object
+        wrapper_object = yield(pyptr)
+        check_wrapper_object(wrapper_object)
+        @wrapper_object_table[pyptr.__address__] = wrapper_object
       end
-
-      wrapper_object = yield(pyptr)
-      check_wrapper_object(wrapper_object)
-      register_wrapper_object(pyptr, wrapper_object)
 
       wrapper_object
     end
@@ -42,20 +37,6 @@ module PyCall
       unless wrapper_object.kind_of?(PyObjectWrapper)
         raise TypeError, "unexpected wrapper object (expected an object extended by PyObjectWrapper)"
       end
-    end
-
-    def register_wrapper_object(pyptr, wrapper_object)
-      @wrapper_object_table[pyptr.__address__] = wrapper_object.__id__
-      @wrapped_pyptr_table[wrapper_object.__id__] = pyptr.__address__
-      ObjectSpace.define_finalizer(wrapper_object, &method(:unregister_wrapper_object))
-      # TODO: weakref
-      self
-    end
-
-    def unregister_wrapper_object(wrapper_object_id)
-      pyptr_addr = @wrapped_pyptr_table.delete(wrapper_object_id)
-      @wrapper_object_table.delete(pyptr_addr) if pyptr_addr
-      self
     end
   end
 end
