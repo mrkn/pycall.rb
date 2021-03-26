@@ -1,5 +1,47 @@
 module PyCall
   class WrapperObjectCache
+
+    begin
+      ObjectSpace::WeakMap.new[42] = Object.new
+    rescue
+      WMAP_SUPPORT_INT_KEY = false
+    else
+      WMAP_SUPPORT_INT_KEY = true
+    end
+
+    if WMAP_SUPPORT_INT_KEY
+      def self.get_key(pyptr)
+        pyptr.__address__
+      end
+    else
+      class Key
+        @address_key_map = {}
+
+        def self.[](address)
+          @address_key_map[address] ||= new(address)
+        end
+
+        def initialize(address)
+          @address = address
+        end
+
+        attr_reader :address
+
+        def ==(other)
+          case other
+          when Key
+            self.address == other.address
+          else
+            super
+          end
+        end
+      end
+
+      def self.get_key(pyptr)
+        Key[pyptr.__address__]
+      end
+    end
+
     def initialize(*restricted_pytypes)
       unless restricted_pytypes.empty?
         restricted_pytypes.each do |pytype|
@@ -23,11 +65,12 @@ module PyCall
         end
       end
 
-      wrapper_object = @wrapper_object_table[pyptr.__address__]
+      key = self.class.get_key(pyptr)
+      wrapper_object = @wrapper_object_table[key]
       unless wrapper_object
         wrapper_object = yield(pyptr)
         check_wrapper_object(wrapper_object)
-        @wrapper_object_table[pyptr.__address__] = wrapper_object
+        @wrapper_object_table[key] = wrapper_object
       end
 
       wrapper_object
