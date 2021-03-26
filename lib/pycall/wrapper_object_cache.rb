@@ -18,6 +18,8 @@ module PyCall
         @address_key_map = {}
 
         def self.[](address)
+          # An instance of Key created here is parmanently cached in @address_key_map.
+          # This behavior is intentional.
           @address_key_map[address] ||= new(address)
         end
 
