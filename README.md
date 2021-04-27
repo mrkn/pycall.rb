@@ -15,7 +15,7 @@ Ruby to Python.
 
 ## Supported Ruby versions
 
-pycall.rb supports Ruby version 2.3 or higher.
+pycall.rb supports Ruby version 2.4 or higher.
 
 ## Supported Python versions
 
