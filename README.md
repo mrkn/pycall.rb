@@ -127,6 +127,20 @@ DEBUG(find_libpython) Unable to find /opt/brew/opt/python/lib/darwin/Python.fram
 DEBUG(find_libpython) dlopen("/opt/brew/opt/python/Frameworks/Python.framework/Versions/3.7/Python") = #<Fiddle::Handle:0x00007fc012048650>
 ```
 
+## Special notes for specific libraries
+
+### matplotlib
+
+Use [mrkn/matplotlib.rb](https://github.com/mrkn/matplotlib.rb) instead of just importing it by `PyCall.import_module("matplotlib")`.
+
+### numpy
+
+Use [mrkn/numpy.rb](https://github.com/mrkn/numpy.rb) instead of just importing it by `PyCall.import_module("numpy")`.
+
+### pandas
+
+Use [mrkn/pandas.rb](https://github.com/mrkn/pandas.rb) instead of just importing it by `PyCall.import_module("pandas")`.
+
 ## PyCall object system
 
 PyCall wraps pointers of Python objects in `PyCall::PyPtr` objects.
