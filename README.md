@@ -61,6 +61,15 @@ the `Math.sin` in Ruby:
 Type conversions from Ruby to Python are automatically performed for numeric,
 boolean, string, arrays, and hashes.
 
+### Specifying the Python version
+
+If you want to use a specific version of Python instead of the default,
+you can change the Python version by setting the `PYTHON` environment variable
+to the path of the `python` executable.
+
+When `PYTHON` is not specified, pycall.rb tries to use `python3` first,
+and then tries to use `python`.
+
 ### Releasing the RubyVM GVL during Python function calls
 
 You may want to release the RubyVM GVL when you call a Python function that takes very long runtime.
@@ -119,13 +128,7 @@ variable `@__pyptr__`.  `PyCall::PyObjectWrapper` assumes the existance of
 system and Python object system.  For example, `PyCall::PyObjectWrapper`
 translates Ruby's coerce system into Python's swapped operation protocol.
 
-### Specifying the Python version
-
-If you want to use a specific version of Python instead of the default,
-you can change the Python version by setting the `PYTHON` environment variable
-to the path of the `python` executable.
-
-### Deploying on Heroku
+## Deploying on Heroku
 
 Heroku's default version of Python is not compiled with the `--enabled-shared`
 option and can't be accessed by PyCall. Alternative [buildpacks](https://devcenter.heroku.com/articles/buildpacks) are available,
