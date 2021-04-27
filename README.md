@@ -61,6 +61,24 @@ the `Math.sin` in Ruby:
 Type conversions from Ruby to Python are automatically performed for numeric,
 boolean, string, arrays, and hashes.
 
+### Calling a constructor
+
+In Python, we call the constructor of a class by `classname(x, y, z)` syntax.  Pycall.rb maps this syntax to `classname.new(x, y, z)`.
+
+### Calling a callable object
+
+In Python, we can call the callable object by `obj(x, y, z)` syntax.  PyCall.rb maps this syntax to `obj.(x, y, z)`.
+
+### Passing keyword arguments
+
+In Python, we can pass keyword arguments by `func(x=1, y=2, z=3)` syntax.  In pycallrb, we should rewrite `x=1` to `x: 1`.
+
+### The callable attribute of an object
+
+Pycall.rb maps the callable attribute of an object to the instance method of the corresponding wrapper object. So, we can write a Python expression `obj.meth(x, y, z=1)` as `obj.meth(x, y, z: 1)` in Ruby. This mapping allows us to call these attributes naturally as Ruby's manner.
+
+But, unfortunately, this mapping prohibits us to get the callable attributes.  We need to write `PyCall.getattr(obj, :meth)` in Ruby to get `obj.meth` object while we can write `obj.meth` in Python.
+
 ### Specifying the Python version
 
 If you want to use a specific version of Python instead of the default,
