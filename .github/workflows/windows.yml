@@ -1,0 +1,127 @@
+name: Windows
+
+on:
+  push:
+    branches:
+    - master
+    - "check/ci/**"
+    - "check/windows/**"
+  pull_request:
+    types:
+    - opened
+    - synchronize
+    - reopened
+
+jobs:
+  test:
+    name: ruby-${{ matrix.ruby }}/python-${{ matrix.python }}-${{ matrix.python_architecture }}
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+        - "3.0"
+        - 2.7
+        - 2.6
+        python:
+        - 3.x
+        - 2.x
+        python_architecture:
+        - x64
+        include:
+        - { os: windows-latest , ruby: mingw , python: 3.x , python_architecture: x64 }
+        #- { os: windows-latest , ruby: mswin , python: 3.x , python_architecture: x64 }
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - uses: ruby/setup-ruby@v1
+      if: matrix.ruby_version != 'master-nightly'
+      with:
+        ruby-version: ${{ matrix.ruby }}
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python }}
+        architecture: ${{ matrix.python_architecture }}
+
+    - run: pip install --user numpy
+
+    - run: bundle install
+
+    - run: rake compile
+
+    - run: python lib/pycall/python/investigator.py
+
+    - run: rake
+      env:
+        PYTHON: python
+
+  conda:
+    name: conda:ruby-${{ matrix. ruby }}/python-${{ matrix.python }}
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+        - "3.0"
+        python:
+        - 3.8
+
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: test
+        python-version: ${{ matrix.python }}
+
+    - run: set
+      shell: cmd
+
+    - name: Add conda's DLL path
+      run: |
+        echo $env:CONDA\Library\bin >> $GITHUB_PATH
+        echo $env:CONDA_PREFIX\Library\bin >> $GITHUB_PATH
+
+    - uses: ruby/setup-ruby@v1
+      if: matrix.ruby_version != 'master-nightly'
+      with:
+        ruby-version: ${{ matrix.ruby }}
+
+    - run: conda install numpy
+
+    - run: python -c 'import numpy; print(numpy)'
+
+    - run: python -c 'import os; print(os.environ)'
+
+    - run: bundle install
+
+    - run: rake compile
+
+    - run: python lib/pycall/python/investigator.py
+
+    - run: |
+        ruby -Ilib -Iext/pycall -rpycall -e "p PyCall.sys.version"
+        ruby -Ilib -Iext/pycall -rpycall -e "PyCall.import_module(:numpy)"
+      env:
+        PYTHON: python
+      continue-on-error: true
+
+    - run: |
+        echo $env:PATH
+        rake
+      env:
+        PYTHON: python
+        CONDA_DLL_SEARCH_MODIFICATION_ENABLE: 1
+      continue-on-error: true

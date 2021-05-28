@@ -1,0 +1,150 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - master
+    - "check/ci/**"
+    - "check/unix/**"
+  pull_request:
+    types:
+    - opened
+    - synchronize
+    - reopened
+
+jobs:
+  test:
+    name: ${{ matrix.venv }}${{ matrix.os }}/${{ matrix.ruby }}/${{ matrix.python }}-${{ matrix.python_architecture }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - ubuntu-20.04
+        - macos-latest
+        ruby:
+        - "3.0"
+        - 2.7
+        - 2.6
+        python:
+        - 3.x
+        - 2.x
+        python_architecture:
+        - x64
+        venv:
+        - ""
+        include:
+        - { os: ubuntu-20.04   , ruby: 2.5   , python: 3.x , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.4   , python: 3.x , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.5   , python: 2.x , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.4   , python: 2.x , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.8 , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.7 , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: 2.7   , python: 3.6 , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-18.04   , ruby: 2.7   , python: 3.8 , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: debug , python: 3.x , python_architecture: x64 , venv: "" }
+        - { os: ubuntu-20.04   , ruby: "3.0" , python: 3.x , python_architecture: x64 , venv: "venv:"  }
+        - { os: ubuntu-18.04   , ruby: "3.0" , python: 3.x , python_architecture: x64 , venv: "venv:"  }
+        - { os: ubuntu-18.04   , ruby: "3.0" , python: 3.8 , python_architecture: x64 , venv: "venv:"  }
+        - { os: macos-latest   , ruby: "3.0" , python: 3.x , python_architecture: x64 , venv: "venv:"  }
+        - { os: macos-latest   , ruby: "3.0" , python: 3.8 , python_architecture: x64 , venv: "venv:"  }
+        #- { os: macos-latest   , ruby: debug , python: 3.x , python_architecture: x64 , venv: "" }
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - uses: ruby/setup-ruby@v1
+      if: matrix.ruby_version != 'master-nightly'
+      with:
+        ruby-version: ${{ matrix.ruby }}
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python }}
+        architecture: ${{ matrix.python_architecture }}
+
+    - run: pip install --user numpy
+
+    - run: bundle install
+
+    - run: rake compile
+
+    - run: python lib/pycall/python/investigator.py
+
+    - name: venv examination
+      run: |
+        python -m venv ~/test-venv
+        source ~/test-venv/bin/activate
+        ruby -Ilib -Iext/pycall -rpycall -ePyCall.builtins
+      env:
+        PYCALL_DEBUG_FIND_LIBPYTHON: 1
+      if: ${{ matrix.venv != '' }}
+
+    - run: rake
+      env:
+        PYTHON: python
+
+  conda:
+    name: conda:${{ matrix.os }}/${{ matrix. ruby }}/${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - ubuntu-20.04
+        - macos-latest
+        ruby:
+        - "3.0"
+        python:
+        - 3.8
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: test
+        python-version: ${{ matrix.python }}
+
+    - uses: ruby/setup-ruby@v1
+      if: matrix.ruby_version != 'master-nightly'
+      with:
+        ruby-version: ${{ matrix.ruby }}
+
+    - name: Add Ruby path
+      run: |
+        echo >> ~/.profile
+        echo >> ~/.profile
+        IFS=:
+        for p in $PATH; do
+          case $p in
+          */Ruby/*)
+            echo "export PATH=$p:\$PATH" >> ~/.profile
+            ;;
+          esac
+        done
+
+    - run: cat ~/.profile
+
+    - run: bash -xe ~/.profile
+
+    - run: conda install numpy
+      shell: bash -l {0}
+
+    - run: bundle install
+
+    - run: rake compile
+
+    - run: python lib/pycall/python/investigator.py
+      shell: bash -l {0}
+
+    - run: rake
+      env:
+        PYTHON: python
+      shell: bash -l {0}
