@@ -32,6 +32,12 @@ pyenv does not build the shared library in default, so you need to specify `--en
 $ env PYTHON_CONFIGURE_OPTS='--enable-shared' pyenv install 3.7.2
 ```
 
+## Note for Windows
+
+Currently, pycall.rb does not support Windows.
+
+On Windows, the error "[BUG] object allocation during garbage collection phase" is occurred at unpredictable timings.
+
 ## Installation
 
 Add this line to your application's Gemfile:
