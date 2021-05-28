@@ -2,6 +2,7 @@
 
 ## 1.4.0
 
+* Explicitly states that Windows is not supported yet in README
 * Add PyCall.same?
 * Improve conda support
 * Fat gem is no longer supported
