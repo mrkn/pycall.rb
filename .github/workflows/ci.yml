@@ -4,6 +4,8 @@ on:
   push:
     branches:
     - master
+    - "check/ci/**"
+    - "check/unix/**"
   pull_request:
     types:
     - opened
