@@ -1,5 +1,12 @@
 # The change history of PyCall
 
+## 1.4.0
+
+* Add PyCall.same?
+* Improve conda support
+* Fat gem is no longer supported
+* Use WeakMap for caching PyPtr instances
+
 ## 1.3.1
 
 * Stop using `&proc` idiom to prevent warnings
