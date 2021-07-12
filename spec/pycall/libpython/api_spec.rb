@@ -10,7 +10,7 @@ module PyCall
         it 'returns the different instance but the same address' do
           other = API.builtins_module_ptr
           expect(subject).not_to equal(other)
-          expect(subject.__address__).to equal(other.__address__)
+          expect(subject.__address__).to eq(other.__address__)
         end
       end
     end
