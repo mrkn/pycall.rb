@@ -6,7 +6,12 @@ module PyCall
     rescue
       WMAP_SUPPORT_INT_KEY = false
     else
-      WMAP_SUPPORT_INT_KEY = true
+      case RUBY_PLATFORM
+      when /cygwin/, /mingw/, /mswin/
+        WMAP_SUPPORT_INT_KEY = false
+      else
+        WMAP_SUPPORT_INT_KEY = true
+      end
     end
 
     if WMAP_SUPPORT_INT_KEY

@@ -125,7 +125,7 @@ RSpec.describe PyCall do
     it 'returns a Module that wraps a Python object' do
       expect(subject).to be_a(Module)
       expect(subject).to be_a(PyCall::PyObjectWrapper)
-      expect(subject.__pyptr__.__address__).to equal(PyCall::LibPython::API.builtins_module_ptr.__address__)
+      expect(subject.__pyptr__.__address__).to eq(PyCall::LibPython::API.builtins_module_ptr.__address__)
     end
 
     it 'returns the first-created wrapper module when called twice' do
