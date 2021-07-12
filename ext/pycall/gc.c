@@ -57,13 +57,16 @@ gcguard_aset(VALUE gcguard, PyObject *pyptr, VALUE rbobj)
 static void
 gcguard_delete(VALUE gcguard, PyObject *pyptr)
 {
-  struct gcguard *gg;
-  st_data_t key, val;
+  if (rb_typeddata_is_kind_of(gcguard, &gcguard_data_type)) {
+    /* This check is necessary to avoid error on the process finalization phase */
+    struct gcguard *gg;
+    st_data_t key, val;
 
-  TypedData_Get_Struct(gcguard, struct gcguard, &gcguard_data_type, gg);
+    TypedData_Get_Struct(gcguard, struct gcguard, &gcguard_data_type, gg);
 
-  key = (st_data_t)pyptr;
-  st_delete(gg->guarded_objects, &key, &val);
+    key = (st_data_t)pyptr;
+    st_delete(gg->guarded_objects, &key, &val);
+  }
 }
 
 static ID id_gcguard_table;
