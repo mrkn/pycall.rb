@@ -1,5 +1,10 @@
 # The change history of PyCall
 
+## 1.4.1
+
+* Fix SEGV occurred on Windows
+* Add PyCall.iterable
+
 ## 1.4.0
 
 * Explicitly states that Windows is not supported yet in README
