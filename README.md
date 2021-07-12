@@ -53,9 +53,8 @@ Or install it yourself as:
 Here is a simple example to call Python's `math.sin` function and compare it to
 the `Math.sin` in Ruby:
 
-    require 'pycall/import'
-    include PyCall::Import
-    pyimport :math
+    require 'pycall'
+    math = PyCall.import_module("math")
     math.sin(math.pi / 4) - Math.sin(Math::PI / 4)   # => 0.0
 
 Type conversions from Ruby to Python are automatically performed for numeric,
