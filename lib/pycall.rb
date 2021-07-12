@@ -5,6 +5,7 @@ module PyCall
   require 'pycall/pyobject_wrapper'
   require 'pycall/pytypeobject_wrapper'
   require 'pycall/pymodule_wrapper'
+  require 'pycall/iterable_wrapper'
   require 'pycall/init'
 
   module_function
@@ -71,6 +72,10 @@ module PyCall
 
   def import_module(name)
     LibPython::Helpers.import_module(name)
+  end
+
+  def iterable(obj)
+    IterableWrapper.new(obj)
   end
 
   def len(obj)
