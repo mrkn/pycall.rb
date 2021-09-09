@@ -59,6 +59,14 @@ module PyCall
     LibPython::Helpers.hasattr?(obj.__pyptr__, name)
   end
 
+  def setattr(obj, name, val)
+    LibPython::Helpers.setattr(obj.__pyptr__, name, val)
+  end
+
+  def delattr(obj, name)
+    LibPython::Helpers.delattr(obj.__pyptr__, name)
+  end
+
   def same?(left, right)
     case left
     when PyObjectWrapper

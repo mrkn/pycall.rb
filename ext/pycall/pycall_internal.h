@@ -568,6 +568,7 @@ typedef struct {
   PyObject * (* PyObject_GetAttrString)(PyObject *, char const *);
   int (* PyObject_SetAttrString)(PyObject *, char const *, PyObject *);
   int (* PyObject_HasAttrString)(PyObject *, char const *);
+  int (* PyObject_DelAttrString)(PyObject *, char const *);
   PyObject * (* PyObject_GetItem)(PyObject *, PyObject *);
   int (* PyObject_SetItem)(PyObject *obj, PyObject *key, PyObject *value);
   int (* PyObject_DelItem)(PyObject *, PyObject *);

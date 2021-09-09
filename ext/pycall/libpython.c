@@ -110,6 +110,7 @@ pycall_init_libpython_api_table(VALUE libpython_handle)
   INIT_API_TABLE_ENTRY(PyObject_GetAttrString, required);
   INIT_API_TABLE_ENTRY(PyObject_SetAttrString, required);
   INIT_API_TABLE_ENTRY(PyObject_HasAttrString, required);
+  INIT_API_TABLE_ENTRY(PyObject_DelAttrString, optional);
   INIT_API_TABLE_ENTRY(PyObject_GetItem, required);
   INIT_API_TABLE_ENTRY(PyObject_SetItem, required);
   INIT_API_TABLE_ENTRY(PyObject_DelItem, required);

@@ -862,6 +862,51 @@ pycall_libpython_helpers_m_hasattr_p(VALUE mod, VALUE pyptr, VALUE name)
 }
 
 static VALUE
+pycall_libpython_helpers_m_setattr(VALUE mod, VALUE pyptr, VALUE name, VALUE val)
+{
+  PyObject *pyobj, *pyval;
+
+  if (!is_pycall_pyptr(pyptr)) {
+    rb_raise(rb_eTypeError, "PyCall::PyPtr is required");
+  }
+
+  pyobj = get_pyobj_ptr(pyptr);
+
+  if (RB_TYPE_P(name, T_SYMBOL)) {
+    name = rb_sym_to_s(name);
+  }
+
+  pyval = pycall_pyobject_from_ruby(val);
+  if (Py_API(PyObject_SetAttrString)(pyobj, StringValueCStr(name), pyval) == -1) {
+    pycall_pyerror_fetch_and_raise("PyObject_SetAttrString");
+  }
+
+  return Qnil;
+}
+
+static VALUE
+pycall_libpython_helpers_m_delattr(VALUE mod, VALUE pyptr, VALUE name)
+{
+  PyObject *pyobj;
+
+  if (!is_pycall_pyptr(pyptr)) {
+    rb_raise(rb_eTypeError, "PyCall::PyPtr is required");
+  }
+
+  pyobj = get_pyobj_ptr(pyptr);
+
+  if (RB_TYPE_P(name, T_SYMBOL)) {
+    name = rb_sym_to_s(name);
+  }
+
+  if (Py_API(PyObject_DelAttrString)(pyobj, StringValueCStr(name)) == -1) {
+    pycall_pyerror_fetch_and_raise("PyObject_DelAttrString");
+  }
+
+  return Qnil;
+}
+
+static VALUE
 pycall_libpython_helpers_m_callable_p(VALUE mod, VALUE pyptr)
 {
   PyObject *pyobj;
@@ -2074,10 +2119,23 @@ pycall_pystring_from_formatv(char const *format, va_list vargs)
 
 /* ==== Python ==== */
 
+int
+pycall_PyObject_DelAttrString(PyObject *pyobj, const char *attr_name)
+{
+  /* PyObject_DelAttrString is defined by using PyObject_SetAttrString in CPython's abstract.h */
+  return Py_API(PyObject_SetAttrString)(pyobj, attr_name, NULL);
+}
+
 static void
 init_python(void)
 {
   static char const *argv[1] = { "" };
+
+  /* optional functions */
+  if (! Py_API(PyObject_DelAttrString)) {
+    /* The case of PyObject_DelAttrString as a macro */
+    Py_API(PyObject_DelAttrString) = pycall_PyObject_DelAttrString;
+  }
 
   Py_API(Py_InitializeEx)(0);
   Py_API(PySys_SetArgvEx)(0, (char **)argv, 0);
@@ -2301,6 +2359,8 @@ Init_pycall(void)
   rb_define_module_function(mHelpers, "compare", pycall_libpython_helpers_m_compare, 3);
   rb_define_module_function(mHelpers, "getattr", pycall_libpython_helpers_m_getattr, -1);
   rb_define_module_function(mHelpers, "hasattr?", pycall_libpython_helpers_m_hasattr_p, 2);
+  rb_define_module_function(mHelpers, "setattr", pycall_libpython_helpers_m_setattr, 3);
+  rb_define_module_function(mHelpers, "delattr", pycall_libpython_helpers_m_delattr, 2);
   rb_define_module_function(mHelpers, "callable?", pycall_libpython_helpers_m_callable_p, 1);
   rb_define_module_function(mHelpers, "call_object", pycall_libpython_helpers_m_call_object, -1);
   rb_define_module_function(mHelpers, "getitem", pycall_libpython_helpers_m_getitem, 2);
