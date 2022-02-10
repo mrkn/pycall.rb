@@ -107,6 +107,10 @@ pycall_without_gvl(VALUE (* func)(VALUE), VALUE arg)
 
   pycall_set_with_gvl();
 
+  if (state) {
+    rb_jump_tag(state);
+  }
+
   return result;
 }
 
