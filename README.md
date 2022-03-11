@@ -160,18 +160,34 @@ translates Ruby's coerce system into Python's swapped operation protocol.
 ## Deploying on Heroku
 
 Heroku's default version of Python is not compiled with the `--enabled-shared`
-option and can't be accessed by PyCall. Alternative [buildpacks](https://devcenter.heroku.com/articles/buildpacks) are available,
-including these that have been reported to work with PyCall:
+option and can't be accessed by PyCall.
 
-https://github.com/richgong/heroku-buildpack-python
-https://github.com/dsounded/heroku-buildpack-python
-https://github.com/ReforgeHQ/heroku-buildpack-python
+There are many ways to make our heroku use Python that is compiled with the `--enabled-shared` option.
 
-These community-developed buildpacks are not supported by Heroku, so it's
-worth examining the source to make sure the buildpack you use suits your
-needs. For instance, 'ReforgeHQ' works well with Python 3.8.1, but has not
-been configured to work with other versions and may not be as generally
-useful as the 'dsounded' or 'richgong' buildpacks.
+  - use Heroku's official Python buildpacks `post_compile` hooks to recompile the python if the `--enabled-shared` option is not enabled.
+    here are the example script of `post_compile` in ruby on rails app
+    `bin/post_compile`
+
+        set -e
+        buildpack_url=https://github.com/heroku/heroku-buildpack-python
+        buildpack_vsn=v197 # adjust version accordingly https://github.com/heroku/heroku-buildpack-python/tags
+
+        # rebuild python if it's missing enable-shared
+        if  ! python3 -msysconfig | grep enable-shared \
+            > /dev/null; then
+          PYTHON_VERSION="$(< runtime.txt)"
+          git clone -b "$buildpack_vsn" "$buildpack_url" _buildpack
+          export WORKSPACE_DIR="$PWD/_buildpack/builds"
+          rm -f .heroku/python/bin/python   # prevent failing ln after build
+          sed -i 's!figure --pre!figure --enable-shared --pre!' \
+            "$WORKSPACE_DIR"/runtimes/python3
+          "$WORKSPACE_DIR/runtimes/$PYTHON_VERSION" /app/.heroku/python/
+          rm -fr _buildpack
+        fi
+
+  - use your own precompiled python with `--enabled-shared` options then fork the official heroku [python buildspacks](https://github.com/heroku/heroku-buildpack-python) and change the `BUILDPACK_S3_BASE_URL` with your own uploaded precompiled python in Amazon's S3
+  - use 3rd party buildpacks from the [markets](https://elements.heroku.com/buildpacks) that have python with `--enabled-shared` option
+
 
 The buildpack will expect to find both a `runtime.txt` and a `requirements.txt` 
 file in the root of your project. You will need to add these to specify the 
