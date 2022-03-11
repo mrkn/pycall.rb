@@ -162,7 +162,7 @@ translates Ruby's coerce system into Python's swapped operation protocol.
 Heroku's default version of Python is not compiled with the `--enabled-shared`
 option and can't be accessed by PyCall.
 
-There are many ways to make our heroku use Python that is compiled with the `--enabled-shared` option.
+There are many ways to make our heroku use Python that is compiled with the `--enabled-shared` option:
 
   - use Heroku's official Python buildpacks `post_compile` hooks to recompile the python if the `--enabled-shared` option is not enabled.
     example script of `post_compile` in ruby on rails app `bin/post_compile`.
