@@ -167,7 +167,9 @@ option and can't be accessed by PyCall.
 There are many ways to make our heroku use Python that is compiled with the `--enabled-shared` option.
 
   - use Heroku's official Python buildpacks `post_compile` hooks to recompile the python if the `--enabled-shared` option is not enabled.
+
     here are the example script of `post_compile` in ruby on rails app
+
     `bin/post_compile`
 
         set -e
