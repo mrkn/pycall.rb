@@ -165,9 +165,7 @@ option and can't be accessed by PyCall.
 There are many ways to make our heroku use Python that is compiled with the `--enabled-shared` option.
 
   - use Heroku's official Python buildpacks `post_compile` hooks to recompile the python if the `--enabled-shared` option is not enabled.
-
-    here are the example script of `post_compile` in ruby on rails app
-
+    example script of `post_compile` in ruby on rails app
     `bin/post_compile`
 
         set -e
@@ -187,8 +185,8 @@ There are many ways to make our heroku use Python that is compiled with the `--e
           rm -fr _buildpack
         fi
 
-  - use your own precompiled python with `--enabled-shared` options then fork the official heroku [python buildspacks](https://github.com/heroku/heroku-buildpack-python) and change the `BUILDPACK_S3_BASE_URL` with your own uploaded precompiled python in Amazon's S3
-  - use 3rd party buildpacks from the [markets](https://elements.heroku.com/buildpacks) that have python with `--enabled-shared` option
+  - use your own precompiled python with `--enabled-shared` options then fork the official heroku [python buildspacks](https://github.com/heroku/heroku-buildpack-python) and change the `BUILDPACK_S3_BASE_URL` with your own uploaded precompiled python in Amazon's S3.
+  - use 3rd party buildpacks from the [markets](https://elements.heroku.com/buildpacks) that have python with `--enabled-shared` option.
 
 
 The buildpack will expect to find both a `runtime.txt` and a `requirements.txt` 
