@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import ctypes.util
-from distutils.sysconfig import get_config_var, get_python_version
+from sysconfig import get_config_var, get_python_version
 import os
 import sys
 
