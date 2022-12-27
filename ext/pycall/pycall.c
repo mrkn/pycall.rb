@@ -80,7 +80,7 @@ pycall_without_gvl_p(void)
    *
    * In Win32 thread, the default value is 0 (initialized by TlsAlloc).
    */
-  return (int)pycall_tls_get(without_gvl_key);
+  return pycall_tls_get(without_gvl_key) != (void*)0;
 }
 
 static inline int
