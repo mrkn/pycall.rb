@@ -1125,7 +1125,7 @@ pycall_pyobject_wrapper_wrapper_method(int argc, VALUE *argv, VALUE wrapper)
 static VALUE
 pycall_libpython_helpers_m_define_wrapper_method(VALUE mod, VALUE wrapper, VALUE name)
 {
-  VALUE pyptr, name_sym;
+  VALUE pyptr;
   PyObject *pyobj, *attr;
   char *name_cstr;
 
@@ -1137,11 +1137,7 @@ pycall_libpython_helpers_m_define_wrapper_method(VALUE mod, VALUE wrapper, VALUE
   pyobj = get_pyobj_ptr(pyptr);
 
   if (RB_TYPE_P(name, T_SYMBOL)) {
-    name_sym = name;
     name = rb_sym_to_s(name);
-  }
-  else if (RB_TYPE_P(name, T_STRING)) {
-    name_sym = rb_str_intern(name);
   }
 
   name_cstr = StringValueCStr(name);
