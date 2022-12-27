@@ -414,7 +414,6 @@ pycall_pyptr_inspect(VALUE obj)
 
   cname = rb_class_name(CLASS_OF(obj));
   str = rb_sprintf("#<%"PRIsVALUE":%p type=%s addr=%p>", cname, (void*)obj, Py_TYPE(pyobj)->tp_name, pyobj);
-  OBJ_INFECT(str, obj);
 
   return str;
 }
