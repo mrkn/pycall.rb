@@ -733,7 +733,7 @@ void pycall_init_gcguard(void);
 void pycall_init_ruby_wrapper(void);
 
 #define pycall_hash_salt_32 0xb592cd9b
-extern long pycall_hash_salt;
+extern intptr_t pycall_hash_salt;
 extern VALUE pycall_mPyCall;
 extern VALUE pycall_cPyPtr;
 extern VALUE pycall_eError;

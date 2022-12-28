@@ -136,7 +136,7 @@ static void *
 PyRuby_hash_long(PyRubyObject *pyro)
 {
   VALUE obj, rbhash;
-  long h;
+  intptr_t h;
 
   obj = PyRuby_get_ruby_object_and_set_pyerr((PyObject *)pyro);
   if (obj == Qundef)
@@ -152,9 +152,9 @@ static long
 PyRuby_hash_long_with_gvl(PyRubyObject *pyro)
 {
   if (!ruby_thread_has_gvl_p()) {
-    return (long)CALL_WITH_GVL(PyRuby_hash_long, pyro);
+    return (long)(intptr_t)CALL_WITH_GVL(PyRuby_hash_long, pyro);
   }
-  return (long)PyRuby_hash_long(pyro);
+  return (long)(intptr_t)PyRuby_hash_long(pyro);
 }
 
 static void *
@@ -171,10 +171,10 @@ PyRuby_hash_hash_t(PyRubyObject *pyro)
 #if SIZEOF_PY_HASH_T == SIZEOF_LONG
   /* In this case, we can assume sizeof(Py_hash_t) == sizeof(long) */
   h = NUM2SSIZET(rbhash);
-  return (void *)(h == -1 ? (Py_hash_t)pycall_hash_salt : h);
+  return (void *)(h == -1 ? pycall_hash_salt : h);
 #else
   /* In this case, we can assume sizeof(long) == 4 and sizeof(Py_hash_t) == 8 */
-  h = (pycall_hash_salt_32 << 32) | FIX2LONG(rbhash);
+  h = ((Py_hash_t)pycall_hash_salt_32 << 32) | FIX2LONG(rbhash);
   return (void *)(h == -1 ? ((pycall_hash_salt << 32) | pycall_hash_salt) : h);
 #endif
 }
