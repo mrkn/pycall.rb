@@ -1233,7 +1233,7 @@ pycall_libpython_helpers_m_setitem(VALUE mod, VALUE pyptr, VALUE key, VALUE v)
 }
 
 static VALUE
-pycall_libpython_helpers_m_delitem(VALUE mod, VALUE pyptr, VALUE key, VALUE v)
+pycall_libpython_helpers_m_delitem(VALUE mod, VALUE pyptr, VALUE key)
 {
   PyObject *pyobj, *pyobj_key;
   int res;
@@ -1246,7 +1246,7 @@ pycall_libpython_helpers_m_delitem(VALUE mod, VALUE pyptr, VALUE key, VALUE v)
     pycall_pyerror_fetch_and_raise("PyObject_DelItem");
   }
 
-  return v;
+  return Qnil;
 }
 
 static VALUE
