@@ -2295,7 +2295,7 @@ Init_pycall(void)
 
   rb_define_module_function(mPyCall, "after_fork", pycall_after_fork, 0);
 
-  pycall_tls_create(&without_gvl_key);
+  pycall_tls_create((pycall_tls_key *)&without_gvl_key);
   rb_define_module_function(mPyCall, "without_gvl", pycall_m_without_gvl, 0);
 
   /* PyCall::PyPtr */
