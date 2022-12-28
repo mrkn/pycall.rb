@@ -52,7 +52,7 @@ pycall_python_hexversion(void)
 
 #define python_is_unicode_literals (python_major_version >= 3)
 
-long pycall_hash_salt;
+intptr_t pycall_hash_salt;
 
 static VALUE pycall_call_python_callable(PyObject *pycallable, int argc, VALUE *argv);
 
