@@ -2061,6 +2061,8 @@ pycall_pyerror_fetch_and_raise(char const *format, ...)
   va_list args;
   VALUE pyerror, msg;
 
+  RBIMPL_NONNULL_ARG(format);
+
   pyerror = pycall_pyerror_fetch();
   if (!NIL_P(pyerror))
     rb_exc_raise(pyerror);

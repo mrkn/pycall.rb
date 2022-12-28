@@ -34,6 +34,22 @@ extern "C" {
 # error ---->> ruby requires sizeof(void*) == sizeof(long) or sizeof(LONG_LONG) to be compiled. <<----
 #endif
 
+#ifndef RUBY_ASSERT
+# define RUBY_ASSERT(expr) assert(expr)
+#endif
+
+#ifndef RBIMPL_ATTR_NONNULL
+# define RBIMPL_ATTR_NONNULL(list) /* void */
+#endif
+
+#ifndef RBIMPL_NONNULL_ARG
+# define RBIMPL_NONNULL_ARG(arg) RUBY_ASSERT(arg)
+#endif
+
+#ifndef RBIMPL_ATTR_FORMAT
+# define RBIMPL_ATTR_FORMAT(x, y, z) /* void */
+#endif
+
 #ifndef RB_INTEGER_TYPE_P
 # define RB_INTEGER_TYPE_P(obj) pycall_integer_type_p(obj)
 static inline int
@@ -693,6 +709,8 @@ PyObject *pycall_pylist_from_ruby(VALUE);
 PyObject *pycall_pydict_from_ruby(VALUE);
 PyObject *pycall_pyslice_from_ruby(VALUE);
 
+RBIMPL_ATTR_NONNULL((1))
+RBIMPL_ATTR_FORMAT(RBIMPL_PRINTF_FORMAT, 1, 0)
 NORETURN(void pycall_pyerror_fetch_and_raise(char const *format, ...));
 
 unsigned long pycall_default_tp_flags(void);
