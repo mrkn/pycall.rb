@@ -9,5 +9,14 @@ class SimpleClass(object):
         self.x = x
         return 'initialized'
 
+    def __neg__(self):
+        return "-{}".format(self.x)
+
+    def __pos__(self):
+        return "+{}".format(self.x)
+
+    def __invert__(self):
+        return "~{}".format(self.x)
+
 class SimpleSubClass(SimpleClass):
     pass

@@ -13,6 +13,12 @@ module PyCall
     end
 
     OPERATOR_METHOD_NAMES = {
+      # Unary operators
+      :+@ => :__pos__,
+      :-@ => :__neg__,
+      :~  => :__invert__,
+
+      # Binary operators
       :+  => :__add__,
       :-  => :__sub__,
       :*  => :__mul__,
