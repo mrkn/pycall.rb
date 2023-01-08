@@ -155,7 +155,7 @@ RUBY
       expect(out.chomp).to eq('true')
     end
 
-    it 'returns false if alreadly initialized' do
+    it 'returns false if already initialized' do
       out, err, status = ruby(<<RUBY)
 require 'pycall'
 PyCall.init
