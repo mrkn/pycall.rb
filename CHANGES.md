@@ -1,5 +1,11 @@
 # The change history of PyCall
 
+## 1.4.2
+
+* Add supports of unary operators: `+@`, `-@`, `~`
+* Fix `without_gvl` for exceptions occurred in the given block
+* Add PyCall.setattr and PyCall.delattr
+
 ## 1.4.1
 
 * Fix SEGV occurred on Windows
