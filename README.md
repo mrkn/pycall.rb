@@ -19,9 +19,7 @@ pycall.rb supports Ruby version 2.4 or higher.
 
 ## Supported Python versions
 
-pycall.rb supports Python version 2.7 or higher.
-
-Note that in Python 2.7 old-style class, that is defined without a super class, is not fully supported in pycall.rb.
+pycall.rb supports Python version 3.7 or higher.
 
 ## Note for pyenv users
 
@@ -144,9 +142,9 @@ Use [mrkn/pandas.rb](https://github.com/mrkn/pandas.rb) instead of just importin
 
 PyCall wraps pointers of Python objects in `PyCall::PyPtr` objects.
 `PyCall::PyPtr` class has two subclasses, `PyCall::PyTypePtr` and
-`PyCall::PyRubyPtr`.  `PyCall::PyTypePtr` is specialized for type (and classobj
-in 2.7) objects, and `PyCall::PyRubyPtr` is for the objects that wraps pointers
-of Ruby objects.
+`PyCall::PyRubyPtr`.  `PyCall::PyTypePtr` is specialized for type objects,
+and `PyCall::PyRubyPtr` is for the objects that wraps pointers of
+Ruby objects.
 
 These `PyCall::PyPtr` objects are used mainly in PyCall infrastructure.
 Instead, we usually treats the instances of `Object`, `Class`, `Module`, or
