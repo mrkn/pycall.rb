@@ -41,14 +41,6 @@ jobs:
         - { os: ubuntu-20.04   , ruby: 2.5   , python: "3.x"  , python_architecture: x64 , venv: "" }
         - { os: ubuntu-20.04   , ruby: 2.4   , python: "3.x"  , python_architecture: x64 , venv: "" }
 
-        # The latest Python 2
-        - { os: ubuntu-20.04   , ruby: 3.1   , python: "2.x"  , python_architecture: x64 , venv: "" }
-        - { os: ubuntu-20.04   , ruby: 3.0   , python: "2.x"  , python_architecture: x64 , venv: "" }
-        - { os: ubuntu-20.04   , ruby: 2.7   , python: "2.x"  , python_architecture: x64 , venv: "" }
-        - { os: ubuntu-20.04   , ruby: 2.6   , python: "2.x"  , python_architecture: x64 , venv: "" }
-        - { os: ubuntu-20.04   , ruby: 2.5   , python: "2.x"  , python_architecture: x64 , venv: "" }
-        - { os: ubuntu-20.04   , ruby: 2.4   , python: "2.x"  , python_architecture: x64 , venv: "" }
-
         # Ruby 2.7 with Each Python 3.x
         - { os: ubuntu-20.04   , ruby: 2.7   , python: "3.11" , python_architecture: x64 , venv: "" }
         - { os: ubuntu-20.04   , ruby: 2.7   , python: "3.10" , python_architecture: x64 , venv: "" }

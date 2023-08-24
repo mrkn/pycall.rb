@@ -26,7 +26,6 @@ jobs:
         - 2.6
         python:
         - 3.x
-        - 2.x
         python_architecture:
         - x64
         include:
