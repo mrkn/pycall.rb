@@ -1,5 +1,18 @@
 # The change history of PyCall
 
+## 1.5.0
+
+* Fix to prevent distutils deprecation warning (#159)
+
+  *Christopher Dilks*
+
+* Drop Python 2.7 support
+
+* Fix memory leak of Python objects. (#129)
+  This should fixes #128 and maybe also fixes #164.
+
+  *mknkmyza*
+
 ## 1.4.2
 
 * Add supports of unary operators: `+@`, `-@`, `~`
