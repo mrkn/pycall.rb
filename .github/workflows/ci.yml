@@ -48,17 +48,12 @@ jobs:
         - { os: ubuntu-20.04   , ruby: 2.7   , python: "3.8"  , python_architecture: x64 , venv: "" }
         - { os: ubuntu-20.04   , ruby: 2.7   , python: "3.7"  , python_architecture: x64 , venv: "" }
         - { os: ubuntu-20.04   , ruby: 2.7   , python: "3.6"  , python_architecture: x64 , venv: "" }
-        - { os: ubuntu-18.04   , ruby: 2.7   , python: "3.8"  , python_architecture: x64 , venv: "" }
 
         # Ruby-debug with the latest Python 3
         - { os: ubuntu-20.04   , ruby: debug , python: "3.x"  , python_architecture: x64 , venv: "" }
 
         # Ruby 3.1 with the latest Python 3 with venv
         - { os: ubuntu-20.04   , ruby: "3.1" , python: "3.x"  , python_architecture: x64 , venv: "venv:"  }
-        - { os: ubuntu-18.04   , ruby: "3.1" , python: "3.x"  , python_architecture: x64 , venv: "venv:"  }
-
-        # Ubuntu 18.04 with venv
-        - { os: ubuntu-18.04   , ruby: "3.1" , python: "3.8"  , python_architecture: x64 , venv: "venv:"  }
 
         # macOS with venv
         - { os: macos-latest   , ruby: "3.1" , python: "3.x"  , python_architecture: x64 , venv: "venv:"  }
