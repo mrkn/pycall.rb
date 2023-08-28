@@ -1,5 +1,11 @@
 # The change history of PyCall
 
+## 1.5.1
+
+* Fix memory leak in rich compare methods (#167, #168).
+
+  *mknkmyza*
+
 ## 1.5.0
 
 * Fix to prevent distutils deprecation warning (#159)
