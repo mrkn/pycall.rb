@@ -792,8 +792,9 @@ pycall_libpython_helpers_m_compare(VALUE mod, VALUE op, VALUE pyptr_a, VALUE pyp
   if (!res) {
     pycall_pyerror_fetch_and_raise("PyObject_RichCompare in pycall_libpython_helpers_m_compare");
   }
-
-  return pycall_pyobject_to_ruby(res);
+  VALUE obj = pycall_pyobject_to_ruby(res);
+  pycall_Py_DecRef(res);
+  return obj;
 }
 
 static int is_pyobject_wrapper(VALUE obj);
