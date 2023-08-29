@@ -1270,7 +1270,9 @@ pycall_libpython_helpers_m_str(VALUE mod, VALUE pyptr)
     pycall_pyerror_fetch_and_raise("PyObject_Str");
   }
 
-  return pycall_pyobject_to_ruby(pyobj_str);
+  VALUE v = pycall_pyobject_to_ruby(pyobj_str);
+  pycall_Py_DecRef(pyobj_str);
+  return v;
 }
 
 static VALUE
@@ -1690,19 +1692,21 @@ pycall_pyunicode_to_ruby(PyObject *pyobj)
     return Qnil;
   }
 
-  pyobj = Py_API(PyUnicode_AsUTF8String)(pyobj);
-  if (!pyobj) {
+  PyObject *pyobj_uni = Py_API(PyUnicode_AsUTF8String)(pyobj);
+  if (!pyobj_uni) {
     Py_API(PyErr_Clear)();
     return Qnil;
   }
 
-  res = Py_API(PyString_AsStringAndSize)(pyobj, &str, &len);
+  res = Py_API(PyString_AsStringAndSize)(pyobj_uni, &str, &len);
   if (res < 0) {
-    pycall_Py_DecRef(pyobj);
+    pycall_Py_DecRef(pyobj_uni);
     return Qnil;
   }
 
-  return rb_enc_str_new(str, len, rb_enc_from_index(rb_utf8_encindex()));
+  VALUE v = rb_enc_str_new(str, len, rb_enc_from_index(rb_utf8_encindex()));
+  pycall_Py_DecRef(pyobj_uni);
+  return v;
 }
 
 static VALUE
