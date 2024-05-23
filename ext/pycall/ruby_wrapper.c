@@ -59,10 +59,11 @@ PyObject *
 PyRuby_New(VALUE ruby_object)
 {
   if (!ruby_thread_has_gvl_p()) {
-    CALL_WITH_GVL(PyRuby_New_impl, ruby_object);
+    return CALL_WITH_GVL(PyRuby_New_impl, ruby_object);
   }
-
-  return PyRuby_New_impl(ruby_object);
+  else {
+    return PyRuby_New_impl(ruby_object);
+  }
 }
 
 static void *
@@ -90,7 +91,9 @@ PyRuby_dealloc_with_gvl(PyRubyObject *pyro)
   if (!ruby_thread_has_gvl_p()) {
     CALL_WITH_GVL(PyRuby_dealloc, pyro);
   }
-  PyRuby_dealloc(pyro);
+  else {
+    PyRuby_dealloc(pyro);
+  }
 }
 
 static PyObject *
@@ -114,7 +117,9 @@ PyRuby_repr_with_gvl(PyRubyObject *pyro)
   if (!ruby_thread_has_gvl_p()) {
     return CALL_WITH_GVL(PyRuby_repr, pyro);
   }
-  return PyRuby_repr(pyro);
+  else {
+    return PyRuby_repr(pyro);
+  }
 }
 
 #if SIZEOF_SSIZE_T < 8
@@ -154,7 +159,9 @@ PyRuby_hash_long_with_gvl(PyRubyObject *pyro)
   if (!ruby_thread_has_gvl_p()) {
     return (long)(intptr_t)CALL_WITH_GVL(PyRuby_hash_long, pyro);
   }
-  return (long)(intptr_t)PyRuby_hash_long(pyro);
+  else {
+    return (long)(intptr_t)PyRuby_hash_long(pyro);
+  }
 }
 
 static void *
@@ -185,7 +192,9 @@ PyRuby_hash_hash_t_with_gvl(PyRubyObject *pyro)
   if (!ruby_thread_has_gvl_p()) {
     return (Py_hash_t)CALL_WITH_GVL(PyRuby_hash_hash_t, pyro);
   }
-  return (Py_hash_t)PyRuby_hash_hash_t(pyro);
+  else {
+    return (Py_hash_t)PyRuby_hash_hash_t(pyro);
+  }
 }
 
 struct call_rb_funcallv_params {
@@ -269,8 +278,9 @@ PyRuby_call_with_gvl(PyRubyObject *pyro, PyObject *pyobj_args, PyObject *pyobj_k
   if (!ruby_thread_has_gvl_p()) {
     return CALL_WITH_GVL(PyRuby_call, &params);
   }
-
-  return PyRuby_call(&params);
+  else {
+    return PyRuby_call(&params);
+  }
 }
 
 struct PyRuby_getattro_params {
@@ -348,8 +358,9 @@ PyRuby_getattro_with_gvl(PyRubyObject *pyro, PyObject *pyobj_name)
   if (!ruby_thread_has_gvl_p()) {
     return CALL_WITH_GVL(PyRuby_getattro, &params);
   }
-
-  return PyRuby_getattro(&params);
+  else {
+    return PyRuby_getattro(&params);
+  }
 }
 
 /* ==== PyCall::PyRubyPtr ==== */
