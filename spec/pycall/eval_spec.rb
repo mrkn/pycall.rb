@@ -20,7 +20,7 @@ RSpec.describe PyCall do
         end
 
         it 'raises an exception occurred in Python side' do
-          expect { PyCall.eval('raise Exception("abcdef")') }.to raise_error(PyCall::PyError, /abcdef/)
+          expect { PyCall.exec('raise Exception("abcdef")') }.to raise_error(PyCall::PyError, /abcdef/)
         end
       end
 
