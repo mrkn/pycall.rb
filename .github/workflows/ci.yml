@@ -59,7 +59,6 @@ jobs:
 
         # macOS with venv
         - { os: macos-latest   , ruby: "3.3" , python: "3.x"  , python_architecture: x64 , venv: "venv:"  }
-        - { os: macos-latest   , ruby: "3.3" , python: "3.8"  , python_architecture: x64 , venv: "venv:"  }
 
         #- { os: macos-latest   , ruby: debug , python: "3.x" , python_architecture: x64 , venv: "" }
 
