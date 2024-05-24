@@ -519,6 +519,11 @@ PyObject * PyRuby_New(VALUE ruby_object);
 
 /* ==== thread support ==== */
 
+typedef enum {
+  PyGILState_LOCKED,
+  PyGILState_UNLOCKED
+} PyGILState_STATE;
+
 #if   defined(PYCALL_THREAD_WIN32)
 typedef DWORD pycall_tls_key;
 #elif defined(PYCALL_THREAD_PTHREAD)
@@ -669,6 +674,10 @@ typedef struct {
   PyObject * (* PyUnicode_AsUTF8String)(PyObject *);
   PyObject * (* PyUnicode_DecodeUTF8)(char const*, Py_ssize_t, char const *);
   PyObject * (* PyUnicode_FromFormatV)(char const*, ...);
+
+  int (* PyGILState_Check)(void);
+  PyGILState_STATE (* PyGILState_Ensure)(void);
+  void (* PyGILState_Release)(PyGILState_STATE);
 } pycall_libpython_api_table_t;
 
 pycall_libpython_api_table_t *pycall_libpython_api_table(void);
