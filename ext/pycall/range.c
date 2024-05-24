@@ -6,6 +6,12 @@ struct enumerator_head {
     VALUE args;
 };
 
+#ifdef HAVE_RTYPEDDATA_GET_DATA
+# define GET_ENUMERATOR_DATA(obj) ((struct enumerator_head *)RTYPEDDATA_GET_DATA(obj))
+#else
+# define GET_ENUMERATOR_DATA(obj) ((struct enumerator_head *)DATA_PTR(obj))
+#endif
+
 int
 pycall_obj_is_step_range(VALUE obj)
 {
@@ -19,7 +25,7 @@ pycall_obj_is_step_range(VALUE obj)
     return 0;
   }
 
-  eh = (struct enumerator_head *)DATA_PTR(obj);
+  eh = GET_ENUMERATOR_DATA(obj);
 
   if (!rb_obj_is_kind_of(eh->obj, rb_cRange)) {
     return 0;
@@ -50,7 +56,7 @@ pycall_extract_range(VALUE obj, VALUE *pbegin, VALUE *pend, int *pexclude_end, V
     exclude_end = rb_funcallv(obj, id_exclude_end, 0, 0);
   }
   else if (pycall_obj_is_step_range(obj)) {
-    struct enumerator_head *eh = (struct enumerator_head *)DATA_PTR(obj);
+    struct enumerator_head *eh = GET_ENUMERATOR_DATA(obj);
     begin = rb_funcallv(eh->obj, id_begin, 0, 0);
     end   = rb_funcallv(eh->obj, id_end,   0, 0);
     exclude_end = rb_funcallv(eh->obj, id_exclude_end, 0, 0);
