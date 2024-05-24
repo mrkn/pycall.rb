@@ -139,7 +139,15 @@ pycall_pyptr_free(void *ptr)
     fprintf(stderr, "zero refcnt object %p of type %s\n", pyobj, Py_TYPE(pyobj)->tp_name);
   }
 #endif /* PYCALL_DEBUG_DUMP_REFCNT */
-  pycall_Py_DecRef(pyobj);
+
+  if (Py_API(PyGILState_Check())) {
+    pycall_Py_DecRef(pyobj);
+  }
+  else {
+    PyGILState_STATE gstate = Py_API(PyGILState_Ensure)();
+    pycall_Py_DecRef(pyobj);
+    Py_API(PyGILState_Release)(gstate);
+  }
 }
 
 static size_t _PySys_GetSizeOf(PyObject *);
