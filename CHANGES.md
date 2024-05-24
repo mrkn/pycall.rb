@@ -1,5 +1,17 @@
 # The change history of PyCall
 
+## 1.5.2
+
+* Fix memory leak with str(list) (#169).
+
+  *mknkmyza*
+
+* Fix SEGV occured on Ruby process finalization.
+
+* Fix for supporting Ruby >= 3.3.
+
+* Fix for supporting Python >= 3.2.
+
 ## 1.5.1
 
 * Fix memory leak in rich compare methods (#167, #168).
