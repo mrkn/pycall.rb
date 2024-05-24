@@ -1,5 +1,7 @@
 #include "pycall_internal.h"
 
+static ID id_gcguard_table;
+
 struct gcguard {
   st_table *guarded_objects;
 };
@@ -24,6 +26,7 @@ gcguard_free(void* ptr)
 {
   struct gcguard *gg = (struct gcguard *)ptr;
   st_free_table(gg->guarded_objects);
+  rb_ivar_set(mPyCall, id_gcguard_table, Qnil);
 }
 
 static size_t
@@ -69,7 +72,6 @@ gcguard_delete(VALUE gcguard, PyObject *pyptr)
   }
 }
 
-static ID id_gcguard_table;
 static PyObject *weakref_callback_pyobj;
 static PyObject *gcguard_weakref_destroyed(PyObject *self, PyObject *weakref);
 
@@ -98,7 +100,9 @@ void
 pycall_gcguard_delete(PyObject *pyobj)
 {
   VALUE gcguard = rb_ivar_get(mPyCall, id_gcguard_table);
-  gcguard_delete(gcguard, pyobj);
+  if (!NIL_P(gcguard)) {
+    gcguard_delete(gcguard, pyobj);
+  }
 }
 
 void
