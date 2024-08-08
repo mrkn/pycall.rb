@@ -38,6 +38,8 @@ module PyCall
 
     require 'pycall.so'
 
+    LibPython.init_python
+
     PyCall.sys.path.append(File.expand_path('../python', __FILE__))
 
     require 'pycall/dict'
