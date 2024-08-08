@@ -2160,6 +2160,18 @@ pycall_PyObject_DelAttrString(PyObject *pyobj, const char *attr_name)
 }
 
 static void
+finalize_python(VALUE arg)
+{
+  int res;
+
+  assert(Py_API(Py_IsInitialized()));
+  res = Py_API(Py_FinalizeEx)();
+
+  if (res != 0)
+    rb_raise(rb_eRuntimeError, "Finalizing Python at_exit: Py_FinalizeEx() returned an error: %d", res);
+}
+
+static void
 init_python(void)
 {
   static char const *argv[1] = { "" };
@@ -2171,6 +2183,7 @@ init_python(void)
   }
 
   Py_API(Py_InitializeEx)(0);
+  rb_set_end_proc(finalize_python, Qnil);
   Py_API(PySys_SetArgvEx)(0, (char **)argv, 0);
 
   if (!Py_API(PyEval_ThreadsInitialized)()) {
