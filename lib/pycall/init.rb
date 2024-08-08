@@ -47,4 +47,8 @@ module PyCall
     const_set(:PYTHON_DESCRIPTION, LibPython::PYTHON_DESCRIPTION)
     true
   end
+
+  def self.finalize
+    LibPython::API.Py_FinalizeEx()
+  end
 end
