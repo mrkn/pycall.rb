@@ -2311,19 +2311,6 @@ init_tuple(void)
   rb_define_alias(cTuple, "to_ary", "to_a");
 }
 
-VALUE
-init_m_python(VALUE mod)
-{
-  /* initialize Python interpreter */
-  init_python();
-  init_pyerror();
-  init_tuple();
-  pycall_init_gcguard();
-  pycall_init_ruby_wrapper();
-
-  return Qnil;
-}
-
 void
 Init_pycall(void)
 {
@@ -2451,5 +2438,11 @@ Init_pycall(void)
   }
   rb_define_const(mLibPython, "PYTHON_VERSION", python_version_string);
 
-  rb_define_module_function(mLibPython, "init_python", init_m_python, 0);
+  /* initialize Python interpreter */
+
+  init_python();
+  init_pyerror();
+  init_tuple();
+  pycall_init_gcguard();
+  pycall_init_ruby_wrapper();
 }
