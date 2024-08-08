@@ -2164,8 +2164,6 @@ init_python(void)
 {
   static char const *argv[1] = { "" };
 
-  printf("PYCALL.C: init_python\n");
-
   /* optional functions */
   if (! Py_API(PyObject_DelAttrString)) {
     /* The case of PyObject_DelAttrString as a macro */
