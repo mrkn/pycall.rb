@@ -163,41 +163,16 @@ translates Ruby's coerce system into Python's swapped operation protocol.
 
 ## Deploying on Heroku
 
-Heroku's default version of Python is not compiled with the `--enabled-shared`
-option and can't be accessed by PyCall.
+Heroku's default builds of Python are now compiled with the `--enabled-shared` option
+(when using Python 3.10 and newer) and so work out of the box with PyCall without
+the need for a custom buildpack.
 
-There are many ways to make our heroku use Python that is compiled with the `--enabled-shared` option:
-
-  - use Heroku's official Python buildpacks `post_compile` hooks to recompile the python if the `--enabled-shared` option is not enabled.
-    example script of `post_compile` in ruby on rails app `bin/post_compile`.
-
-        set -e
-        buildpack_url=https://github.com/heroku/heroku-buildpack-python
-        buildpack_vsn=v197 # adjust version accordingly https://github.com/heroku/heroku-buildpack-python/tags
-
-        # rebuild python if it's missing enable-shared
-        if  ! python3 -msysconfig | grep enable-shared \
-            > /dev/null; then
-          PYTHON_VERSION="$(< runtime.txt)"
-          git clone -b "$buildpack_vsn" "$buildpack_url" _buildpack
-          export WORKSPACE_DIR="$PWD/_buildpack/builds"
-          rm -f .heroku/python/bin/python   # prevent failing ln after build
-          sed -i 's!figure --pre!figure --enable-shared --pre!' \
-            "$WORKSPACE_DIR"/runtimes/python3
-          "$WORKSPACE_DIR/runtimes/$PYTHON_VERSION" /app/.heroku/python/
-          rm -fr _buildpack
-        fi
-
-  - use your own precompiled python with `--enabled-shared` options then fork the official heroku [python buildspacks](https://github.com/heroku/heroku-buildpack-python) and change the `BUILDPACK_S3_BASE_URL` with your own uploaded precompiled python in Amazon's S3.
-  - use 3rd party buildpacks from the [markets](https://elements.heroku.com/buildpacks) that have python with `--enabled-shared` option.
-
-
-The buildpack will expect to find both a `runtime.txt` and a `requirements.txt` 
+The Python buildpack will expect to find both a `.python-version` and a `requirements.txt` 
 file in the root of your project. You will need to add these to specify the 
 version of Python and any packages to be installed via `pip`, _e.g_ to use 
-version Python 3.8.1 and version 2.5 of the 'networkx' package:
+the latest patch version Python 3.12 and version 2.5 of the 'networkx' package:
 
-    $ echo "python-3.8.1" >> runtime.txt
+    $ echo "3.12" > .python-version
     $ echo "networkx==2.5" >> requirements.txt
 
 Commit these two files into project's repository. You'll use these to manage
@@ -216,12 +191,11 @@ For a Ruby/Rails application this will typically report the stock `heroku/ruby`
 buildpack, or possibly both `heroku/ruby` and `heroku/nodejs`. 
 
 Clear the list and progressively add back your buildpacks, starting with the Python 
-community-developed buildpack. For example, if `ruby` and `nodejs` buildpacks were 
-previously installed, and chosing the 'ReforgeHQ' buildback, your setup process will 
-be similar to this: 
+buildpack. For example, if `ruby` and `nodejs` buildpacks were previously installed,
+your setup process will be similar to this: 
 
     $ heroku buildpacks:clear
-    $ heroku buildpacks:add https://github.com/ReforgeHQ/heroku-buildpack-python -i 1
+    $ heroku buildpacks:add heroku/python -i 1
     $ heroku buildpacks:add heroku/nodejs -i 2
     # heroku buildpacks:add heroku/ruby -i 3
 
@@ -233,14 +207,11 @@ specify the order Heroku will load runtimes and execute bootstrapping code. It's
 important for the Python environment to be engaged first, as PyCall will need to 
 be able to find it when Ruby-based processes start. 
 
-Once you have set up your buildpacks, and have commited both `requirements.txt` and 
-`runtime.txt` files to git, deploy your Heroku application as your normally would.
+Once you have set up your buildpacks, and have committed both `requirements.txt` and 
+`.python-version` files to git, deploy your Heroku application as your normally would.
 The Python bootstrapping process will appear in the log first, followed by the Ruby
 and so on. PyCall should now be able to successfully call Python functions from 
 within the Heroku environment.
-
-NB It is also possible to specify buildpacks within Docker images on Heroku.
-See Heroku's [documentation on using Docker Images](https://devcenter.heroku.com/articles/build-docker-images-heroku-yml).
 
 ## Development
 
