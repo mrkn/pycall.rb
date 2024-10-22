@@ -21,7 +21,6 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-        - "3.4"
         - "3.3"
         - "3.2"
         - "3.1"
@@ -70,7 +69,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-        - "3.4"
+        - "3.3"
         python:
         - 3.x
 
