@@ -31,8 +31,10 @@ jobs:
         python_architecture:
         - x64
         include:
+        # Python 3.11 with the latest Ruby
+        - { ruby: "3.3" , python: 3.11 , python_architecture: x64 }
+        # The development version of Ruby
         - { ruby: mingw , python: 3.x  , python_architecture: x64 }
-        - { ruby: mingw , python: 3.11 , python_architecture: x64 }
         #- { ruby: mswin , python: 3.x , python_architecture: x64 }
 
     steps:
