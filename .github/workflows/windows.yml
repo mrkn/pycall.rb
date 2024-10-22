@@ -31,8 +31,9 @@ jobs:
         python_architecture:
         - x64
         include:
-        - { os: windows-latest , ruby: mingw , python: 3.x , python_architecture: x64 }
-        #- { os: windows-latest , ruby: mswin , python: 3.x , python_architecture: x64 }
+        - { ruby: mingw , python: 3.x  , python_architecture: x64 }
+        - { ruby: mingw , python: 3.11 , python_architecture: x64 }
+        #- { ruby: mswin , python: 3.x , python_architecture: x64 }
 
     steps:
     - uses: actions/checkout@v3
