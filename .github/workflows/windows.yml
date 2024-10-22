@@ -74,7 +74,8 @@ jobs:
         ruby:
         - "3.3"
         python:
-        - 3.x
+        - 3.12
+        - 3.11
 
     defaults:
       run:
