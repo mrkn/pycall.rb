@@ -21,6 +21,10 @@ pycall.rb supports Ruby version 2.4 or higher.
 
 pycall.rb supports Python version 3.7 or higher.
 
+## PyCall does not support multi-threaded use officially
+
+CPython's C-API has GIL acquiring/releasing functions such as `PyGILState_Ensure` and `PyGILState_Release`. Programmers can call CPython's C-APIs from outside of Python threads if they manage GIL's state by these functions. However, we do not want to officially support the multi-threaded use of PyCall because creating the feature enabling stable multi-threaded use in any situation is too difficult. We want to avoid incurring the costs to support such use cases.
+
 ## Note for pyenv users
 
 pycall.rb requires Python's shared library (e.g. `libpython3.7m.so`).
