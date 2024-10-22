@@ -37,6 +37,9 @@ jobs:
         venv:
         - ""
         include:
+        # Python 3.11 with the latest Ruby
+        - { os: ubuntu-20.04   , ruby: 3.3   , python: "3.11" , python_architecture: x64 , venv: "" }
+
         # Old ruby and the latest Python 3
         - { os: ubuntu-20.04   , ruby: 2.6   , python: "3.x"  , python_architecture: x64 , venv: "" }
         - { os: ubuntu-20.04   , ruby: 2.5   , python: "3.x"  , python_architecture: x64 , venv: "" }
